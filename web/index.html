@@ -1,0 +1,860 @@
+<title>K-UAM 회랑 기상 콘솔</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: EFB-style console — control rail on the left, verdict → time → plan/alerts → section → segments on the right */
+:root{
+  --bg:#EEF2F5; --surface:#FFFFFF; --surface-2:#F6F8FA; --ink:#14202B; --muted:#566676; --line:#D3DCE4;
+  --accent:#1C5DB8; --accent-soft:#E3ECF8;
+  --ok:#2C8A57; --caution:#B88300; --warn:#D2541C; --nogo:#A8143D;
+  --ok-soft:#DDF0E4; --caution-soft:#FBF0CF; --warn-soft:#FBE3D6; --nogo-soft:#F6D9E1;
+  --font-ui:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-data:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151C; --surface:#151F29; --surface-2:#1A2632; --ink:#E5ECF2; --muted:#93A4B4; --line:#2A3846;
+  --accent:#6FA6F5; --accent-soft:#1D3048;
+  --ok:#4CC083; --caution:#E5B53A; --warn:#F07F4B; --nogo:#F0628A;
+  --ok-soft:#173327; --caution-soft:#3A3014; --warn-soft:#3D2316; --nogo-soft:#3E1825; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151C; --surface:#151F29; --surface-2:#1A2632; --ink:#E5ECF2; --muted:#93A4B4; --line:#2A3846;
+  --accent:#6FA6F5; --accent-soft:#1D3048;
+  --ok:#4CC083; --caution:#E5B53A; --warn:#F07F4B; --nogo:#F0628A;
+  --ok-soft:#173327; --caution-soft:#3A3014; --warn-soft:#3D2316; --nogo-soft:#3E1825; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 32px}
+.num,.mono{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;max-width:1440px;margin:0 auto 14px}
+.top h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.top .sub{color:var(--muted);font-size:13px}
+.times{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px}
+.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.tag b{color:var(--ink);font-weight:600}
+.tag.syn{border-color:var(--caution);color:var(--caution);background:var(--caution-soft)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+aside{display:flex;flex-direction:column;gap:12px;min-width:0}
+main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.panel h2{font-size:15px;font-weight:600}
+.panel-head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:9px}
+.ctl-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+label.row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;font-size:13px}
+label.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+label.row output,label.row .val{font-family:var(--font-data);font-size:12.5px;color:var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.field input,.field select{font:inherit;font-family:var(--font-data);font-size:13px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:5px 7px;width:100%}
+select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+.check{display:flex;gap:8px;align-items:center;font-size:13px}
+.check input{accent-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:5px 12px;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:hover{border-color:var(--accent)}
+
+/* verdict */
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px 22px;align-items:center}
+@media (max-width:620px){.verdict{grid-template-columns:minmax(0,1fr)}}
+.big{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 18px;border-radius:9px;min-width:150px}
+.big .lbl{font-size:12px;font-weight:600;opacity:.85}
+.big .val{font-size:30px;font-weight:700;line-height:1.1}
+.c0{background:var(--ok-soft);color:var(--ok)} .c1{background:var(--caution-soft);color:var(--caution)}
+.c2{background:var(--warn-soft);color:var(--warn)} .c3{background:var(--nogo-soft);color:var(--nogo)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 18px}
+.fact .k{font-size:11.5px;color:var(--muted)}
+.fact .v{font-size:15px;font-weight:600}
+.fact .v small{font-size:12px;font-weight:400;color:var(--muted)}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600}
+
+/* time */
+.timebar{display:grid;gap:10px}
+.trow{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.trow input[type=range]{flex:1 1 220px;accent-color:var(--accent)}
+.tlabel{font-family:var(--font-data);font-size:13px;min-width:220px}
+.mode{font-size:11.5px;border-radius:999px;padding:1px 8px;border:1px solid var(--accent);color:var(--accent)}
+.strip-wrap{overflow-x:auto}
+.strip{display:grid;grid-template-columns:repeat(13,minmax(9px,1fr)) repeat(47,minmax(7px,1fr));gap:2px;min-width:560px}
+.strip button{height:26px;padding:0;border:0;border-radius:3px}
+.strip button.sel{outline:2px solid var(--ink);outline-offset:1px}
+.strip button.k0{background:var(--ok)} .strip button.k1{background:var(--caution)} .strip button.k2{background:var(--warn)} .strip button.k3{background:var(--nogo)}
+.strip-axis{position:relative;height:16px;min-width:560px;font-size:11px;color:var(--muted);font-family:var(--font-data)}
+.strip-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.strip-cap{font-size:12px;color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px}
+@media (max-width:1180px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.cv-wrap{position:relative;width:100%}
+canvas{display:block;width:100%;border-radius:7px}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin-top:8px;font-size:11px;color:var(--muted);font-family:var(--font-data)}
+.legend .sw{display:flex;flex-direction:column;align-items:flex-start;min-width:44px}
+.legend .sw i{display:block;height:9px;width:100%}
+.legend .unit{margin-left:8px}
+.readout{margin-top:6px;font-size:12px;color:var(--muted);font-family:var(--font-data);min-height:18px;overflow-wrap:anywhere}
+
+/* alerts */
+.alerts{display:flex;flex-direction:column}
+.alist{display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:620px}
+.alert{border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:10px 12px;display:grid;gap:6px;background:var(--surface-2)}
+.alert.l1{border-left-color:var(--caution)} .alert.l2{border-left-color:var(--warn)}
+.alert .hd{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.alert .ttl{font-weight:600;font-size:14px}
+.alert .msg{font-family:var(--font-data);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;overflow-wrap:anywhere}
+.alert .ft{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.alert.acked{opacity:.62}
+.idx{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;color:var(--surface)}
+.idx.l1{background:var(--caution)} .idx.l2{background:var(--warn)}
+.empty{padding:16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+.banner{display:none;margin-bottom:10px;padding:8px 10px;border-radius:7px;font-weight:600;font-size:13px;background:var(--warn-soft);color:var(--warn)}
+.banner.on{display:block}
+@media (prefers-reduced-motion:no-preference){.banner.on{animation:pulse 1.6s ease-in-out infinite}}
+@keyframes pulse{50%{opacity:.6}}
+.limits{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:6px;font-size:12.5px}
+.lim{display:grid;grid-template-columns:92px minmax(0,1fr) 54px;gap:8px;align-items:center}
+.bar{height:8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%}
+
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:720px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:right}
+th:first-child,td:first-child{text-align:left}
+td.num{font-family:var(--font-data)}
+details.panel summary{cursor:pointer;font-weight:600;font-size:15px}
+.notes{color:var(--ink);font-size:13.5px;max-width:78ch}
+.notes code{font-family:var(--font-data);font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.notes li{margin:4px 0}
+.foot{max-width:1440px;margin:16px auto 0;color:var(--muted);font-size:12px}
+</style>
+
+<header class="top">
+  <div>
+    <div class="eyebrow">K-UAM 경로 기상 · 초안</div>
+    <h1>K-UAM 회랑 기상 콘솔</h1>
+    <div class="sub">킨텍스 V5 → 여의도 · 단순 진단모델로 만든 시연 화면</div>
+  </div>
+  <div class="times">
+    <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
+    <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
+    <span class="tag">유효 <b class="num" id="tValid">—</b></span>
+  </div>
+</header>
+
+<div class="layout">
+<aside>
+  <section class="panel">
+    <div class="ctl-title"><h2>기상 시나리오</h2></div>
+    <fieldset>
+      <select id="scn" aria-label="기상 시나리오"></select>
+      <label class="row">상층 일반풍 (600 m) <output id="oU" class="val"></output><input id="U" type="range" min="0" max="30" step="0.5"></label>
+      <label class="row">풍향 (불어오는 방향) <output id="oDir" class="val"></output><input id="dir" type="range" min="0" max="355" step="5"></label>
+      <label class="row">일평균 기온 <output id="oT" class="val"></output><input id="T" type="range" min="-15" max="35" step="1"></label>
+      <label class="row">평균 이슬점차 <output id="oDep" class="val"></output><input id="dep" type="range" min="0.2" max="15" step="0.2"></label>
+      <label class="row">야간 저층제트 세기 <output id="oLlj" class="val"></output><input id="llj" type="range" min="0" max="14" step="1"></label>
+      <label class="check"><input id="conv" type="checkbox"> 대류셀·돌풍전선 포함</label>
+    </fieldset>
+  </section>
+  <section class="panel">
+    <div class="ctl-title"><h2>eVTOL 제원</h2><span class="eyebrow">가상 기체</span></div>
+    <fieldset>
+      <select id="acPreset" aria-label="기체 프로필"></select>
+      <div class="pair">
+        <label class="field">순항속도 km/h<input id="ac_vc" type="number" min="60" max="350" step="5"></label>
+        <label class="field">순항고도 m<input id="ac_alt" type="number" min="100" max="800" step="10"></label>
+        <label class="field">상승률 m/s<input id="ac_climb" type="number" min="1" max="10" step="0.5"></label>
+        <label class="field">하강률 m/s<input id="ac_desc" type="number" min="1" max="10" step="0.5"></label>
+        <label class="field">이착륙 풍속 한계 m/s<input id="ac_xw" type="number" min="3" max="25" step="0.5"></label>
+        <label class="field">순항 풍속 한계 m/s<input id="ac_wmax" type="number" min="5" max="40" step="1"></label>
+        <label class="field">돌풍 한계 m/s<input id="ac_gust" type="number" min="5" max="40" step="1"></label>
+        <label class="field">EDR 한계<input id="ac_edr" type="number" min="0.05" max="0.6" step="0.01"></label>
+        <label class="field">최저 시정 m<input id="ac_vis" type="number" min="200" max="8000" step="100"></label>
+        <label class="field">강수 한계 mm/h<input id="ac_rain" type="number" min="1" max="60" step="1"></label>
+      </div>
+      <label class="check"><input id="ac_icing" type="checkbox"> 결빙 조건 운용 가능</label>
+    </fieldset>
+  </section>
+  <section class="panel">
+    <div class="ctl-title"><h2>판정 기준</h2></div>
+    <div class="notes" style="font-size:12.5px;color:var(--muted)">
+      항목별 여유율 = 1 − 예측값 ÷ 기체 한계. 가장 낮은 항목이 그 지점의 등급을 정합니다.<br>
+      <span class="chip c0">정상</span> 20% 이상 · <span class="chip c1">주의</span> 0~20% · <span class="chip c2">경고</span> 0 ~ −25% · <span class="chip c3">불가</span> −25% 미만
+    </div>
+  </section>
+</aside>
+
+<main>
+  <section class="panel verdict" aria-live="polite">
+    <div id="vBig" class="big c0"><span class="lbl">경로 종합 판정</span><span class="val" id="vVal">—</span></div>
+    <div class="facts">
+      <div class="fact"><div class="k">제한 요소</div><div class="v" id="fFactor">—</div></div>
+      <div class="fact"><div class="k">가장 위험한 구간</div><div class="v" id="fSeg">—</div></div>
+      <div class="fact"><div class="k">경로 거리 · 비행시간</div><div class="v num" id="fDist">—</div></div>
+      <div class="fact"><div class="k">급변풍·난류 경고</div><div class="v num" id="fAlerts">—</div></div>
+      <div class="fact"><div class="k">최소 여유율</div><div class="v num" id="fMargin">—</div></div>
+    </div>
+  </section>
+
+  <section class="panel timebar">
+    <div class="panel-head" style="margin:0">
+      <h2>출발 시각</h2>
+      <span class="strip-cap">칸마다 그 시각에 출발했을 때의 경로 판정입니다. 눌러서 고르세요.</span>
+    </div>
+    <div class="trow">
+      <button id="play" class="primary" type="button">재생</button>
+      <input id="step" type="range" min="0" max="59" step="1" value="0" aria-label="출발 시각">
+      <span class="tlabel" id="stepLbl">—</span>
+      <span class="mode" id="modeLbl">준실시간</span>
+    </div>
+    <div class="strip-wrap">
+      <div class="strip" id="strip" role="group" aria-label="출발 시각별 판정"></div>
+      <div class="strip-axis" id="stripAxis"></div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>수평 지도</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="mapField" aria-label="지도 요소">
+            <option value="risk">위험도 (기체 기준)</option>
+            <option value="spd">풍속</option>
+            <option value="edr">난류 EDR</option>
+            <option value="vis">시정</option>
+          </select>
+          <select id="mapAlt" aria-label="지도 고도">
+            <option value="cruise">순항고도</option>
+            <option value="10">10 m</option>
+            <option value="100">100 m</option>
+            <option value="300">300 m</option>
+            <option value="600">600 m</option>
+          </select>
+        </div>
+      </div>
+      <div class="cv-wrap"><canvas id="map" aria-label="경로 수평 지도"></canvas></div>
+      <div class="legend" id="mapLegend"></div>
+      <div class="readout" id="mapRead">지도 위에 커서를 올리면 그 지점 값을 보여줍니다.</div>
+    </section>
+
+    <section class="panel alerts">
+      <div class="panel-head">
+        <h2>조종사 경고</h2>
+        <span class="eyebrow">급변풍 · 난류</span>
+      </div>
+      <div class="banner" id="banner">확인하지 않은 급변풍 경고가 있습니다</div>
+      <div class="alist" id="alist"></div>
+      <div class="limits" id="limits"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>연직 단면 · 경로 거리 × 고도</h2>
+      <select id="secField" aria-label="단면 요소">
+        <option value="along">경로방향 바람 (배풍 +)</option>
+        <option value="spd">풍속</option>
+        <option value="edr">난류 EDR</option>
+        <option value="vsh">30 m 연직시어</option>
+        <option value="vis">시정</option>
+      </select>
+    </div>
+    <div class="cv-wrap"><canvas id="sec" aria-label="경로 연직 단면"></canvas></div>
+    <div class="legend" id="secLegend"></div>
+    <div class="readout" id="secRead">검은 선은 비행 프로파일이며 색은 지점별 판정입니다. 번호는 조종사 경고 위치입니다.</div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>구간별 요약</h2></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>구간</th><th>거리 km</th><th>고도 m</th><th>최대 풍속 m/s</th><th>최대 돌풍</th><th>최대 EDR</th><th>최저 시정 m</th><th>최소 여유율</th><th>제한 요소</th><th>판정</th></tr></thead>
+      <tbody id="segBody"></tbody>
+    </table></div>
+  </section>
+
+  <details class="panel">
+    <summary>모델 설명과 한계</summary>
+    <div class="notes">
+      <p>이 화면은 실측 자료 없이 시나리오 입력만으로 돌아가는 <b>단순 진단모델</b>입니다. 실제 운영 체계에서는 각 줄이 오른쪽 자료로 바뀝니다.</p>
+      <ul>
+        <li><b>평균풍</b>: 600 m 일반풍에서 멱법칙 <code>U(z)=U₆₀₀(z/600)^α</code>. α는 지표 거칠기 z₀(한강 수면 0.0002 m, 도시 0.5 m, 농경지 0.1 m, 김포공항 0.03 m)와 대기안정도(낮 감소, 밤 증가)로 정함. 높이가 오를수록 z₀를 지역 평균으로 섞어 내부경계층을 흉내 냄. → LDAPS·ECMWF 블렌딩 풍장</li>
+        <li><b>버티포트 증폭</b>: 킨텍스 V5 반경 약 1.2 km, 저고도에서 MUKLIMO_3 민감도 결과(평균 약 1.58배, 북풍 최강·남풍 최약)를 풍향별 배율로 적용. → MUKLIMO DB 조견표 / 3D U-Net</li>
+        <li><b>저층제트·풍향 순전</b>: 야간 320 m 부근 제트, 지표로 갈수록 반시계로 풍향 회전.</li>
+        <li><b>난류 EDR</b>: <code>ε = u*³/(κz)</code> + 낮 대류항 + 제트 시어항 + 건물 후류(여의도), <code>EDR = ε^(1/3)</code>.</li>
+        <li><b>이착륙 구간</b>: 고도 150 m 미만 상승·하강 구간은 기체가 바람을 향해 이착륙한다고 보고 총풍속을 이착륙 풍속 한계와 비교.</li>
+        <li><b>돌풍</b>: <code>G = U(1 + 2.2·TI)</code>, <code>TI ≈ 1/ln(z/z₀)</code>.</li>
+        <li><b>급변풍 F-factor</b>: 비행경로를 따라 <code>F = (dWx/dt)/g − w/V</code>, 1 km 이동평균. 주의 0.07, 경고 0.105(대형기 기준 준용, eVTOL용 재설정 필요).</li>
+        <li><b>대류셀</b>: 하강기류와 방사형 유출풍, 강수, 강한 난류를 가진 이동 셀. → 레이더 외삽(pySTEPS)</li>
+        <li><b>안개·운고</b>: 상대습도·약풍·야간 조건으로 안개 강도, 한강 근처 가중. 이슬점차 2.5 °C 미만일 때만 낮은 구름, 운고 ≈ 125 × 이슬점차(m). 난류 길이척도는 50 m 이상. → 시정계·위성·ML 분류</li>
+        <li><b>착빙</b>: 0 ~ −12 °C이면서 구름·안개·강수 속.</li>
+      </ul>
+      <p>시간 축은 0~60분 5분 간격(준실시간), 2~48시간 1시간 간격(단기)입니다. 위치·고도·수치는 모두 설명용이며 운항 판단에 쓰면 안 됩니다.</p>
+    </div>
+  </details>
+</main>
+</div>
+<div class="foot">좌표·지표 분류는 근사값입니다. 기체 프로필은 가상 기체이며 실제 제원으로 바꿔 넣어야 합니다.</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const G = 9.81, KAPPA = 0.4;
+
+/* ---------- geography (km, origin = KINTEX V5, x east, y north) ---------- */
+const WP = [
+  {n:'킨텍스 V5', x:0, y:0}, {n:'장항', x:2.14, y:-3.25}, {n:'김포대교', x:5.49, y:-6.36},
+  {n:'방화대교', x:6.99, y:-9.36}, {n:'가양대교', x:10.25, y:-10.58}, {n:'성산대교', x:12.8, y:-12.69},
+  {n:'여의도', x:15.78, y:-15.9}];
+const RIVER = [[-6,1.6],[-2,-1.1],[2.14,-3.25],[5.49,-6.36],[6.99,-9.36],[10.25,-10.58],[12.8,-12.69],[15.3,-15.2],[18.8,-16.6],[22,-16.2]];
+const AIRPORT = {x:3.96, y:-12.33};
+const YEO = {x:15.78, y:-15.9};
+const EXT = {x0:-6, x1:22, y0:-20, y1:6};
+
+function polyDist(x, y, P){
+  let best = 1e9, side = 1;
+  for (let i=0;i<P.length-1;i++){
+    const [ax,ay]=P[i],[bx,by]=P[i+1], dx=bx-ax, dy=by-ay;
+    let t=((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy); t=Math.max(0,Math.min(1,t));
+    const px=ax+t*dx, py=ay+t*dy, d=Math.hypot(x-px,y-py);
+    if (d<best){best=d; side = (dx*(y-ay)-dy*(x-ax))<0?-1:1;}
+  }
+  return {d:best, side};
+}
+const smooth = (e0,e1,v) => {const t=Math.max(0,Math.min(1,(v-e0)/(e1-e0)));return t*t*(3-2*t);};
+
+/* log10 z0 field */
+function logz0(x, y){
+  const r = polyDist(x,y,RIVER);
+  let land = -0.3;                                         // urban 0.5 m
+  if (r.side<0) land = -0.3 + (-1.0+0.3)*(1-smooth(7,10,x)); // Gimpo farmland SW of river
+  if (r.side<0 && x>9) land = -0.2;                         // Gangseo/Yangcheon
+  if (r.side>0 && x>9) land = -0.1;                         // Mapo
+  const ra = Math.hypot(x-AIRPORT.x, y-AIRPORT.y);
+  land += (-1.55-land)*Math.exp(-Math.pow(ra/1.7,4));       // airport 0.03 m
+  land += 0.45*Math.exp(-Math.pow(Math.hypot(x-YEO.x,y-YEO.y)/1.1,2)); // Yeouido towers
+  const wr = 1/(1+Math.exp((r.d-0.55)/0.12));               // Han river water
+  return {lz: land*(1-wr) + (-3.7)*wr, dRiver:r.d};
+}
+
+/* ---------- scenarios & aircraft ---------- */
+const SCN = {
+  calm:{label:'가을 맑음 · 약풍', issueH:14, U:6, dir:270, T:17, dep:7, llj:0, conv:false},
+  nw:{label:'겨울 강한 북서풍', issueH:9, U:17, dir:315, T:1, dep:9, llj:0, conv:false, front:{h:10,dU:5,dDir:15}},
+  llj:{label:'야간 저층제트', issueH:21, U:9, dir:235, T:13, dep:4, llj:9, conv:false},
+  conv:{label:'여름 대류성 돌풍전선', issueH:15, U:7, dir:250, T:28, dep:4, llj:0, conv:true},
+  fog:{label:'새벽 한강 복사안개', issueH:4, U:2, dir:80, T:9, dep:0.6, llj:0, conv:false}
+};
+const CONV = {t0:-0.8, t1:3.5, x0:-1, y0:-14, vx:5.5, vy:3, R:3, W:7, O:13, P:45};
+const AC = {
+  multi:{label:'멀티콥터형 · 2인승급', vc:100, alt:300, climb:3, desc:2.5, xw:8, tail:4, wmax:12, gust:13, edr:0.20, vis:1600, rain:5, icing:false},
+  lift:{label:'리프트+크루즈형 · 4인승급', vc:180, alt:450, climb:4, desc:3, xw:10, tail:5, wmax:18, gust:16, edr:0.25, vis:1600, rain:10, icing:false},
+  tilt:{label:'틸트로터형 · 5인승급', vc:240, alt:600, climb:5, desc:4, xw:12, tail:6, wmax:22, gust:19, edr:0.30, vis:1600, rain:15, icing:false}
+};
+const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
+
+const state = {sc:{...SCN.conv}, scKey:'conv', ac:{...AC.lift}, acKey:'lift', step:0, acked:{}};
+
+/* ---------- the simple model ---------- */
+function met(x, y, z, t, sc){
+  const h = ((sc.issueH + t) % 24 + 24) % 24;
+  const S = (h>6 && h<18) ? Math.sin(Math.PI*(h-6)/12) : -0.8;
+  let Us = sc.U*(1+0.12*Math.sin(2*Math.PI*t/30+0.7));
+  let dir = sc.dir + 8*Math.sin(2*Math.PI*t/20);
+  if (sc.front && t>sc.front.h){const k=1-Math.exp(-(t-sc.front.h)/2); Us+=sc.front.dU*k; dir+=sc.front.dDir*k;}
+  const Seff = S*Math.exp(-Us/12);
+  const zz = Math.max(z,10);
+  const g = logz0(x,y);
+  const lzE = g.lz + (-0.6-g.lz)*Math.min(1,zz/400);
+  const z0e = Math.pow(10,lzE);
+  let a = (0.096*lzE + 0.016*lzE*lzE + 0.24)*(1-0.45*Seff);
+  a = Math.max(0.06, Math.min(0.5, a));
+  let spd = zz<=600 ? Us*Math.pow(zz/600,a) : Us*(1+0.0003*(zz-600));
+  // nocturnal low-level jet
+  let jet=0, dJ=0;
+  if (S<0 && sc.llj>0){const jf=sc.llj*Math.min(1,-S/0.8); jet=jf*Math.exp(-Math.pow((zz-320)/110,2)); dJ=jet*(-2*(zz-320)/(110*110));}
+  // KINTEX V5 amplification (MUKLIMO_3 sensitivity, ~1.58x mean, N strongest)
+  const r5 = Math.hypot(x,y);
+  const A = 1.58 + 0.45*Math.cos(dir*Math.PI/180);
+  const amp = 1 + (A-1)*Math.exp(-Math.pow(r5/1.2,2))*Math.exp(-zz/80);
+  // Yeouido building wake
+  const bw = Math.exp(-Math.pow(Math.hypot(x-YEO.x,y-YEO.y)/0.9,2))*Math.exp(-zz/150);
+  const base = spd*(1-0.25*bw) + jet;
+  spd = spd*amp*(1-0.25*bw) + jet;
+  const veer = (Seff<0?25:10)*(1-Math.min(zz,600)/600);
+  const dr = (dir - veer)*Math.PI/180;
+  let u = -spd*Math.sin(dr), v = -spd*Math.cos(dr), w = 0, P = 0, epsC = 0, tiC = 0;
+  if (sc.conv && t>=CONV.t0 && t<=CONV.t1){
+    const tau=t-CONV.t0, life=Math.sin(Math.PI*tau/(CONV.t1-CONV.t0));
+    const cx=CONV.x0+CONV.vx*tau, cy=CONV.y0+CONV.vy*tau, r=Math.max(0.01,Math.hypot(x-cx,y-cy)), R=CONV.R;
+    const O = CONV.O*life*(r/R)*Math.exp(1-r/R)*Math.exp(-zz/450);
+    u += O*(x-cx)/r; v += O*(y-cy)/r;
+    w = -CONV.W*life*Math.exp(-Math.pow(r/(0.6*R),2))*Math.min(1,zz/250);
+    P = CONV.P*life*Math.exp(-Math.pow(r/(0.7*R),2));
+    epsC = 0.04*life*Math.exp(-Math.pow(r/R,2));
+    tiC = 0.15*life*Math.exp(-Math.pow(r/R,2));
+  }
+  const sH = Math.hypot(u,v);
+  const lnz = Math.log(zz/z0e);
+  const TI = (1/lnz)*(1+0.5*Math.max(Seff,0)) + 0.10*bw + 0.08*Math.exp(-Math.pow(r5/0.8,2))*Math.exp(-zz/100) + tiC;
+  const gust = sH*(1+2.2*TI);
+  const us = KAPPA*(base + (sc.conv ? Math.max(0, sH - spd) : 0))/lnz;
+  const eps = us*us*us/(KAPPA*Math.max(zz,50))*(1+2*bw) + 0.0015*Math.max(Seff,0)*Math.max(0,1-zz/1500) + 1.5*dJ*dJ + epsC;
+  const edr = Math.cbrt(eps);
+  // thermo, fog, cloud, icing
+  const sd = Math.sin(2*Math.PI*(h-9)/24);
+  const T0 = sc.T + 5*sd;
+  const dep = Math.max(0.15, sc.dep*(1+0.75*sd));
+  const es = T => Math.exp(17.625*T/(243.04+T));
+  const RH = 100*es(T0-dep)/es(T0);
+  const ceil = dep<2.5 ? Math.max(30, 125*dep) : 3000;
+  const U10 = Us*0.35;
+  let f = Math.max(0,Math.min(1,(RH-95)/4))*Math.max(0,Math.min(1,(5-U10)/3))*(S<0.25?1:Math.max(0,1-(S-0.25)*3));
+  f = Math.min(1, f*(1+0.4*Math.exp(-Math.pow(g.dRiver/1,2))));
+  const fogTop = 60+200*f;
+  let vis = (zz<fogTop) ? 10000*Math.exp(-4.6*f) : 10000;
+  const inCloud = zz>ceil;
+  if (inCloud) vis = Math.min(vis,300);
+  vis = Math.max(80, Math.min(vis, 12000/(1+0.3*P)));
+  const Tz = T0 - 0.0065*zz;
+  const icing = Tz<=0 && Tz>=-12 && (inCloud || (f>0.3 && zz<fogTop) || P>0.5);
+  return {u, v, w, spd:sH, gust, edr, vis, ceil, T:Tz, rh:RH, icing, P, z0:z0e, lz:g.lz};
+}
+
+/* ---------- route geometry ---------- */
+const DS = 0.1;
+const ROUTE = (() => {
+  const xs=[],ys=[],tx=[],ty=[],seg=[],s=[];
+  let acc=0;
+  for (let i=0;i<WP.length-1;i++){
+    const a=WP[i], b=WP[i+1], len=Math.hypot(b.x-a.x,b.y-a.y), n=Math.max(1,Math.round(len/DS));
+    for (let k=0;k<n;k++){const f=k/n; xs.push(a.x+(b.x-a.x)*f); ys.push(a.y+(b.y-a.y)*f); tx.push((b.x-a.x)/len); ty.push((b.y-a.y)/len); seg.push(i); s.push(acc+len*f);}
+    acc+=len;
+  }
+  const last=WP[WP.length-1]; xs.push(last.x); ys.push(last.y); tx.push(tx[tx.length-1]); ty.push(ty[ty.length-1]); seg.push(WP.length-2); s.push(acc);
+  return {xs,ys,tx,ty,seg,s,n:xs.length,L:acc};
+})();
+const wpS = (() => {const o=[0]; let a=0; for(let i=0;i<WP.length-1;i++){a+=Math.hypot(WP[i+1].x-WP[i].x,WP[i+1].y-WP[i].y); o.push(a);} return o;})();
+function nearestWP(i){let b=0,bd=1e9; for(let k=0;k<WP.length;k++){const d=Math.abs(wpS[k]-ROUTE.s[i]); if(d<bd){bd=d;b=k;}} return WP[b].n;}
+
+function profile(ac){
+  const n=ROUTE.n, L=ROUTE.L, Vc=ac.vc/3.6, Vcl=0.55*Vc;
+  let dc=ac.alt/ac.climb*Vcl/1000, dd=ac.alt/ac.desc*Vcl/1000, top=ac.alt;
+  if (dc+dd>L*0.9){const k=L*0.9/(dc+dd); dc*=k; dd*=k; top*=k;}
+  const alt=new Float64Array(n), vg=new Float64Array(n), cum=new Float64Array(n), phase=[];
+  for (let i=0;i<n;i++){
+    const s=ROUTE.s[i];
+    if (s<dc){alt[i]=top*s/dc; vg[i]=Vcl; phase.push('climb');}
+    else if (s>L-dd){alt[i]=top*(L-s)/dd; vg[i]=Vcl; phase.push('desc');}
+    else {alt[i]=top; vg[i]=Vc; phase.push('cruise');}
+    alt[i]=Math.max(alt[i],5);
+    if (i>0) cum[i]=cum[i-1]+(ROUTE.s[i]-ROUTE.s[i-1])*1000/vg[i];
+  }
+  return {alt,vg,cum,phase,top};
+}
+
+const LV = ['정상','주의','경고','불가'];
+const cat = m => m>=0.2?0 : m>=0?1 : m>=-0.25?2 : 3;
+const FTH = [0.07,0.105], HSH=[5,7.5], VSH=[1.5,2.0];
+
+function evalRoute(t0, ac, sc, full){
+  const pr = profile(ac), n=ROUTE.n;
+  const Wx=new Float64Array(n), W=new Float64Array(n), out=[];
+  for (let i=0;i<n;i++){
+    const x=ROUTE.xs[i], y=ROUTE.ys[i], z=pr.alt[i], eta=t0+pr.cum[i]/3600;
+    const m=met(x,y,z,eta,sc);
+    const zt=z+15, zb=Math.max(2,z-15), m1=met(x,y,zt,eta,sc), m0=met(x,y,zb,eta,sc);
+    const vsh=Math.hypot(m1.u-m0.u,m1.v-m0.v)*30/(zt-zb);
+    Wx[i]=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i]; W[i]=m.w;
+    out.push({i, m, z, eta, vsh, cross:Math.abs(-m.u*ROUTE.ty[i]+m.v*ROUTE.tx[i])});
+  }
+  const k=3, Fr=new Float64Array(n);
+  for (let i=0;i<n;i++){
+    const a=Math.max(0,i-k), b=Math.min(n-1,i+k), ds=(ROUTE.s[b]-ROUTE.s[a])*1000;
+    const dWdt=(Wx[b]-Wx[a])/ds*pr.vg[i];
+    const Va=Math.max(15, pr.vg[i]-Wx[i]);
+    Fr[i]=dWdt/G - W[i]/Va;
+    out[i].hsh=Math.abs(Wx[b]-Wx[a])*0.5/((ROUTE.s[b]-ROUTE.s[a])||0.5);
+  }
+  let worst={mg:9,i:0,f:''};
+  for (let i=0;i<n;i++){
+    let sum=0,c=0; for(let j=Math.max(0,i-5);j<=Math.min(n-1,i+5);j++){sum+=Fr[j];c++;}
+    const p=out[i], m=p.m, F=sum/c; p.F=F; p.Wx=Wx[i];
+    const low = p.z<150 && pr.phase[i]!=='cruise';
+    const items = [];
+    items.push(low ? ['이착륙 풍속', 1-m.spd/ac.xw] : ['풍속', 1-m.spd/ac.wmax]);
+    items.push(['돌풍', 1-m.gust/ac.gust]);
+    items.push(['난류', 1-m.edr/ac.edr]);
+    items.push(['시정', 1-ac.vis/m.vis]);
+    items.push(['운고', 1-(p.z+100)/m.ceil]);
+    items.push(['급변풍', F>0 ? 1-F/FTH[1] : 1]);
+    items.push(['수평시어', 1-p.hsh/HSH[1]]);
+    items.push(['연직시어', 1-p.vsh/VSH[1]]);
+    items.push(['강수', 1-m.P/ac.rain]);
+    if (m.icing && !ac.icing) items.push(['착빙', -0.5]);
+    for (const it of items) it[1]=Math.max(-1,Math.min(1,it[1]));
+    let mg=9, f=''; for (const [nm,v] of items){ if (v<mg){mg=v; f=nm;} }
+    p.items=items; p.mg=mg; p.f=f; p.c=cat(mg);
+    if (mg<worst.mg) worst={mg,i,f};
+  }
+  const res={pts:out, pr, worst, c:cat(worst.mg)};
+  if (full) res.alerts=makeAlerts(out, ac);
+  return res;
+}
+
+function makeAlerts(pts, ac){
+  const defs=[
+    {key:'F', name:'급변풍', val:p=>p.F, th:FTH, fmt:(p)=>`${p.Wx>=0?'배풍':'정풍'} 변화 · F ${p.F.toFixed(2)}`},
+    {key:'H', name:'수평 급변풍', val:p=>p.hsh, th:HSH, fmt:(p)=>`경로성분 ${p.hsh.toFixed(1)} m/s / 0.5 km`},
+    {key:'V', name:'연직 급변풍', val:p=>p.vsh, th:VSH, fmt:(p)=>`${p.vsh.toFixed(1)} m/s / 30 m`},
+    {key:'E', name:'난류', val:p=>p.m.edr, th:[ac.edr*0.8, ac.edr], fmt:(p)=>`EDR ${p.m.edr.toFixed(2)}`}
+  ];
+  const al=[];
+  for (const d of defs){
+    let run=null;
+    const close=()=>{ if(run){al.push(run); run=null;} };
+    pts.forEach((p,i)=>{
+      const v=d.val(p), lv = v>=d.th[1]?2 : v>=d.th[0]?1 : 0;
+      if (lv){
+        if(!run) run={d, i0:i, i1:i, peak:i, pv:v, lv};
+        run.i1=i; if (v>run.pv){run.pv=v; run.peak=i;} run.lv=Math.max(run.lv,lv);
+      } else close();
+    });
+    close();
+  }
+  al.forEach(a=>{
+    const p=pts[a.peak];
+    a.where=nearestWP(a.peak); a.alt=Math.round(p.z); a.s=ROUTE.s[a.peak];
+    a.len=Math.max(0.1,ROUTE.s[a.i1]-ROUTE.s[a.i0]);
+    a.detail=a.d.fmt(p);
+    a.id=`${a.d.key}-${a.where}-${a.lv}`;
+    a.msg=`${a.d.name} ${a.lv===2?'경고':'주의'} · ${a.where} 부근 · 고도 ${a.alt} m · ${a.detail} · ${a.len.toFixed(1)} km 구간`;
+  });
+  al.sort((a,b)=> b.lv-a.lv || a.s-b.s);
+  return al;
+}
+
+/* ---------- colors ---------- */
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const RAMPS = {
+  spd:{stops:[[0,'#EAF2F8'],[4,'#BFD9EC'],[8,'#7FB3D9'],[12,'#3E7FC1'],[16,'#2B4FA0'],[20,'#4B2C8C'],[26,'#7A1E6E']], unit:'m/s', fmt:v=>v},
+  edr:{stops:[[0,'#F3F3EC'],[0.05,'#ECE8C0'],[0.1,'#F1D078'],[0.2,'#EE9A3F'],[0.3,'#D9531E'],[0.45,'#9E1F3A']], unit:'m²ᐟ³ s⁻¹', fmt:v=>v.toFixed(2)},
+  vis:{stops:[[0,'#56376E'],[300,'#7E5C93'],[800,'#A487B5'],[1600,'#C9B6D4'],[5000,'#E5DDEA'],[10000,'#F4F2F5']], unit:'m', fmt:v=>v},
+  along:{stops:[[-16,'#145F70'],[-8,'#5FA7B5'],[0,'#F2F2EE'],[8,'#E9A15A'],[16,'#B04E17']], unit:'m/s (− 정풍, + 배풍)', fmt:v=>v>0?'+'+v:v},
+  vsh:{stops:[[0,'#F3F3EC'],[0.75,'#D9E6C6'],[1.5,'#F1D078'],[2,'#EE9A3F'],[3,'#C2361F']], unit:'m/s / 30 m', fmt:v=>v}
+};
+const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+RAMPS.spd.rgb=null;
+for (const k in RAMPS) RAMPS[k].rgb = RAMPS[k].stops.map(s=>[s[0],hex(s[1])]);
+function ramp(key, v){
+  const S=RAMPS[key].rgb;
+  if (v<=S[0][0]) return S[0][1];
+  for (let i=1;i<S.length;i++) if (v<=S[i][0]){const f=(v-S[i-1][0])/(S[i][0]-S[i-1][0]), a=S[i-1][1], b=S[i][1]; return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f];}
+  return S[S.length-1][1];
+}
+const catColor = c => css(['--ok','--caution','--warn','--nogo'][c]);
+const RISKRGB = () => [0,1,2,3].map(c=>hex(css(['--ok','--caution','--warn','--nogo'][c]).length===7?css(['--ok','--caution','--warn','--nogo'][c]):'#888888'));
+
+function legendHTML(key){
+  if (key==='risk'){
+    return LV.map((l,c)=>`<span class="sw" style="min-width:64px"><i style="background:${catColor(c)};opacity:.75"></i>${l}</span>`).join('') + `<span class="unit">여유율 기준</span>`;
+  }
+  const R=RAMPS[key];
+  return R.stops.map(s=>`<span class="sw"><i style="background:${s[1]}"></i>${R.fmt(s[0])}</span>`).join('') + `<span class="unit">${R.unit}</span>`;
+}
+
+/* ---------- canvas helpers ---------- */
+function fit(cv, aspect){
+  const dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth, h=Math.round(w*aspect);
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+'px';
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function label(ctx, txt, x, y, opt={}){
+  ctx.font = `${opt.w||500} ${opt.size||12}px ${css('--font-ui')}`;
+  ctx.textAlign = opt.align||'left'; ctx.textBaseline = opt.base||'middle';
+  ctx.lineWidth=3.5; ctx.strokeStyle=css('--surface'); ctx.strokeText(txt,x,y);
+  ctx.fillStyle=opt.color||css('--ink'); ctx.fillText(txt,x,y);
+}
+
+/* ---------- rendering ---------- */
+let current=null;
+
+function mapAlt(){ const v=$('#mapAlt').value; return v==='cruise'? state.ac.alt : +v; }
+
+function drawMap(){
+  const cv=$('#map'), aspect=(EXT.y1-EXT.y0)/(EXT.x1-EXT.x0);
+  const {ctx,w,h}=fit(cv, Math.min(aspect, 0.95));
+  const sx = w/(EXT.x1-EXT.x0), sy = h/(EXT.y1-EXT.y0), s=Math.min(sx,sy);
+  const ox=(w-s*(EXT.x1-EXT.x0))/2, oy=(h-s*(EXT.y1-EXT.y0))/2;
+  const X=x=>ox+(x-EXT.x0)*s, Y=y=>oy+(EXT.y1-y)*s;
+  const field=$('#mapField').value, z=mapAlt(), t0=STEPS[state.step], sc=state.sc, ac=state.ac;
+  // heat field
+  const NX=112, NY=104, off=document.createElement('canvas'); off.width=NX; off.height=NY;
+  const oc=off.getContext('2d'), img=oc.createImageData(NX,NY), rr=RISKRGB();
+  for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
+    const x=EXT.x0+(i+0.5)/NX*(EXT.x1-EXT.x0), y=EXT.y1-(j+0.5)/NY*(EXT.y1-EXT.y0);
+    const m=met(x,y,z,t0,sc); let c;
+    if (field==='risk'){
+      const mg=Math.min(1-m.spd/ac.wmax,1-m.gust/ac.gust,1-m.edr/ac.edr,1-ac.vis/m.vis,1-m.P/ac.rain,1-(z+100)/m.ceil,(m.icing&&!ac.icing)?-0.5:1);
+      c=rr[cat(mg)];
+    } else c=ramp(field, field==='spd'?m.spd: field==='edr'?m.edr : m.vis);
+    const k=(j*NX+i)*4; img.data[k]=c[0]; img.data[k+1]=c[1]; img.data[k+2]=c[2]; img.data[k+3]= field==='risk'? 120 : 215;
+  }
+  oc.putImageData(img,0,0);
+  ctx.fillStyle=css('--surface-2'); ctx.fillRect(0,0,w,h);
+  ctx.imageSmoothingEnabled=true; ctx.drawImage(off, X(EXT.x0), Y(EXT.y1), s*(EXT.x1-EXT.x0), s*(EXT.y1-EXT.y0));
+  // river
+  ctx.save(); ctx.strokeStyle=css('--accent'); ctx.globalAlpha=0.35; ctx.lineWidth=Math.max(3,1.0*s); ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.beginPath(); RIVER.forEach(([x,y],i)=> i?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y))); ctx.stroke(); ctx.restore();
+  label(ctx,'한강',X(19.2),Y(-17.6),{color:css('--accent'),size:11.5});
+  // grid km
+  ctx.save(); ctx.strokeStyle=css('--line'); ctx.globalAlpha=0.5; ctx.lineWidth=1;
+  for (let gx=-5;gx<=20;gx+=5){ctx.beginPath();ctx.moveTo(X(gx),Y(EXT.y0));ctx.lineTo(X(gx),Y(EXT.y1));ctx.stroke();}
+  for (let gy=-20;gy<=5;gy+=5){ctx.beginPath();ctx.moveTo(X(EXT.x0),Y(gy));ctx.lineTo(X(EXT.x1),Y(gy));ctx.stroke();}
+  ctx.restore();
+  // wind arrows
+  ctx.save(); ctx.strokeStyle=css('--ink'); ctx.fillStyle=css('--ink'); ctx.globalAlpha=0.55; ctx.lineWidth=1.2;
+  for (let gx=-4; gx<=21; gx+=2.5) for (let gy=-18.5; gy<=5; gy+=2.5){
+    const m=met(gx,gy,z,t0,sc), L=Math.min(22, 4+m.spd*1.1), ux=m.u/(m.spd||1), uy=m.v/(m.spd||1);
+    const x0=X(gx)-ux*L/2, y0=Y(gy)+uy*L/2, x1=X(gx)+ux*L/2, y1=Y(gy)-uy*L/2;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+    const an=Math.atan2(y1-y0,x1-x0); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1-5*Math.cos(an-0.45),y1-5*Math.sin(an-0.45)); ctx.lineTo(x1-5*Math.cos(an+0.45),y1-5*Math.sin(an+0.45)); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+  // airport
+  ctx.save(); ctx.strokeStyle=css('--muted'); ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.arc(X(AIRPORT.x),Y(AIRPORT.y),1.7*s,0,Math.PI*2); ctx.stroke(); ctx.restore();
+  label(ctx,'김포공항',X(AIRPORT.x),Y(AIRPORT.y)+1.7*s+10,{align:'center',size:11.5,color:css('--muted')});
+  // convective cell outline
+  if (sc.conv && t0>=CONV.t0 && t0<=CONV.t1){
+    const tau=t0-CONV.t0, cx=CONV.x0+CONV.vx*tau, cy=CONV.y0+CONV.vy*tau;
+    ctx.save(); ctx.strokeStyle=css('--nogo'); ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.arc(X(cx),Y(cy),CONV.R*s,0,Math.PI*2); ctx.stroke(); ctx.restore();
+    label(ctx,'대류셀 · 돌풍전선',X(cx),Y(cy)-CONV.R*s-9,{align:'center',size:11.5,color:css('--nogo'),w:600});
+  }
+  // route
+  if (current){
+    const P=current.pts;
+    ctx.save(); ctx.lineCap='round';
+    ctx.strokeStyle=css('--surface'); ctx.lineWidth=9; ctx.beginPath();
+    P.forEach((p,i)=> i?ctx.lineTo(X(ROUTE.xs[i]),Y(ROUTE.ys[i])):ctx.moveTo(X(ROUTE.xs[i]),Y(ROUTE.ys[i]))); ctx.stroke();
+    ctx.lineWidth=5;
+    for (let i=1;i<P.length;i++){ ctx.strokeStyle=catColor(P[i].c); ctx.beginPath(); ctx.moveTo(X(ROUTE.xs[i-1]),Y(ROUTE.ys[i-1])); ctx.lineTo(X(ROUTE.xs[i]),Y(ROUTE.ys[i])); ctx.stroke(); }
+    ctx.restore();
+    WP.forEach((p,k)=>{
+      const end = k===0||k===WP.length-1;
+      ctx.fillStyle=css('--ink'); ctx.beginPath(); ctx.arc(X(p.x),Y(p.y), end?6:3.5, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle=css('--surface'); ctx.lineWidth=1.5; ctx.stroke();
+      const dx = k===0? 10 : 8, dy = k===0? -2 : -10;
+      label(ctx,p.n,X(p.x)+dx,Y(p.y)+dy,{size:end?13:11.5,w:end?600:500});
+    });
+    (current.alerts||[]).forEach((a,n)=>{
+      const i=a.peak, x=X(ROUTE.xs[i]), y=Y(ROUTE.ys[i]);
+      drawMarker(ctx,x+12,y+12,n+1,a.lv);
+    });
+  }
+  // north arrow & scale
+  label(ctx,'N ↑',w-14,16,{align:'right',size:12,w:600});
+  const sb=5*s; ctx.strokeStyle=css('--ink'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(14,h-14); ctx.lineTo(14+sb,h-14); ctx.stroke();
+  label(ctx,'5 km',14+sb/2,h-24,{align:'center',size:11});
+  label(ctx,`고도 ${z} m · ${$('#mapField').selectedOptions[0].text}`,14,16,{size:12,w:600});
+  $('#mapLegend').innerHTML=legendHTML(field);
+  cv._inv = (px,py)=>({x:EXT.x0+(px-ox)/s, y:EXT.y1-(py-oy)/s});
+}
+function drawMarker(ctx,x,y,num,lv){
+  ctx.save(); ctx.fillStyle=lv===2?css('--warn'):css('--caution');
+  ctx.beginPath(); ctx.moveTo(x,y-10); ctx.lineTo(x+10,y+8); ctx.lineTo(x-10,y+8); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle=css('--surface'); ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle=css('--surface'); ctx.font=`700 10.5px ${css('--font-data')}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(num),x,y+2.5);
+  ctx.restore();
+}
+
+function drawSection(){
+  const cv=$('#sec'), wide=cv.parentElement.clientWidth;
+  const {ctx,w,h}=fit(cv, wide<560?0.62:0.36);
+  const padL=46, padR=14, padT=26, padB=40, ZMAX=800;
+  const iw=w-padL-padR, ih=h-padT-padB, L=ROUTE.L;
+  const X=s=>padL+s/L*iw, Y=z=>padT+(1-z/ZMAX)*ih;
+  const field=$('#secField').value, t0=STEPS[state.step], sc=state.sc, pr=current.pr;
+  const NC=Math.min(240,Math.round(iw/3)), NR=80;
+  const off=document.createElement('canvas'); off.width=NC; off.height=NR;
+  const oc=off.getContext('2d'), img=oc.createImageData(NC,NR);
+  for (let c=0;c<NC;c++){
+    const sv=(c+0.5)/NC*L, i=Math.min(ROUTE.n-1,Math.round(sv/DS)), x=ROUTE.xs[i], y=ROUTE.ys[i], eta=t0+pr.cum[i]/3600;
+    for (let r=0;r<NR;r++){
+      const z=(1-(r+0.5)/NR)*ZMAX, m=met(x,y,z,eta,sc); let v;
+      if (field==='along') v=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i];
+      else if (field==='spd') v=m.spd; else if (field==='edr') v=m.edr; else if (field==='vis') v=m.vis;
+      else { const a=met(x,y,z+15,eta,sc), b=met(x,y,Math.max(2,z-15),eta,sc); v=Math.hypot(a.u-b.u,a.v-b.v)*30/(z+15-Math.max(2,z-15)); }
+      const col=ramp(field,v), k=(r*NC+c)*4; img.data[k]=col[0]; img.data[k+1]=col[1]; img.data[k+2]=col[2]; img.data[k+3]=230;
+    }
+  }
+  oc.putImageData(img,0,0);
+  ctx.clearRect(0,0,w,h);
+  ctx.imageSmoothingEnabled=true; ctx.drawImage(off,padL,padT,iw,ih);
+  // surface strip
+  for (let c=0;c<iw;c+=2){
+    const i=Math.min(ROUTE.n-1,Math.round((c/iw*L)/DS)), lz=logz0(ROUTE.xs[i],ROUTE.ys[i]).lz;
+    ctx.fillStyle= lz<-2.5? css('--accent') : lz<-0.8? css('--caution') : css('--muted');
+    ctx.globalAlpha= lz<-2.5?0.7:0.55; ctx.fillRect(padL+c,padT+ih+1,2,5);
+  }
+  ctx.globalAlpha=1;
+  // axes
+  ctx.strokeStyle=css('--line'); ctx.lineWidth=1; ctx.fillStyle=css('--muted');
+  ctx.font=`11px ${css('--font-data')}`; ctx.textAlign='right'; ctx.textBaseline='middle';
+  for (let z=0;z<=ZMAX;z+=200){ ctx.beginPath(); ctx.moveTo(padL,Y(z)); ctx.lineTo(padL+iw,Y(z)); ctx.globalAlpha=0.6; ctx.stroke(); ctx.globalAlpha=1; ctx.fillText(z+' m',padL-5,Y(z)); }
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  for (let s=0;s<=L;s+=5) ctx.fillText(s+' km',X(s),padT+ih+9);
+  ctx.textBaseline='bottom';
+  let lastX=-99;
+  WP.forEach((p,k)=>{ const x=X(wpS[k]); ctx.save(); ctx.setLineDash([2,3]); ctx.strokeStyle=css('--muted'); ctx.globalAlpha=0.5; ctx.beginPath(); ctx.moveTo(x,padT); ctx.lineTo(x,padT+ih); ctx.stroke(); ctx.restore();
+    if (x-lastX>58 || k===WP.length-1){ ctx.fillStyle=css('--ink'); ctx.font=`500 11px ${css('--font-ui')}`; ctx.textAlign= k===0?'left': k===WP.length-1?'right':'center'; ctx.fillText(p.n,x,padT-6); lastX=x; } });
+  ctx.fillStyle=css('--muted'); ctx.font=`11px ${css('--font-ui')}`; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('지표: 파랑 수면 · 노랑 농경지·공항 · 회색 도시', padL, padT+ih+24);
+  // flight profile
+  ctx.save(); ctx.lineCap='round';
+  ctx.strokeStyle=css('--surface'); ctx.lineWidth=7; ctx.beginPath();
+  current.pts.forEach((p,i)=> i?ctx.lineTo(X(ROUTE.s[i]),Y(p.z)):ctx.moveTo(X(ROUTE.s[i]),Y(p.z))); ctx.stroke();
+  ctx.strokeStyle=css('--ink'); ctx.lineWidth=2; ctx.stroke();
+  for (let i=1;i<current.pts.length;i+=1){ const p=current.pts[i]; if(p.c===0) continue; ctx.strokeStyle=catColor(p.c); ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(X(ROUTE.s[i-1]),Y(current.pts[i-1].z)); ctx.lineTo(X(ROUTE.s[i]),Y(p.z)); ctx.stroke(); }
+  ctx.restore();
+  (current.alerts||[]).forEach((a,n)=> drawMarker(ctx, X(a.s), Y(a.alt)-16, n+1, a.lv));
+  $('#secLegend').innerHTML=legendHTML(field);
+  cv._inv=(px,py)=>({s:(px-padL)/iw*L, z:(1-(py-padT)/ih)*ZMAX, ok:px>=padL&&px<=padL+iw&&py>=padT&&py<=padT+ih});
+}
+
+function fmtTime(d){const p=n=>String(n).padStart(2,'0'); return `${d.getMonth()+1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function issueDate(){ const d=new Date(); d.setHours(state.sc.issueH,0,0,0); return d; }
+
+function renderSummary(){
+  const r=current, w=r.worst, p=r.pts[w.i];
+  const big=$('#vBig'); big.className='big c'+r.c; $('#vVal').textContent=LV[r.c];
+  $('#fFactor').textContent= r.c===0 ? '없음' : w.f;
+  $('#fSeg').innerHTML = `${WP[ROUTE.seg[w.i]].n} → ${WP[ROUTE.seg[w.i]+1].n} <small class="num">${ROUTE.s[w.i].toFixed(1)} km · ${Math.round(p.z)} m</small>`;
+  const ft=r.pr.cum[ROUTE.n-1]/60;
+  $('#fDist').innerHTML=`${ROUTE.L.toFixed(1)} km <small>· ${ft.toFixed(0)}분</small>`;
+  const a=r.alerts, nW=a.filter(x=>x.lv===2).length;
+  $('#fAlerts').innerHTML=`${nW} <small>경고 · ${a.length-nW} 주의</small>`;
+  $('#fMargin').textContent=`${(w.mg*100).toFixed(0)}%`;
+  const iss=issueDate(), val=new Date(iss.getTime()+STEPS[state.step]*3600e3);
+  $('#tIssue').textContent=fmtTime(iss); $('#tValid').textContent=fmtTime(val);
+  const t=STEPS[state.step];
+  $('#stepLbl').textContent = (t<=1 ? `출발 +${Math.round(t*60)}분` : `출발 +${t}시간`) + ` · ${fmtTime(val)} KST`;
+  $('#modeLbl').textContent = t<=1 ? '준실시간 · 5분 갱신' : '단기예측 · 1시간 갱신';
+}
+
+function renderAlerts(){
+  const list=$('#alist'), al=current.alerts;
+  if (!al.length){ list.innerHTML='<div class="empty">이 출발 시각에는 경로상 급변풍·난류 경고가 없습니다.</div>'; }
+  else list.innerHTML = al.map((a,n)=>{
+    const ack=state.acked[a.id];
+    return `<article class="alert l${a.lv}${ack?' acked':''}">
+      <div class="hd"><span class="ttl"><span class="idx l${a.lv}">${n+1}</span> ${a.d.name} ${a.lv===2?'경고':'주의'}</span><span class="chip c${a.lv}">${a.lv===2?'경고':'주의'}</span></div>
+      <div class="msg">${a.msg}</div>
+      <div class="ft"><span class="num">${a.s.toFixed(1)} km 지점 · 통과 ${fmtTime(new Date(issueDate().getTime()+current.pts[a.peak].eta*3600e3))}</span>
+      ${ack?`<span class="num">확인 ${ack}</span>`:`<button type="button" data-ack="${a.id}">확인</button>`}</div></article>`;
+  }).join('');
+  $('#banner').classList.toggle('on', al.some(a=>a.lv===2 && !state.acked[a.id]));
+  // limiting factors at worst point
+  const p=current.pts[current.worst.i];
+  const items=[...p.items].sort((a,b)=>a[1]-b[1]).slice(0,5);
+  $('#limits').innerHTML = `<div class="eyebrow">가장 위험한 지점의 여유율</div>` + items.map(([nm,v])=>{
+    const c=cat(v), wd=Math.max(2,Math.min(100,(v+0.5)/1.5*100));
+    return `<div class="lim"><span>${nm}</span><span class="bar"><i style="width:${wd}%;background:${catColor(c)}"></i></span><span class="num" style="text-align:right">${(v*100).toFixed(0)}%</span></div>`;
+  }).join('');
+}
+
+function renderSegments(){
+  const rows=[];
+  for (let k=0;k<WP.length-1;k++){
+    const ps=current.pts.filter((p,i)=>ROUTE.seg[i]===k);
+    if (!ps.length) continue;
+    let mg=9,f='',mxS=0,mxG=0,mxE=0,mnV=1e9,zmin=1e9,zmax=0;
+    ps.forEach(p=>{mxS=Math.max(mxS,p.m.spd);mxG=Math.max(mxG,p.m.gust);mxE=Math.max(mxE,p.m.edr);mnV=Math.min(mnV,p.m.vis);zmin=Math.min(zmin,p.z);zmax=Math.max(zmax,p.z);if(p.mg<mg){mg=p.mg;f=p.f;}});
+    const c=cat(mg);
+    rows.push(`<tr><td>${WP[k].n} → ${WP[k+1].n}</td><td class="num">${(wpS[k+1]-wpS[k]).toFixed(1)}</td><td class="num">${Math.round(zmin)}–${Math.round(zmax)}</td><td class="num">${mxS.toFixed(1)}</td><td class="num">${mxG.toFixed(1)}</td><td class="num">${mxE.toFixed(2)}</td><td class="num">${Math.round(mnV).toLocaleString()}</td><td class="num">${(mg*100).toFixed(0)}%</td><td>${c===0?'—':f}</td><td><span class="chip c${c}">${LV[c]}</span></td></tr>`);
+  }
+  $('#segBody').innerHTML=rows.join('');
+}
+
+function renderStrip(){
+  const strip=$('#strip');
+  if (!strip.children.length){
+    strip.innerHTML = STEPS.map((t,i)=>`<button type="button" data-step="${i}" aria-label="${t<=1?Math.round(t*60)+'분':t+'시간'}"></button>`).join('');
+    const ax=$('#stripAxis'), marks=[[0,'지금'],[6,'+30분'],[12,'+1시간'],[16,'+6시간'],[22,'+12시간'],[34,'+24시간'],[46,'+36시간'],[58,'+48시간']];
+    const total=13*1.3+47; // proportional to fr widths approx
+    ax.innerHTML = marks.map(([i,t])=>{ const pos = i<13 ? (i+0.5)*1.3 : 13*1.3+(i-13+0.5); return `<span style="left:${pos/total*100}%">${t}</span>`; }).join('');
+    strip.style.gridTemplateColumns = `repeat(13,minmax(9px,1.3fr)) repeat(47,minmax(7px,1fr))`;
+  }
+  STEPS.forEach((t,i)=>{
+    const r=evalRoute(t,state.ac,state.sc,false), b=strip.children[i];
+    b.className='k'+r.c+(i===state.step?' sel':'');
+    b.title=`${t<=1?'+'+Math.round(t*60)+'분':'+'+t+'시간'} · ${LV[r.c]}${r.c?' · '+r.worst.f:''}`;
+  });
+}
+function markStrip(){ [...$('#strip').children].forEach((b,i)=>b.classList.toggle('sel',i===state.step)); }
+
+function recompute(stripToo){
+  current = evalRoute(STEPS[state.step], state.ac, state.sc, true);
+  renderSummary(); renderAlerts(); renderSegments(); drawMap(); drawSection();
+  if (stripToo) renderStrip(); else markStrip();
+}
+
+/* ---------- controls ---------- */
+const scSel=$('#scn'), acSel=$('#acPreset');
+scSel.innerHTML=Object.entries(SCN).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+acSel.innerHTML=Object.entries(AC).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('') + '<option value="custom">직접 입력</option>';
+const scFields=['U','dir','T','dep','llj'];
+const scOut={U:v=>v.toFixed(1)+' m/s', dir:v=>{const n=['북','북북동','북동','동북동','동','동남동','남동','남남동','남','남남서','남서','서남서','서','서북서','북서','북북서'][Math.round(v/22.5)%16]; return `${v}° ${n}풍`;}, T:v=>v+' °C', dep:v=>v.toFixed(1)+' °C', llj:v=>v+' m/s'};
+function syncSc(){ scFields.forEach(f=>{ $('#'+f).value=state.sc[f]; $('#o'+f[0].toUpperCase()+f.slice(1)).textContent=scOut[f](+state.sc[f]); }); $('#conv').checked=!!state.sc.conv; scSel.value=state.scKey; }
+const acFields=['vc','alt','climb','desc','xw','wmax','gust','edr','vis','rain'];
+function syncAc(){ acFields.forEach(f=>$('#ac_'+f).value=state.ac[f]); $('#ac_icing').checked=!!state.ac.icing; acSel.value=state.acKey; }
+
+let deb=null; const later = (fn,ms=120)=>{ clearTimeout(deb); deb=setTimeout(fn,ms); };
+scSel.addEventListener('change',()=>{ state.scKey=scSel.value; state.sc={...SCN[scSel.value]}; state.acked={}; syncSc(); recompute(true); });
+scFields.forEach(f=>$('#'+f).addEventListener('input',e=>{ state.sc[f]=+e.target.value; $('#o'+f[0].toUpperCase()+f.slice(1)).textContent=scOut[f](+e.target.value); later(()=>recompute(true)); }));
+$('#conv').addEventListener('change',e=>{ state.sc.conv=e.target.checked; recompute(true); });
+acSel.addEventListener('change',()=>{ if (acSel.value!=='custom'){ state.acKey=acSel.value; state.ac={...AC[acSel.value]}; syncAc(); recompute(true);} });
+acFields.forEach(f=>$('#ac_'+f).addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(!isFinite(v)) return; state.ac[f]=v; state.acKey='custom'; acSel.value='custom'; later(()=>recompute(true),250); }));
+$('#ac_icing').addEventListener('change',e=>{ state.ac.icing=e.target.checked; state.acKey='custom'; acSel.value='custom'; recompute(true); });
+$('#step').addEventListener('input',e=>{ state.step=+e.target.value; recompute(false); });
+$('#strip').addEventListener('click',e=>{ const b=e.target.closest('[data-step]'); if(!b) return; state.step=+b.dataset.step; $('#step').value=state.step; recompute(false); });
+$('#mapField').addEventListener('change',drawMap); $('#mapAlt').addEventListener('change',drawMap);
+$('#secField').addEventListener('change',drawSection);
+$('#alist').addEventListener('click',e=>{ const b=e.target.closest('[data-ack]'); if(!b) return; const d=new Date(); state.acked[b.dataset.ack]=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; renderAlerts(); });
+let timer=null;
+$('#play').addEventListener('click',()=>{
+  if (timer){ clearInterval(timer); timer=null; $('#play').textContent='재생'; return; }
+  $('#play').textContent='정지';
+  timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; recompute(false); }, 900);
+});
+
+// readouts
+$('#map').addEventListener('mousemove',e=>{
+  const cv=e.currentTarget; if(!cv._inv) return; const rc=cv.getBoundingClientRect(), q=cv._inv(e.clientX-rc.left,e.clientY-rc.top), z=mapAlt();
+  const m=met(q.x,q.y,z,STEPS[state.step],state.sc), wd=(Math.atan2(-m.u,-m.v)*180/Math.PI+360)%360;
+  $('#mapRead').textContent=`(${q.x.toFixed(1)}, ${q.y.toFixed(1)}) km · ${z} m · 풍향 ${wd.toFixed(0)}° 풍속 ${m.spd.toFixed(1)} m/s 돌풍 ${m.gust.toFixed(1)} · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m · z₀ ${m.z0<0.01?m.z0.toExponential(0):m.z0.toFixed(2)} m${m.P>0.5?' · 강수 '+m.P.toFixed(0)+' mm/h':''}`;
+});
+$('#sec').addEventListener('mousemove',e=>{
+  const cv=e.currentTarget; if(!cv._inv) return; const rc=cv.getBoundingClientRect(), q=cv._inv(e.clientX-rc.left,e.clientY-rc.top); if(!q.ok) return;
+  const i=Math.min(ROUTE.n-1,Math.max(0,Math.round(q.s/DS))), eta=STEPS[state.step]+current.pr.cum[i]/3600, m=met(ROUTE.xs[i],ROUTE.ys[i],q.z,eta,state.sc);
+  const al=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i];
+  $('#secRead').textContent=`${q.s.toFixed(1)} km · ${Math.round(q.z)} m · 풍속 ${m.spd.toFixed(1)} m/s · ${al>=0?'배풍':'정풍'} ${Math.abs(al).toFixed(1)} · EDR ${m.edr.toFixed(2)} · 연직속도 ${m.w.toFixed(1)} m/s · 기온 ${m.T.toFixed(1)} °C`;
+});
+
+// redraw on resize / theme
+let rz=null; new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(current){drawMap();drawSection();} },120); }).observe($('main'));
+const redraw=()=>{ if(current){ drawMap(); drawSection(); renderStrip(); } };
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+syncSc(); syncAc();
+recompute(true);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ drawMap(); drawSection(); });
+})();
+</script>
