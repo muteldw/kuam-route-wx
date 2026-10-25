@@ -9,7 +9,9 @@ K-UAM 경로 기상 위험 단순 진단모델과 웹 표출 초안 (킨텍스 V
 | 경로 | 내용 |
 | --- | --- |
 | `model/kuam_simple_model.py` | 진단모델 참조 구현(파이썬, 외부 패키지 없음). 경로 판정 결과를 JSON으로 출력 |
-| `web/index.html` | 단일 파일 웹 대시보드. 같은 모델을 JavaScript로 내장해 브라우저에서 바로 계산 |
+| `web/index.html` | 단일 파일 웹 대시보드. 같은 모델을 JavaScript로 내장해 브라우저에서 바로 계산. 수평 지도는 Leaflet + 내장 벡터 기본도 |
+| `web/basemap.json` | 기본도 자료(한강, 시군구·읍면동 경계, 주요도로). `index.html`에 같은 내용이 들어 있음 |
+| `tools/build_basemap.py` | 기본도 생성 스크립트 (Natural Earth 10m, 통계청 2018 경계) |
 
 ## 실행
 
@@ -23,6 +25,12 @@ python model/kuam_simple_model.py --scenario llj --aircraft tilt --lead 0 > rout
 
 시나리오: `calm`(가을 약풍), `nw`(겨울 북서풍), `llj`(야간 저층제트), `conv`(대류성 돌풍전선), `fog`(새벽 한강 안개)
 기체(가상): `multi`(멀티콥터형), `lift`(리프트+크루즈형), `tilt`(틸트로터형)
+
+## 지도 배경
+
+- 기본: 내장 벡터 지도(오프라인에서도 표시). 한강 하류(일산대교~오두산)와 강폭은 근사값
+- 선택: OpenStreetMap 타일. claude.ai 미리보기에서는 외부 타일이 막혀 있고, GitHub Pages 등 일반 웹 주소에서 보임
+- 카카오지도는 API 키와 등록 도메인이 필요해 웹 주소를 정한 뒤 연결 예정
 
 ## 모델 요약
 
