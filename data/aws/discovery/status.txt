@@ -1,0 +1,2 @@
+HUB key: missing (KMA_APIHUB_KEY)
+DATA.GO.KR key: missing (DATA_GO_KR_KEY)
