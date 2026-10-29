@@ -1,0 +1,57 @@
+name: aws-fetch
+# 2단계: config.json의 지점·기간으로 AWS 매분자료 수집 → 10분 자료(연·지점별 csv.gz)로 커밋
+on:
+  push:
+    branches: [data/aws-5yr]
+    paths: ['data/aws/config.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      stations: ${{ steps.c.outputs.stations }}
+      start: ${{ steps.c.outputs.start }}
+      end: ${{ steps.c.outputs.end }}
+      years: ${{ steps.c.outputs.years }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: c
+        run: |
+          python3 - <<'PY' >> $GITHUB_OUTPUT
+          import json; c=json.load(open('data/aws/config.json'))
+          s,e=c['start'],c['end']; ys=list(range(int(s[:4]),int(e[:4])+1))
+          print('stations='+','.join(str(x) for x in c['stations']))
+          print('start='+s); print('end='+e); print('years='+json.dumps(ys))
+          PY
+  fetch:
+    needs: plan
+    if: needs.plan.outputs.stations != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        year: ${{ fromJson(needs.plan.outputs.years) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch ${{ matrix.year }}
+        env:
+          KMA_APIHUB_KEY: ${{ secrets.KMA_APIHUB_KEY }}
+        run: python3 tools/aws/fetch_aws.py "${{ needs.plan.outputs.stations }}" ${{ matrix.year }} ${{ needs.plan.outputs.start }} ${{ needs.plan.outputs.end }} out
+      - uses: actions/upload-artifact@v4
+        with: {name: 'aws10-${{ matrix.year }}', path: out/}
+  commit:
+    needs: fetch
+    if: always() && needs.fetch.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {path: dl, pattern: 'aws10-*', merge-multiple: true}
+      - run: |
+          mkdir -p data/aws/10min && cp dl/*.csv.gz data/aws/10min/ 2>/dev/null || true
+          ls -la data/aws/10min | tee data/aws/10min/_files.txt
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add data/aws/10min && git commit -m "AWS 10분 자료 수집 결과" && git push || echo "nothing to commit"
