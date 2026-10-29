@@ -1,0 +1,25 @@
+=== https://apis.data.go.kr/1360000/AsosHourlyInfoService/getWthrDataList?pageNo=1&numOfRows=1&dataType=JSON
+HTTP 401  time 0.688863s
+{   "OpenAPI_ServiceResponse": {     "cmmMsgHeader": {       "errMsg": "SERVICE_KEY_IS_NULL",       "returnAuthMsg": "서비스 접근거부",       "returnReasonCode": "20"     }   } } 
+
+=== https://apis.data.go.kr/1360000/Aws1miInfoService/getAws1miList
+HTTP 401  time 0.688819s
+<?xml version="1.0" encoding="UTF-8"?> <OpenAPI_ServiceResponse> <cmmMsgHeader>   <errMsg>SERVICE_KEY_IS_NULL</errMsg>   <returnAuthMsg>서비스 접근거부</returnAuthMsg>   <returnReasonCode>20</returnReasonCode> </cmmMsgHeader> </OpenAPI_ServiceResponse> 
+
+=== https://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php?tm=202610010000&stn=108&help=0
+HTTP 401  time 1.595223s
+{   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+
+=== https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm2=202610010000&stn=0&disp=0&help=1
+HTTP 401  time 1.459668s
+{   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+
+=== https://data.kma.go.kr/
+HTTP 200  time 1.184927s
+<!DOCTYPE html> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko"> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>기상자료개방포털</title> <meta name="keywords" content="기상청, 기상자료개방포털"> <meta name="description" content="기상청, 기상자료개방포털">
+
+=== https://www.data.go.kr/
+HTTP 200  time 1.705763s
+            <!DOCTYPE html> <html lang="ko"> 	<head> 		<meta charset="UTF-8">  		 		<!-- 로봇 차단 --> 			<meta name="robots" content="noindex, nofollow"> 			<meta name="googlebot" content="noindex, nofollow"> 			<meta name="naverbot" content="noindex, nofollow"> 		<!-- 로봇 차단 --> 		 		 		<meta http-equiv="X-UA-Compatible" content="IE=edge"> 		<meta name="viewport" content="width=device
+
+runner country: US
