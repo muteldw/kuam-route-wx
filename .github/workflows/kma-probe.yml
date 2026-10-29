@@ -1,0 +1,23 @@
+name: kma-access-probe
+on:
+  push:
+    branches: [probe/kma-access]
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check reachability of KMA / data.go.kr endpoints (no key)
+        run: |
+          for u in \
+            "https://apis.data.go.kr/1360000/AsosHourlyInfoService/getWthrDataList?pageNo=1&numOfRows=1&dataType=JSON" \
+            "https://apis.data.go.kr/1360000/AwsYearlyInfoService/getAwsYearlyList" \
+            "https://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php?tm=202610010000&stn=108&help=0" \
+            "https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm2=202610010000&stn=0&disp=0&help=1" \
+            "https://data.kma.go.kr/" \
+            "https://www.data.go.kr/" ; do
+            echo "=== $u"
+            curl -s -m 25 -o body.txt -w "HTTP %{http_code}  time %{time_total}s\n" "$u" || echo "CURL FAIL $?"
+            head -c 400 body.txt | tr '\n' ' '; echo; echo
+          done
+          curl -s -m 10 https://ipinfo.io/country || true
