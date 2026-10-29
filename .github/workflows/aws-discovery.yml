@@ -1,0 +1,39 @@
+name: aws-discovery
+# 1단계: 지점 목록·자료 형식 확인 (키는 저장소 Secrets에서만 읽음, 로그·커밋에 키 노출 없음)
+on:
+  push:
+    branches: [data/aws-5yr]
+    paths: ['.github/workflows/aws-discovery.yml', 'data/aws/RUN_DISCOVERY']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    env:
+      HUB: ${{ secrets.KMA_APIHUB_KEY }}
+      DGK: ${{ secrets.DATA_GO_KR_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch station lists and format samples
+        run: |
+          d=data/aws/discovery; mkdir -p $d; : > $d/status.txt
+          if [ -n "$HUB" ]; then
+            curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=AWS&stn=&tm=202610290000&help=1&authKey=$HUB" -o $d/stn_aws.txt
+            curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=SFC&stn=&tm=202610290000&help=1&authKey=$HUB" -o $d/stn_asos.txt
+            curl -s -m 120 "https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm1=202610010000&tm2=202610010010&stn=0&disp=1&help=1&authKey=$HUB" -o $d/aws_min_sample.txt
+            echo "HUB key: set" >> $d/status.txt
+          else echo "HUB key: missing (KMA_APIHUB_KEY)" >> $d/status.txt; fi
+          if [ -n "$DGK" ]; then
+            curl -s -m 60 -G "https://apis.data.go.kr/1360000/AsosHourlyInfoService/getWthrDataList" \
+              --data-urlencode "serviceKey=$DGK" -d pageNo=1 -d numOfRows=24 -d dataType=JSON -d dataCd=ASOS -d dateCd=HR \
+              -d startDt=20261001 -d startHh=00 -d endDt=20261001 -d endHh=23 -d stnIds=108 -o $d/asos_hr_sample.json
+            echo "DATA.GO.KR key: set" >> $d/status.txt
+          else echo "DATA.GO.KR key: missing (DATA_GO_KR_KEY)" >> $d/status.txt; fi
+          # 키 문자열이 응답에 섞였으면 지움
+          for f in $d/*; do [ -n "$HUB" ] && sed -i "s/$HUB/***/g" $f; [ -n "$DGK" ] && sed -i "s|$DGK|***|g" $f; done
+          wc -c $d/*
+      - name: Commit
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add data/aws/discovery && git commit -m "AWS discovery result" && git push || echo "nothing to commit"
