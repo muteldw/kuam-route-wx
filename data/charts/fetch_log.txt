@@ -1,0 +1,17 @@
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/sfc3_2026011003.png
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/up00_anlmod_pb4_2026011003.gif
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/surf_2026011003.png
+200 text/html;charset=utf-8 26128 https://www.kma.go.kr/repositary/image/cht/img/sfc3_2026011003.png
+200 text/html;charset=utf-8 26128 https://www.weather.go.kr/repositary/image/cht/img/sfc3_2026011003.png
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/sfc3_2026011006.png
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/up00_anlmod_pb4_2026011006.gif
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/surf_2026011006.png
+200 text/html;charset=utf-8 26128 https://www.kma.go.kr/repositary/image/cht/img/sfc3_2026011006.png
+200 text/html;charset=utf-8 26128 https://www.weather.go.kr/repositary/image/cht/img/sfc3_2026011006.png
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/sfc3_2026011000.png
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/up00_anlmod_pb4_2026011000.gif
+200 text/html;charset=utf-8 4066 https://www.weather.go.kr/w/repositary/image/cht/img/surf_2026011000.png
+200 text/html;charset=utf-8 26128 https://www.kma.go.kr/repositary/image/cht/img/sfc3_2026011000.png
+200 text/html;charset=utf-8 26128 https://www.weather.go.kr/repositary/image/cht/img/sfc3_2026011000.png
+301  0 https://www.data.jma.go.jp/fcd/yoho/data/hibiten/2026/2601.pdf
+200 application/pdf 2270024 https://www.data.jma.go.jp/yoho/data/hibiten/2026/2601.pdf
