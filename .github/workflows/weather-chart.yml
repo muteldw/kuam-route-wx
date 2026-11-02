@@ -1,0 +1,45 @@
+name: weather-chart-fetch
+# 2026.1.10 지상 일기도 후보 URL 수집 (키 불필요한 공개 경로만)
+on:
+  push:
+    branches: [data/aws-5yr]
+    paths: ['.github/workflows/weather-chart.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Try candidate chart URLs
+        run: |
+          d=data/charts; mkdir -p $d; log=$d/fetch_log.txt; : > $log
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+          for T in 2026011003 2026011006 2026011000; do
+            for u in \
+              "https://www.weather.go.kr/w/repositary/image/cht/img/sfc3_${T}.png" \
+              "https://www.weather.go.kr/w/repositary/image/cht/img/up00_anlmod_pb4_${T}.gif" \
+              "https://www.weather.go.kr/w/repositary/image/cht/img/surf_${T}.png" \
+              "https://www.kma.go.kr/repositary/image/cht/img/sfc3_${T}.png" \
+              "https://www.weather.go.kr/repositary/image/cht/img/sfc3_${T}.png" ; do
+              f=$d/$(basename "$u")
+              code=$(curl -s -A "$UA" -m 30 -o "$f" -w "%{http_code} %{content_type} %{size_download}" "$u")
+              echo "$code $u" >> $log
+              case "$code" in 200\ image*) ;; *) rm -f "$f";; esac
+            done
+          done
+          # 기상청 일기도 페이지(URL 형식 확인용)
+          for p in "https://www.weather.go.kr/w/image/chart/analysis-chart.do" "https://www.weather.go.kr/w/image/chart/analysis-chart.do?type=surface"; do
+            curl -s -A "$UA" -m 30 "$p" | grep -oE "[^\"' ]*(repositary|cht)[^\"' ]*" | sort -u | head -50 >> $d/page_urls.txt || true
+          done
+          # 일본기상청 일일 일기도(2026년 1월 월간 PDF, 09 JST)
+          for u in "https://www.data.jma.go.jp/fcd/yoho/data/hibiten/2026/2601.pdf" "https://www.data.jma.go.jp/yoho/data/hibiten/2026/2601.pdf"; do
+            code=$(curl -s -A "$UA" -m 60 -o $d/jma_hibiten_2601.pdf -w "%{http_code} %{content_type} %{size_download}" "$u"); echo "$code $u" >> $log
+            case "$code" in 200\ application/pdf*) break;; *) rm -f $d/jma_hibiten_2601.pdf;; esac
+          done
+          cat $log; ls -la $d
+      - name: Commit
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add data/charts && git commit -m "1.10 일기도 후보 수집 결과" && git push || echo "nothing"
