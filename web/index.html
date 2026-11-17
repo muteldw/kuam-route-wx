@@ -803,6 +803,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .lmap .leaflet-bar a{background:var(--surface);color:var(--ink);border-bottom-color:var(--line)}
 .lmap .leaflet-control-scale-line{background:var(--surface);color:var(--ink);border-color:var(--ink)}
 .field-img{image-rendering:auto}
+.flow-cv{position:absolute;left:0;top:0;pointer-events:none}
 .sgg-lbl,.river-lbl,.poi-lbl,.cell-lbl{white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none;
   text-shadow:0 0 3px var(--surface),0 0 3px var(--surface),0 0 2px var(--surface)}
 .sgg-lbl{font-size:11px;color:var(--muted);font-weight:500}
@@ -919,6 +920,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <option value="vector">배경: 내장 지도</option>
             <option value="osm">배경: OpenStreetMap</option>
           </select>
+          <select id="mapWind" aria-label="바람 표시">
+            <option value="flow">바람: 흐름 애니메이션</option>
+            <option value="arrows">바람: 화살표</option>
+            <option value="off">바람: 끄기</option>
+          </select>
           <select id="mapAlt" aria-label="지도 고도">
             <option value="cruise">순항고도</option>
             <option value="10">10 m</option>
@@ -930,7 +936,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
       <div id="map" class="lmap" role="region" aria-label="경로 수평 지도"></div>
       <div class="legend" id="mapLegend"></div>
-      <div class="readout" id="mapRead">지도는 확대·이동할 수 있습니다. 커서를 올리면 그 지점 값을, 경고 삼각형에 올리면 경고 문구를 보여줍니다.</div>
+      <div class="readout" id="mapRead">지도는 확대·이동할 수 있습니다. 흐르는 선은 고른 고도의 바람이며, 빠를수록 진하고 빨리 움직입니다. 커서를 올리면 그 지점 값을, 경고 삼각형에 올리면 경고 문구를 보여줍니다.</div>
     </section>
 
     <section class="panel alerts">
@@ -1327,12 +1333,84 @@ function initMap(){
     $('#mapRead').textContent=`${e.latlng.lat.toFixed(4)}N ${e.latlng.lng.toFixed(4)}E · ${z} m · 풍향 ${wd.toFixed(0)}° 풍속 ${m.spd.toFixed(1)} m/s 돌풍 ${m.gust.toFixed(1)} · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m · z₀ ${m.z0<0.01?m.z0.toExponential(0):m.z0.toFixed(2)} m${m.P>0.5?' · 강수 '+m.P.toFixed(0)+' mm/h':''}`;
   });
   $('#mapBase').addEventListener('change',e=>{ if(e.target.value==='osm'){ LY.osm.addTo(LM); LY.urban.remove(); } else { LY.osm.remove(); LY.urban.addTo(LM); } });
+  flowInit();
+  $('#mapWind').addEventListener('change',drawMap);
   LM.fire('zoomend');
   return true;
 }
 function restyleBase(){
   if(!LM) return; const S=lineStyle();
   LY.urban.setStyle(S.urban); LY.river.setStyle(S.river); LY.dong.setStyle(S.dong); LY.sgg.setStyle(S.sgg); LY.road.setStyle(S.road);
+}
+/* ---------- animated wind particles (windy-style) ---------- */
+const FLOW={cv:null,ctx:null,parts:[],grid:null,raf:0,T:null,w:0,h:0,rgb:[20,32,43]};
+const FLOW_SPD=0.08;          // 화면 이동량: 프레임당 px / (m/s)
+function flowInit(){
+  const pane=LM.createPane('flowPane'); pane.style.zIndex=390; pane.style.pointerEvents='none';
+  FLOW.cv=L.DomUtil.create('canvas','flow-cv',pane); FLOW.ctx=FLOW.cv.getContext('2d');
+  LM.on('movestart zoomstart',()=>{ FLOW.cv.style.visibility='hidden'; });
+  LM.on('moveend zoomend resize',()=>{ flowReset(); FLOW.cv.style.visibility=''; });
+  document.addEventListener('visibilitychange',flowLoop);
+  flowReset();
+}
+function flowReset(){
+  if(!FLOW.cv) return;
+  const sz=LM.getSize(), dpr=window.devicePixelRatio||1, cv=FLOW.cv;
+  cv.width=Math.round(sz.x*dpr); cv.height=Math.round(sz.y*dpr); cv.style.width=sz.x+'px'; cv.style.height=sz.y+'px';
+  L.DomUtil.setPosition(cv, LM.containerPointToLayerPoint([0,0]));
+  FLOW.ctx.setTransform(dpr,0,0,dpr,0,0);
+  const p0=LM.latLngToContainerPoint(LL(0,0)), p1=LM.latLngToContainerPoint(LL(10,0)), p2=LM.latLngToContainerPoint(LL(0,10));
+  FLOW.T={ox:p0.x, oy:p0.y, bx:(p1.x-p0.x)/10, by:(p2.y-p0.y)/10};
+  FLOW.w=sz.x; FLOW.h=sz.y;
+  const n=Math.min(1400, Math.round(sz.x*sz.y/280));
+  FLOW.parts=Array.from({length:n},()=>flowSpawn({}, true));
+}
+function flowSpawn(p, initial){
+  const T=FLOW.T; p.x=null;
+  for (let k=0;k<6;k++){
+    const x=(Math.random()*FLOW.w-T.ox)/T.bx, y=(Math.random()*FLOW.h-T.oy)/T.by;
+    if (x>EXT.x0&&x<EXT.x1&&y>EXT.y0&&y<EXT.y1){ p.x=x; p.y=y; break; }
+  }
+  p.max=45+Math.random()*70; p.age=initial?Math.floor(Math.random()*p.max):0; return p;
+}
+function flowGrid(z,t0,sc){
+  const NX=80, NY=72, u=new Float32Array(NX*NY), v=new Float32Array(NX*NY);
+  for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
+    const m=met(EXT.x0+i/(NX-1)*(EXT.x1-EXT.x0), EXT.y0+j/(NY-1)*(EXT.y1-EXT.y0), z, t0, sc);
+    u[j*NX+i]=m.u; v[j*NX+i]=m.v;
+  }
+  FLOW.grid={NX,NY,u,v};
+}
+function flowUV(x,y){
+  const G=FLOW.grid, fx=(x-EXT.x0)/(EXT.x1-EXT.x0)*(G.NX-1), fy=(y-EXT.y0)/(EXT.y1-EXT.y0)*(G.NY-1);
+  if (fx<0||fy<0||fx>=G.NX-1||fy>=G.NY-1) return null;
+  const i=fx|0, j=fy|0, a=fx-i, b=fy-j, k=j*G.NX+i;
+  const bil=A=>(A[k]*(1-a)+A[k+1]*a)*(1-b)+(A[k+G.NX]*(1-a)+A[k+G.NX+1]*a)*b;
+  return [bil(G.u), bil(G.v)];
+}
+function flowFrame(){
+  const c=FLOW.ctx, T=FLOW.T; if(!FLOW.grid||!T) return;
+  c.globalCompositeOperation='destination-in'; c.fillStyle='rgba(0,0,0,0.88)'; c.fillRect(0,0,FLOW.w,FLOW.h);
+  c.globalCompositeOperation='source-over'; c.lineWidth=1.15; c.lineCap='round';
+  const [r,g,b]=FLOW.rgb, bins=[new Path2D(),new Path2D(),new Path2D()];
+  for (const p of FLOW.parts){
+    if (p.x===null || ++p.age>p.max){ flowSpawn(p); continue; }
+    const uv=flowUV(p.x,p.y); if(!uv){ flowSpawn(p); continue; }
+    const sx=T.ox+T.bx*p.x, sy=T.oy+T.by*p.y, dx=uv[0]*FLOW_SPD, dy=-uv[1]*FLOW_SPD;
+    p.x+=dx/T.bx; p.y+=dy/T.by;
+    const s=Math.hypot(uv[0],uv[1]), path=bins[s<5?0:s<10?1:2];
+    path.moveTo(sx,sy); path.lineTo(sx+dx,sy+dy);
+  }
+  [0.4,0.65,0.9].forEach((a,i)=>{ c.strokeStyle=`rgba(${r},${g},${b},${a})`; c.stroke(bins[i]); });
+}
+function flowLoop(){
+  if(!FLOW.cv) return;
+  const on=$('#mapWind').value==='flow' && !document.hidden;
+  FLOW.cv.style.display=on?'':'none';
+  if (!on){ FLOW.ctx.clearRect(0,0,FLOW.w,FLOW.h); return; }
+  if (FLOW.raf) return;
+  const tick=()=>{ if($('#mapWind').value!=='flow'||document.hidden){ FLOW.raf=0; return; } flowFrame(); FLOW.raf=requestAnimationFrame(tick); };
+  FLOW.raf=requestAnimationFrame(tick);
 }
 function arrowLines(x,y,m,len){
   const ux=m.u/(m.spd||1), uy=m.v/(m.spd||1), a=[x-ux*len/2,y-uy*len/2], b=[x+ux*len/2,y+uy*len/2];
@@ -1359,10 +1437,12 @@ function drawMap(){
   oc.putImageData(img,0,0);
   const url=off.toDataURL(), bnds=[LL(EXT.x0,EXT.y0),LL(EXT.x1,EXT.y1)];
   if (LY.field) LY.field.setUrl(url); else LY.field=L.imageOverlay(url,bnds,{pane:'fieldPane',interactive:false,className:'field-img'}).addTo(LM);
-  // wind arrows
+  // wind: animated particles or arrows
   LY.arrows.clearLayers();
-  const ink=css('--ink');
-  for (let gx=-4; gx<=20; gx+=2) for (let gy=-18; gy<=3; gy+=2){
+  const ink=css('--ink'), wmode=$('#mapWind').value;
+  if (/^#[0-9a-f]{6}$/i.test(ink)) FLOW.rgb=hex(ink);
+  flowGrid(z,t0,sc); flowLoop();
+  if (wmode==='arrows') for (let gx=-4; gx<=20; gx+=2) for (let gy=-18; gy<=3; gy+=2){
     const m=met(gx,gy,z,t0,sc), len=Math.min(1.7,0.35+m.spd*0.075), [shaft,head]=arrowLines(gx,gy,m,len);
     LY.arrows.addLayer(L.polyline(shaft,{pane:'linePane',color:ink,weight:1.3,opacity:0.6,interactive:false}));
     LY.arrows.addLayer(L.polyline(head,{pane:'linePane',color:ink,weight:1.3,opacity:0.6,interactive:false}));
@@ -1584,6 +1664,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redr
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
 syncSc(); syncAc();
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#mapWind').value='arrows';
 recompute(true);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ drawMap(); drawSection(); });
 })();
