@@ -7,7 +7,7 @@
 ```bash
 git tag v0.1.0 912dbe8 && git tag v0.2.0 d71e7ed && git tag v0.3.0 09d4170
 git tag v1.0.0 a0d4db0 && git tag v1.1.0 a17e9f0 && git tag v1.2.0 28df8b0
-git tag v1.2.1 <이번 커밋 ID>
+git tag v1.2.1 d8aaf1b
 git push origin --tags
 ```
 
