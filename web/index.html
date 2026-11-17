@@ -897,6 +897,24 @@ table.fleet tr[data-air]:hover td{background:var(--surface-2)}
 table.fleet td .muted{font-weight:400}
 input.act{width:86px;font:inherit;font-family:var(--font-data);font-size:12.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
 .rank-mk.sel b{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+[hidden]{display:none!important}
+.crash-ovl{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:min(480px,calc(100% - 16px));background:var(--surface);color:var(--ink);border:2px solid var(--nogo);border-radius:10px;padding:14px 16px;display:grid;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.28);z-index:5}
+.crash-ovl.pre{border-color:var(--warn)}
+.crash-ovl h3{font-size:16px;color:var(--nogo)} .crash-ovl.pre h3{color:var(--warn)}
+.crash-ovl p{margin:0;font-size:13.5px} .crash-ovl .why{font-size:12.5px;color:var(--muted)}
+.crash-ovl dl.acc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0}
+@media (max-width:520px){.crash-ovl dl.acc{grid-template-columns:1fr 1fr}}
+.crash-ovl dt{font-size:11px;color:var(--muted)} .crash-ovl dd{margin:0;font-family:var(--font-data);font-size:13px;font-weight:600}
+button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-accent)}
+#secWrap.crashing canvas{outline:3px solid var(--nogo);outline-offset:-3px}
+@media (prefers-reduced-motion:no-preference){#secWrap.crashing{animation:shake .12s linear 6}}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.uam-mk.crashed .uam-svg g{fill:var(--nogo)!important}
+.crash-mk span{display:block;width:34px;height:34px;border-radius:50%;border:3px solid var(--nogo);background:var(--nogo-soft);position:relative}
+.crash-mk span::before,.crash-mk span::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:3px;background:var(--nogo);border-radius:2px;transform:translate(-50%,-50%) rotate(45deg)}
+.crash-mk span::after{transform:translate(-50%,-50%) rotate(-45deg)}
+@media (prefers-reduced-motion:no-preference){.crash-mk span{animation:pulse 1s ease-in-out infinite}}
+.leaflet-tooltip.crash-tip{color:var(--nogo);border-color:var(--nogo);font-weight:700}
 </style>
 
 <header class="top">
@@ -1122,7 +1140,7 @@ input.act{width:86px;font:inherit;font-family:var(--font-data);font-size:12.5px;
       </select>
     </div>
     <div class="live" id="live"></div>
-    <div class="cv-wrap"><canvas id="sec" aria-label="경로 연직 단면과 비행 위치"></canvas></div>
+    <div class="cv-wrap" id="secWrap"><canvas id="sec" aria-label="경로 연직 단면과 비행 위치"></canvas><div class="crash-ovl" id="crashOvl" role="alertdialog" aria-live="assertive" hidden></div></div>
     <div class="legend" id="secLegend"></div>
     <div class="sub-h">경로 기상 <span>기체가 지나는 고도·시각의 값</span></div>
     <div class="cv-wrap"><canvas id="met" aria-label="경로상 기상 요소"></canvas></div>
@@ -2060,8 +2078,8 @@ function drawMarker(ctx,x,y,num,lv){
   ctx.fillStyle=css('--surface'); ctx.font=`700 10.5px ${css('--font-data')}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(num),x,y+2.5);
   ctx.restore();
 }
-function drawUAMSide(ctx,x,y){
-  const acc=css('--accent'), sf=css('--surface');
+function drawUAMSide(ctx,x,y,col){
+  const acc=col||css('--accent'), sf=css('--surface');
   ctx.save(); ctx.translate(x,y);
   ctx.globalAlpha=0.18; ctx.fillStyle=acc; ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
   ctx.fillStyle=acc; ctx.strokeStyle=sf; ctx.lineWidth=1.5;
@@ -2079,6 +2097,7 @@ function secPaint(){
   ctx.setTransform(SEC.dpr,0,0,SEC.dpr,0,0);
   const s=cursorS();
   if (s!==null){ const x=SEC.X(s); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.globalAlpha=0.55; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x,SEC.padT); ctx.lineTo(x,SEC.padT+SEC.ih); ctx.stroke(); ctx.restore(); }
+  if (CRASH.on){ drawCrash(ctx); return; }
   const f=flightAt(FP.t); drawUAMSide(ctx, SEC.X(f.s), SEC.Y(Math.max(f.z,0))-10);
 }
 const MROWS=[{k:'ri',n:'위험도',u:'지수'},{k:'kw',n:'전력',u:'kW'},{k:'T',n:'기온',u:'°C'},{k:'wind',n:'바람',u:'m/s'},{k:'rh',n:'습도',u:'%'},{k:'cc',n:'구름',u:'운량'},{k:'pr',n:'강수',u:'mm/h'}];
@@ -2159,7 +2178,7 @@ function fpUpdate(){
   const pctNow = eNow*current.energy.corr/current.energy.usable*100;
   const wd=wdirOf(m), Wx=p.Wx;
   const items=[
-    ['경과', `${fmtMS(FP.t)}`], ['비행 단계', f.phase], ['고도', `${Math.round(f.z)} m`], ['수직속도', `${f.vz>=0?'+':''}${f.vz.toFixed(1)} m/s`],
+    ['경과', `${fmtMS(FP.t)}`], ['비행 단계', CRASH.on?'<span class="chip c3">사고 · 비행 중단</span>':f.phase], ['고도', `${Math.round(f.z)} m`], ['수직속도', `${f.vz>=0?'+':''}${f.vz.toFixed(1)} m/s`],
     ['대기속도 · 대지속도', `${Math.round(f.va*3.6)} · ${Math.round(f.gs*3.6)} km/h`],
     ['바람', `${dirName(wd)} ${m.spd.toFixed(1)} m/s (${Wx<0?'맞바람':'뒷바람'} ${Math.abs(Wx).toFixed(1)})`],
     ['기온 · 습도', `${m.T.toFixed(1)} °C · ${m.rh.toFixed(0)}%`],
@@ -2174,13 +2193,113 @@ function interpXY(s){ const i=Math.min(ROUTE.n-2,Math.max(0,Math.floor(s/DS))); 
 function fpPlay(){
   if (!current) return;
   if (FP.playing){ fpStop(); return; }
+  if (CRASH.on){ resetCrash(); FP.t=0; }
   if (FP.t>=current.pr.total) FP.t=0;
+  const hz=hazardOf();
+  if (hz && FP.t<=hz.t && !FP.override){ showPreflight(hz); return; }
+  hideOvl();
   FP.playing=true; FP.last=performance.now(); $('#fpPlay').textContent='일시정지';
   const tick=now=>{ if(!FP.playing) return; const dt=(now-FP.last)/1000; FP.last=now; FP.t=Math.min(current.pr.total, FP.t+dt*(+$('#fpSpeed').value));
+    if (hz && FP.override && FP.t>=hz.t){ FP.t=hz.t; startCrash(hz); return; }
     fpUpdate(); if (FP.t>=current.pr.total){ fpStop(); onArrive(); return; } FP.raf=requestAnimationFrame(tick); };
   FP.raf=requestAnimationFrame(tick);
 }
-function fpStop(){ FP.playing=false; cancelAnimationFrame(FP.raf); $('#fpPlay').textContent=FP.t>=(current?current.pr.total:0)?'다시 재생':'비행 재생'; fpUpdate(); }
+function fpStop(){ FP.playing=false; cancelAnimationFrame(FP.raf); $('#fpPlay').textContent=(CRASH.on||FP.t>=(current?current.pr.total:0))?'다시 재생':'비행 재생'; fpUpdate(); }
+
+/* ---------- no-go flight: pre-flight warning, accident animation, accident report ---------- */
+const CRASH={on:false, start:0, raf:0, hz:null};
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ACC_KIND = {
+  '풍속':'강풍으로 자세 제어를 잃고 추락', '이착륙 풍속':'이착륙 중 강풍으로 자세 제어를 잃고 추락', '돌풍':'돌풍으로 자세 제어를 잃고 추락',
+  '난류':'심한 난류로 자세 제어를 잃고 추락', '급변풍':'급변풍(하강기류·정풍 손실)으로 양력과 고도를 잃고 추락',
+  '수평시어':'수평 급변풍으로 대기속도를 잃고 추락', '연직시어':'연직 급변풍으로 고도를 잃고 추락',
+  '시정':'시정 불량으로 장애물·지면을 보지 못해 충돌', '운고':'구름 속으로 들어가 공간정위를 잃고 지면·장애물과 충돌',
+  '강우':'폭우로 추진계 성능이 떨어져 고도를 잃고 추락', '강설':'강설로 시야와 센서를 잃고 추락',
+  '뇌우':'뇌우(낙뢰·강한 하강기류)를 만나 추락', '착빙':'착빙으로 로터 효율이 떨어져 추락',
+  '배터리 여유':'배터리가 바닥나 동력을 잃고 추락', '중량 초과':'최대이륙중량을 넘어 이륙 중 고도를 유지하지 못하고 추락'
+};
+function hazDetail(p){
+  const m=p.m, L=ACT.lim;
+  return ({'풍속':`풍속 ${m.spd.toFixed(1)} m/s > 한계 ${L.wmax} m/s`, '이착륙 풍속':`풍속 ${m.spd.toFixed(1)} m/s > 이착륙 한계 ${L.xw} m/s`,
+    '돌풍':`돌풍 ${m.gust.toFixed(1)} m/s > 한계 ${L.gust} m/s`, '난류':`EDR ${m.edr.toFixed(2)} > 한계 ${L.edr}`,
+    '급변풍':`F-factor ${p.F.toFixed(3)} > 경고 0.105`, '수평시어':`경로성분 변화 ${p.hsh.toFixed(1)} m/s / 0.5 km > 7.5`,
+    '연직시어':`${p.vsh.toFixed(1)} m/s / 30 m > 2.0`, '시정':`시정 ${Math.round(m.vis)} m < 최저 ${L.vis} m`,
+    '운고':`운고 ${Math.round(m.ceil)} m, 비행고도 ${Math.round(p.z)} m`, '강우':`강우 ${m.rain.toFixed(1)} mm/h > 한계 ${L.rain}`,
+    '강설':`강설 ${m.snow.toFixed(1)} mm/h > 한계 ${L.snow}`, '뇌우':`뇌우 지수 ${m.ts.toFixed(2)} > 한계 0.25`,
+    '착빙':`기온 ${m.T.toFixed(1)} °C에서 ${m.inCloud?'구름':'강수·안개'} 속 비행, 결빙 운용 불가 기체`})[p.f] || `${p.f} 여유율 ${(p.mg*100).toFixed(0)}%`;
+}
+function hazardOf(){
+  if (!current) return null;
+  const pr=current.pr, P=current.pts, E=current.energy, R=ROUTE;
+  if (ACT.mass>ACT.air.mtow) return {t:pr.tUp*0.6, s:0, z:pr.H0*0.6, i:0, cause:'중량 초과', detail:`비행 중량 ${Math.round(ACT.mass).toLocaleString()} kg > 최대이륙중량 ${ACT.air.mtow.toLocaleString()} kg`};
+  let hz=null;
+  for (let i=0;i<P.length;i++) if (P[i].c===3){ hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:P[i].f, detail:hazDetail(P[i])}; break; }
+  const cap=E.usable/E.corr;
+  for (let i=0;i<P.length;i++) if (P[i].ecum>cap){ if (!hz || pr.cum[i]<hz.t) hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:'배터리 여유', detail:`사용 가능 ${E.usable.toFixed(0)} kWh 모두 소진`}; break; }
+  return hz;
+}
+const whereOf = hz => (nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i]) ? nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i])+' 부근' : `${hz.s.toFixed(1)} km 지점`);
+function safeRouteIdx(){ let best=-1; state.routes.forEach((p,k)=>{ if (p.r && p.r.c<3 && (best<0 || p.r.riMax<state.routes[best].r.riMax)) best=k; }); return best; }
+function showOvl(html, cls){ const o=$('#crashOvl'); o.className='crash-ovl '+(cls||''); o.innerHTML=html; o.hidden=false; const b=o.querySelector('button'); if (b) b.focus({preventScroll:true}); }
+function hideOvl(){ const o=$('#crashOvl'); if (o) o.hidden=true; }
+function showPreflight(hz){
+  const safe=safeRouteIdx();
+  showOvl(`<h3>이륙 불가 판정</h3>
+    <p>이 항로로 지금 출발하면 <b>${whereOf(hz)} · 고도 ${Math.round(hz.z)} m</b>에서 운용 한계를 넘습니다.</p>
+    <p class="why"><b>${hz.cause}</b> · ${hz.detail}</p>
+    <p class="why">실제 운항이라면 이륙하지 않습니다. 그래도 비행하면 그 지점에서 일어날 사고를 재현합니다.</p>
+    <div class="btnrow"><button type="button" data-ovl="cancel">이륙 취소</button>${safe>=0?`<button type="button" data-ovl="safe">안전한 추천 ${safe+1}로 바꾸기</button>`:''}<button type="button" class="danger" data-ovl="force">그래도 비행 (사고 재현)</button></div>
+    ${safe<0?'<p class="why">추천 항로가 모두 불가입니다. 출발 시각이나 기체, 고도를 바꿔 보세요.</p>':''}`, 'pre');
+}
+function startCrash(hz){
+  FP.playing=false; cancelAnimationFrame(FP.raf);
+  CRASH.on=true; CRASH.hz=hz; CRASH.start=performance.now() - (REDUCED?5000:0);
+  $('#fpPlay').textContent='다시 재생';
+  fpUpdate();
+  if (LY.uam){ const el=LY.uam.getElement(); if (el) el.classList.add('crashed'); }
+  if (LM){ if (!LY.crash) LY.crash=L.layerGroup().addTo(LM); LY.crash.clearLayers();
+    const pos = hz.s<=0 ? [state.A.x,state.A.y] : interpXY(hz.s);
+    LY.crash.addLayer(L.marker(LL(pos[0],pos[1]),{pane:'markPane',keyboard:false,icon:L.divIcon({className:'crash-mk',html:'<span></span>',iconSize:[34,34],iconAnchor:[17,17]})}).bindTooltip(`사고 지점 · ${hz.cause}`,{permanent:true,direction:'right',offset:[16,0],className:'wp-tip crash-tip'})); }
+  $('#secWrap').classList.add('crashing'); setTimeout(()=>$('#secWrap').classList.remove('crashing'),1300);
+  const tick=()=>{ secPaint(); if (CRASH.on && performance.now()-CRASH.start<2800) CRASH.raf=requestAnimationFrame(tick); };
+  CRASH.raf=requestAnimationFrame(tick);
+  const safe=safeRouteIdx();
+  setTimeout(()=>{ if (!CRASH.on) return; showOvl(`<h3>사고 발생 · 비행 중단</h3>
+    <dl class="acc"><div><dt>시각</dt><dd>이륙 후 ${fmtMS(hz.t)}</dd></div><div><dt>위치</dt><dd>${whereOf(hz)}</dd></div><div><dt>고도</dt><dd>${Math.round(hz.z)} m</dd></div><div><dt>원인</dt><dd>${hz.cause}</dd></div></dl>
+    <p><b>${ACC_KIND[hz.cause]||'운용 한계 초과로 추락'}</b></p>
+    <p class="why">${hz.detail}. 위험도 지수가 80을 넘는 불가 구간입니다. 실제 운항이라면 이륙하지 않거나 이 지점 전에 회항해야 합니다.</p>
+    <div class="btnrow"><button type="button" data-ovl="restart">처음으로</button>${safe>=0?`<button type="button" class="primary" data-ovl="safe">안전한 추천 ${safe+1}로 바꾸기</button>`:''}</div>`, 'acc');
+    const b=$('#banner'); b.textContent=`사고 재현: ${whereOf(hz)} ${Math.round(hz.z)} m · ${hz.cause}`; b.classList.add('on'); }, REDUCED?0:1400);
+}
+function resetCrash(){
+  CRASH.on=false; CRASH.hz=null; cancelAnimationFrame(CRASH.raf); hideOvl();
+  if (LY.crash) LY.crash.clearLayers();
+  if (LY.uam){ const el=LY.uam.getElement(); if (el) el.classList.remove('crashed'); }
+  const b=$('#banner'); if (b){ b.textContent='확인하지 않은 경고가 있습니다'; if (current) b.classList.toggle('on', current.alerts.some(a=>a.lv===2 && !state.acked[a.id])); }
+}
+function drawCrash(ctx){
+  const hz=CRASH.hz, k=clamp((performance.now()-CRASH.start)/2600,0,1);
+  const x0=SEC.X(hz.s), y0=SEC.Y(hz.z)-10, yG=SEC.Y(0)-7, nogo=css('--nogo'), warn=css('--warn');
+  ctx.save(); ctx.strokeStyle=nogo; ctx.setLineDash([4,3]); ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x0,SEC.padT); ctx.lineTo(x0,SEC.padT+SEC.ih); ctx.stroke(); ctx.restore();
+  label(ctx,'사고',x0+4,SEC.padT+10,{size:11.5,w:700,color:nogo});
+  const fallEnd=0.55, drift=Math.min(26, SEC.iw*0.03);
+  if (k<0.12){ const r=10+40*k/0.12; ctx.save(); ctx.globalAlpha=1-k/0.12; ctx.strokeStyle=nogo; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x0,y0,r,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+  if (k<fallEnd){
+    const f=k/fallEnd, x=x0+drift*f, y=y0+(yG-y0)*f*f, rot=f*Math.PI*2.4;
+    for (let j=1;j<=7;j++){ const g=Math.max(0,f-j*0.05); const sx=x0+drift*g, sy=y0+(yG-y0)*g*g; ctx.save(); ctx.globalAlpha=0.28*(1-j/8); ctx.fillStyle=css('--muted'); ctx.beginPath(); ctx.arc(sx-3,sy-2,4+j*1.4,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rot); drawUAMSide(ctx,0,0,nogo); ctx.restore();
+  } else {
+    const r=(k-fallEnd)/(1-fallEnd), x=x0+drift, y=yG;
+    if (r<1){ ctx.save();
+      for (let q=0;q<3;q++){ const rr=(r*36+q*9); ctx.globalAlpha=Math.max(0,(1-r)*(0.75-q*0.2)); ctx.fillStyle=q===0?warn:nogo; ctx.beginPath(); ctx.arc(x,y,rr,Math.PI,0); ctx.fill(); }
+      ctx.globalAlpha=Math.max(0,1-r); ctx.strokeStyle=warn; ctx.lineWidth=2;
+      for (let a=0;a<9;a++){ const an=Math.PI+a*Math.PI/8, d1=10+r*20, d2=18+r*38; ctx.beginPath(); ctx.moveTo(x+Math.cos(an)*d1,y+Math.sin(an)*d1); ctx.lineTo(x+Math.cos(an)*d2,y+Math.sin(an)*d2); ctx.stroke(); }
+      ctx.restore(); }
+    for (let j=0;j<4;j++){ ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=css('--muted'); ctx.beginPath(); ctx.arc(x-6+j*5, y-14-j*9-r*10, 6+j*2.5, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+    ctx.save(); ctx.translate(x,y+2); ctx.rotate(0.35); drawUAMSide(ctx,0,0,nogo); ctx.restore();
+    ctx.save(); ctx.strokeStyle=nogo; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x-7,y-30); ctx.lineTo(x+7,y-16); ctx.moveTo(x+7,y-30); ctx.lineTo(x-7,y-16); ctx.stroke(); ctx.restore();
+  }
+}
 
 /* ---------- panels ---------- */
 function issueDate(){ const d=new Date(); d.setHours(state.sc.issueH,0,0,0); return d; }
@@ -2448,7 +2567,7 @@ function evalSelected(){
   current=evalRoute(t0(), ACT, state.sc, ROUTE, {alerts:true});
   p.r=evalRoute(t0(), ACT, state.sc, ROUTE, {fast:true});
   FP.sig=routeSig();
-  if (FP.sig!==prevSig && !FP.playing){ FP.t=0; $('#fpPlay').textContent='비행 재생'; }
+  if (FP.sig!==prevSig && !FP.playing){ FP.t=0; FP.override=false; resetCrash(); $('#fpPlay').textContent='비행 재생'; }
   if (FP.t>current.pr.total) FP.t=current.pr.total;
 }
 function renderAll(kind){
@@ -2526,8 +2645,13 @@ $('#play').addEventListener('click',()=>{
   timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; update('step'); }, 1200);
 });
 $('#fpPlay').addEventListener('click',fpPlay);
-$('#fpReset').addEventListener('click',()=>{ fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
-$('#fpScrub').addEventListener('input',e=>{ if(!current) return; FP.dragging=true; FP.t=+e.target.value/1000*current.pr.total; fpUpdate(); });
+$('#crashOvl').addEventListener('click',e=>{ const b=e.target.closest('[data-ovl]'); if(!b) return; const k=b.dataset.ovl;
+  if (k==='cancel'){ hideOvl(); }
+  else if (k==='force'){ FP.override=true; hideOvl(); fpPlay(); }
+  else if (k==='restart'){ resetCrash(); FP.override=false; FP.t=0; fpStop(); }
+  else if (k==='safe'){ const i=safeRouteIdx(); resetCrash(); FP.override=false; FP.t=0; if (i>=0) selectRoute(i); fpStop(); } });
+$('#fpReset').addEventListener('click',()=>{ resetCrash(); FP.override=false; fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
+$('#fpScrub').addEventListener('input',e=>{ if(!current) return; if (CRASH.on) resetCrash(); FP.dragging=true; FP.t=+e.target.value/1000*current.pr.total; fpUpdate(); });
 $('#fpScrub').addEventListener('change',()=>{ FP.dragging=false; });
 function hoverOn(cv, X0getter){
   cv.addEventListener('mousemove',e=>{
