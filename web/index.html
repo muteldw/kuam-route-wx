@@ -933,7 +933,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.2.0 · 2026-11-17</span>
+    <span class="tag ver">v1.2.1 · 2026-11-17</span>
     <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1223,6 +1223,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.2.1</b> (2026-11-17) 화면이 크기 0으로 먼저 열릴 때 연직 단면·비행 아이콘·경로 기상이 그려지지 않던 오류 수정, 한 화면의 오류가 다른 화면을 멈추지 않도록 분리</li>
         <li><b>v1.2.0</b> (2026-11-17) 지도 시간 자동 반복과 비행 재생 시간 동기화, 지도 바로 아래 비행 재생 배치, 재생 배속 1~300배, 버전·작성자 표시</li>
         <li><b>v1.1.0</b> (2026-11-17) 불가 조건 이륙 경고와 사고 재현 애니메이션, 사고 보고</li>
         <li><b>v1.0.0</b> (2026-11-17) 출발·도착 지정, 항로 3개 추천, 비행 재생, 국가별 eVTOL 10종, 탑승 인원, 배터리 소비, 기체별 민감도, 누적 통계 학습</li>
@@ -1255,7 +1256,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.2.0 (2026-11-17) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.2.1 (2026-11-17) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1766,6 +1767,11 @@ function planRoutes(A, B, t0, sc, acBase, autoAlt){
   return picks;
 }
 
+/* ---------- robustness: one failing view must not stop the others ---------- */
+const PENDING=new Set();
+function safe(fn, ...a){ try { return fn(...a); } catch(e){ console.error('[K-UAM]', fn.name, e); } }
+function roomFor(cv, key){ const w=cv.parentElement ? cv.parentElement.clientWidth : 0; if (w<120){ PENDING.add(key); return false; } PENDING.delete(key); return true; }
+
 /* ---------- colors ---------- */
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
@@ -1814,7 +1820,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.2.0', APP_DATE='2026-11-17', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.2.1', APP_DATE='2026-11-17', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -1983,7 +1989,7 @@ function arrowLines(x,y,m,len){
 }
 
 function drawMapField(){
-  if (!LM) return;
+  if (!LM || $('#map').clientWidth<50) return;
   const field=$('#mapField').value, z=mapAlt(), t=MT.h, sc=state.sc, lim=state.lim;
   const NX=130, NY=120, off=document.createElement('canvas'); off.width=NX; off.height=NY;
   const oc=off.getContext('2d'), img=oc.createImageData(NX,NY);
@@ -2020,6 +2026,8 @@ function drawMapField(){
   MT.drawn=t; MT.lastDraw=performance.now(); mtLabel();
 }
 function drawMap(){
+  if ($('#map').clientWidth<50){ PENDING.add('map'); return; }
+  PENDING.delete('map');
   if(!LM && !initMap()) return;
   LM.invalidateSize();
   drawMapField();
@@ -2066,6 +2074,7 @@ const SEC={bg:null}, MET={bg:null}, PADL=64, PADR=16;
 const HOV={s:null};
 function drawSection(){
   if (!current) return;
+  if (!roomFor($('#sec'),'sec')) return;
   const cv=$('#sec'), wide=cv.parentElement.clientWidth, H=wide<560?300:Math.round(Math.min(380,Math.max(280,wide*0.3)));
   const {ctx,w,h,dpr}=fit(cv,H);
   const padT=26, padB=40, iw=w-PADL-PADR, ih=h-padT-padB, L=ROUTE.L, pr=current.pr;
@@ -2144,7 +2153,7 @@ function drawUAMSide(ctx,x,y,col){
 }
 function cursorS(){ if (FP.playing || HOV.s===null) return FP.t>0 || FP.playing ? flightAt(FP.t).s : null; return HOV.s; }
 function secPaint(){
-  if (!SEC.bg) return;
+  if (!SEC.bg || !SEC.bg.width || !SEC.bg.height) return;
   const cv=$('#sec'), ctx=cv.getContext('2d');
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(SEC.bg,0,0);
   ctx.setTransform(SEC.dpr,0,0,SEC.dpr,0,0);
@@ -2156,6 +2165,7 @@ function secPaint(){
 const MROWS=[{k:'ri',n:'위험도',u:'지수'},{k:'kw',n:'전력',u:'kW'},{k:'T',n:'기온',u:'°C'},{k:'wind',n:'바람',u:'m/s'},{k:'rh',n:'습도',u:'%'},{k:'cc',n:'구름',u:'운량'},{k:'pr',n:'강수',u:'mm/h'}];
 function drawMeteo(){
   if (!current) return;
+  if (!roomFor($('#met'),'met')) return;
   const cv=$('#met'), rowH=32, top=6, H=top+MROWS.length*rowH+30;
   const {w,h,dpr}=fit(cv,H), iw=w-PADL-PADR, L=ROUTE.L, P=current.pts;
   const X=s=>PADL+s/L*iw;
@@ -2198,7 +2208,7 @@ function drawMeteo(){
   MET.bg=bg; meteoPaint();
 }
 function meteoPaint(){
-  if (!MET.bg) return;
+  if (!MET.bg || !MET.bg.width || !MET.bg.height) return;
   const cv=$('#met'), ctx=cv.getContext('2d');
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(MET.bg,0,0);
   ctx.setTransform(MET.dpr,0,0,MET.dpr,0,0);
@@ -2265,7 +2275,7 @@ function fpUpdate(){
     ['위험도 지수', `<span class="chip c${p.c}">${p.ri.toFixed(0)} ${LV[p.c]}</span>`]
   ];
   $('#live').innerHTML=items.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
-  secPaint(); meteoPaint(); mtSync(false);
+  safe(secPaint); safe(meteoPaint); safe(mtSync,false);
 }
 function interpXY(s){ const i=Math.min(ROUTE.n-2,Math.max(0,Math.floor(s/DS))); const f=clamp((s-ROUTE.s[i])/((ROUTE.s[i+1]-ROUTE.s[i])||1),0,1); return [ROUTE.xs[i]+(ROUTE.xs[i+1]-ROUTE.xs[i])*f, ROUTE.ys[i]+(ROUTE.ys[i+1]-ROUTE.ys[i])*f]; }
 function fpPlay(){
@@ -2514,6 +2524,7 @@ function renderFleet(){
   $('#fleetBody').innerHTML=rows.join('');
 }
 function renderSens(){
+  if (!roomFor($('#sens'),'sens')) return;
   const cv=$('#sens'), {ctx,w,h}=fit(cv,200), air=AIR();
   const Us=[0,5,10,15,20,25,30], ri=[], bp=[];
   Us.forEach(U=>{ const r=evalRoute(t0(), ACT, {...state.sc, U}, ROUTE, {fast:true}); ri.push(r.riMax); bp.push(r.energy.pct); });
@@ -2649,10 +2660,9 @@ function evalSelected(){
   if (FP.t>current.pr.total) FP.t=current.pr.total;
 }
 function renderAll(kind){
-  renderSummary(); renderRecs(); renderAlerts(); renderSegments(); renderEnergy(); renderSpec(); renderPax();
-  drawMap(); drawSection(); drawMeteo();
-  if (kind!=='step') { renderStrip(); } else markStrip();
-  renderFleet(); renderSens(); fpUpdate();
+  [renderSummary, renderRecs, renderAlerts, renderSegments, renderEnergy, renderSpec, renderPax, drawSection, drawMeteo, drawMap].forEach(f=>safe(f));
+  safe(kind!=='step' ? renderStrip : markStrip);
+  safe(renderFleet); safe(renderSens); safe(fpUpdate);
 }
 function update(kind){
   if (kind==='plan'){
@@ -2748,15 +2758,17 @@ function hoverOn(cv, X0getter){
 }
 hoverOn($('#sec')); hoverOn($('#met'));
 
-let rz=null; new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(current){ drawMap(); drawSection(); drawMeteo(); renderSens(); } },150); }).observe($('main'));
-const redraw=()=>{ if(current){ restyleBase(); renderAll('select'); } };
+let rz=null; const RO=new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(current){ safe(drawSection); safe(drawMeteo); safe(renderSens); safe(drawMap); if (LM) safe(()=>LM.invalidateSize()); safe(fpUpdate); } },150); });
+[$('main'), $('#secWrap'), $('#met').parentElement, $('#map')].forEach(el=>RO.observe(el));
+document.addEventListener('visibilitychange',()=>{ if (!document.hidden && PENDING.size && current){ safe(drawSection); safe(drawMeteo); safe(renderSens); safe(drawMap); safe(fpUpdate); } });
+const redraw=()=>{ if(current){ safe(restyleBase); renderAll('select'); } };
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
 syncSc(); syncFl(); syncLim(); airSel.value=state.airId; syncPointSelect();
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#mapWind').value='arrows';
-update('plan');
-initDb();
+safe(update,'plan');
+safe(initDb);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ if(current){ drawSection(); drawMeteo(); renderSens(); } });
 })();
 </script>
