@@ -12,6 +12,7 @@
   --font-ui:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --font-data:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
   --r:10px;
+  --on-accent:#FFFFFF;
   --map-land:#EEF0EA; --map-urban:#E2E1DA; --map-water:#BFD7EC; --map-water-edge:#8FB6D8; --map-line:#B9BCB2; --map-boundary:#7E8794; --map-road:#E3A85A;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -36,7 +37,7 @@ h1,h2,h3{margin:0;text-wrap:balance}
 .tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
 .tag b{color:var(--ink);font-weight:600}
 .tag.syn{border-color:var(--caution);color:var(--caution);background:var(--caution-soft)}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto}
+.layout{display:grid;grid-template-columns:316px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto}
 @media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
 aside{display:flex;flex-direction:column;gap:12px;min-width:0}
 main{display:flex;flex-direction:column;gap:16px;min-width:0}
@@ -819,82 +820,220 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .alert-pin span{display:grid;place-items:center;width:22px;height:20px;clip-path:polygon(50% 0,100% 100%,0 100%);font:700 10.5px var(--font-data);color:var(--surface);padding-top:5px}
 .alert-pin.l1 span{background:var(--caution)} .alert-pin.l2 span{background:var(--warn)}
 .map-info{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+
+/* route planner */
+.route-pt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center}
+.route-pt svg{display:block}
+.route-pt select{width:100%;min-width:0}
+button.pick{white-space:nowrap}
+button.pick.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow .primary{flex:1}
+.hint{font-size:12px;color:var(--muted);line-height:1.45}
+.lmap.picking,.lmap.picking .leaflet-interactive{cursor:crosshair}
+.ctx{display:flex;flex-direction:column;gap:6px;min-width:120px}
+.ctx button{width:100%}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink)}
+/* recommendations */
+.recs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.recs{grid-template-columns:minmax(0,1fr)}}
+.rec{text-align:left;display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);cursor:pointer;font:inherit;color:inherit;min-width:0}
+.rec:hover{border-color:var(--accent)}
+.rec.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);background:var(--surface)}
+.rec .rh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rank{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--accent)}
+.rank i{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-style:normal;font-size:11px}
+.rec .nm{font-weight:700;font-size:15px}
+.rec dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 8px;margin:0}
+.rec dt{font-size:11px;color:var(--muted)}
+.rec dd{margin:0;font-family:var(--font-data);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.ribar{height:10px;border-radius:5px;border:1px solid var(--line)}
+.rec .why{font-size:12px;color:var(--muted)}
+.recs-empty{grid-column:1/-1}
+/* flight playback */
+.fp{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:6px}
+.fp input[type=range]{flex:1 1 200px;accent-color:var(--accent);min-width:0}
+.fp .tl{font-family:var(--font-data);font-size:13px;min-width:120px}
+.live{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px 14px;margin:8px 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.live .k{font-size:11px;color:var(--muted)}
+.live .v{font-family:var(--font-data);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.sub-h{font-size:13px;font-weight:600;margin:12px 0 6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sub-h span{font-weight:400;color:var(--muted);font-size:12px}
+.ab-pin,.uam-mk,.rank-mk{background:none;border:0}
+.uam-svg{display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.rank-mk b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface);border:2px solid var(--muted);color:var(--ink);font:700 11px var(--font-data)}
+
+.spec{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surface-2);display:grid;gap:8px}
+.spec-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 8px;align-items:baseline}
+.spec-h b{font-size:15px} .spec-h span{font-size:12px;color:var(--muted)}
+.spec-dl{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin:0}
+.spec-dl dt{font-size:11px;color:var(--muted)} .spec-dl dd{margin:0;font-size:12.5px;font-weight:500}
+.spec-dl div:last-child{grid-column:1/-1}
+abbr{font-size:10.5px;color:var(--caution);text-decoration:none;border:1px solid var(--caution);border-radius:4px;padding:0 3px;margin-left:2px}
+.hint a{color:var(--accent)}
+details.lims summary{cursor:pointer;font-size:13px;font-weight:600;margin-bottom:8px}
+.pax{display:grid;gap:10px}
+.prow{display:flex;justify-content:space-between;align-items:center;font-size:13.5px}
+.step{display:inline-flex;align-items:center;gap:10px}
+.step button{width:32px;height:30px;padding:0;font-size:16px;line-height:1}
+.step button:disabled{opacity:.4;cursor:not-allowed}
+.step b{min-width:18px;text-align:center}
+.pmass{display:grid;gap:6px;font-size:12.5px;border-top:1px solid var(--line);padding-top:10px}
+.mrow{display:flex;justify-content:space-between;gap:8px}
+.phase{margin:12px 0 4px}
+.pbar{display:flex;height:16px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.pbar i{display:block;height:100%}
+.plg{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font-size:12px;color:var(--muted)}
+.plg b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.legs{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px}
+@media (max-width:700px){.legs{grid-template-columns:minmax(0,1fr)}}
+.leglist{margin:0;padding-left:20px;display:grid;gap:6px;font-size:13px}
+.leglist li{display:grid;gap:1px}
+.leglist .num{font-size:12.5px} .leglist .why{font-size:12px;color:var(--muted)}
+.muted{color:var(--muted);font-size:12px}
+table.fleet tr[data-air]{cursor:pointer}
+table.fleet tr.on td{background:var(--accent-soft)}
+table.fleet tr[data-air]:hover td{background:var(--surface-2)}
+table.fleet td .muted{font-weight:400}
+input.act{width:86px;font:inherit;font-family:var(--font-data);font-size:12.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+.rank-mk.sel b{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
 </style>
 
 <header class="top">
   <div>
     <div class="eyebrow">K-UAM 경로 기상 · 초안</div>
     <h1>K-UAM 회랑 기상 콘솔</h1>
-    <div class="sub">킨텍스 V5 → 여의도 · 단순 진단모델로 만든 시연 화면</div>
+    <div class="sub">출발·도착을 정하면 기상 위험을 따져 항로 3개를 추천하고 비행을 재생합니다 · 단순 진단모델 시연</div>
   </div>
   <div class="times">
     <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
-    <span class="tag">유효 <b class="num" id="tValid">—</b></span>
+    <span class="tag">출발 <b class="num" id="tValid">—</b></span>
   </div>
 </header>
 
 <div class="layout">
 <aside>
   <section class="panel">
+    <div class="ctl-title"><h2>경로 설정</h2><span class="eyebrow">예시 버티포트</span></div>
+    <fieldset>
+      <div class="route-pt">
+        <svg width="24" height="30" viewBox="0 0 34 44" aria-hidden="true"><path d="M17 43C17 43 2 26 2 16A15 15 0 0 1 32 16C32 26 17 43 17 43Z" style="fill:var(--accent)"/></svg>
+        <select id="selA" aria-label="출발지"></select>
+        <button type="button" class="pick" id="pickA">지도에서</button>
+      </div>
+      <div class="route-pt">
+        <svg width="24" height="30" viewBox="0 0 34 44" aria-hidden="true"><path d="M17 43C17 43 2 26 2 16A15 15 0 0 1 32 16C32 26 17 43 17 43Z" style="fill:var(--nogo)"/></svg>
+        <select id="selB" aria-label="도착지"></select>
+        <button type="button" class="pick" id="pickB">지도에서</button>
+      </div>
+      <div class="btnrow">
+        <button type="button" id="swap">출발↔도착</button>
+        <button type="button" class="primary" id="search">경로 탐색</button>
+      </div>
+      <div class="hint">‘지도에서’를 누르고 지도를 클릭하면 그 위치로 정합니다. 출발·도착 핀은 끌어서 옮길 수 있고, 지도를 오른쪽 클릭(길게 누르기)해도 정할 수 있습니다.</div>
+    </fieldset>
+  </section>
+
+  <section class="panel">
+    <div class="ctl-title"><h2>비행 속도·고도</h2></div>
+    <fieldset>
+      <label class="row">이륙 구간 속도 (상승 중 전진) <output id="oVto" class="val"></output><input id="vto" type="range" min="10" max="150" step="5"></label>
+      <label class="row">정속 순항 속도 <output id="oVc" class="val"></output><input id="vc" type="range" min="60" max="330" step="2"></label>
+      <label class="row">착륙 구간 속도 (하강 중 전진) <output id="oVld" class="val"></output><input id="vld" type="range" min="10" max="150" step="5"></label>
+      <label class="row">순항고도 상한 <output id="oAlt" class="val"></output><input id="alt" type="range" min="150" max="600" step="10"></label>
+      <label class="row">상승률 <output id="oClimb" class="val"></output><input id="climb" type="range" min="1" max="8" step="0.5"></label>
+      <label class="row">하강률 <output id="oDesc" class="val"></output><input id="desc" type="range" min="1" max="8" step="0.5"></label>
+      <label class="check"><input id="autoAlt" type="checkbox" checked> 기상에 맞춰 순항고도 자동 추천 (상한 이하)</label>
+      <div class="hint">대지속도는 위 속도(대기속도)에 경로방향 바람을 더해 계산합니다. 출발·도착은 30 m까지 수직으로 오르내립니다.</div>
+    </fieldset>
+  </section>
+
+  <section class="panel">
     <div class="ctl-title"><h2>기상 시나리오</h2></div>
     <fieldset>
       <select id="scn" aria-label="기상 시나리오"></select>
       <label class="row">상층 일반풍 (600 m) <output id="oU" class="val"></output><input id="U" type="range" min="0" max="30" step="0.5"></label>
       <label class="row">풍향 (불어오는 방향) <output id="oDir" class="val"></output><input id="dir" type="range" min="0" max="355" step="5"></label>
-      <label class="row">일평균 기온 <output id="oT" class="val"></output><input id="T" type="range" min="-15" max="35" step="1"></label>
+      <label class="row">일평균 기온 (지상) <output id="oT" class="val"></output><input id="T" type="range" min="-15" max="35" step="1"></label>
       <label class="row">평균 이슬점차 <output id="oDep" class="val"></output><input id="dep" type="range" min="0.2" max="15" step="0.2"></label>
+      <label class="row">층운형 강수 (비·눈) <output id="oPr" class="val"></output><input id="pr" type="range" min="0" max="20" step="0.5"></label>
       <label class="row">야간 저층제트 세기 <output id="oLlj" class="val"></output><input id="llj" type="range" min="0" max="14" step="1"></label>
-      <label class="check"><input id="conv" type="checkbox"> 대류셀·돌풍전선 포함</label>
+      <label class="check"><input id="conv" type="checkbox"> 대류셀·뇌우·돌풍전선 포함</label>
     </fieldset>
   </section>
+
   <section class="panel">
-    <div class="ctl-title"><h2>eVTOL 제원</h2><span class="eyebrow">가상 기체</span></div>
+    <div class="ctl-title"><h2>기체 선택</h2><span class="eyebrow">국가별 실제 기체</span></div>
     <fieldset>
-      <select id="acPreset" aria-label="기체 프로필"></select>
-      <div class="pair">
-        <label class="field">순항속도 km/h<input id="ac_vc" type="number" min="60" max="350" step="5"></label>
-        <label class="field">순항고도 m<input id="ac_alt" type="number" min="100" max="800" step="10"></label>
-        <label class="field">상승률 m/s<input id="ac_climb" type="number" min="1" max="10" step="0.5"></label>
-        <label class="field">하강률 m/s<input id="ac_desc" type="number" min="1" max="10" step="0.5"></label>
-        <label class="field">이착륙 풍속 한계 m/s<input id="ac_xw" type="number" min="3" max="25" step="0.5"></label>
-        <label class="field">순항 풍속 한계 m/s<input id="ac_wmax" type="number" min="5" max="40" step="1"></label>
-        <label class="field">돌풍 한계 m/s<input id="ac_gust" type="number" min="5" max="40" step="1"></label>
-        <label class="field">EDR 한계<input id="ac_edr" type="number" min="0.05" max="0.6" step="0.01"></label>
-        <label class="field">최저 시정 m<input id="ac_vis" type="number" min="200" max="8000" step="100"></label>
-        <label class="field">강수 한계 mm/h<input id="ac_rain" type="number" min="1" max="60" step="1"></label>
-      </div>
-      <label class="check"><input id="ac_icing" type="checkbox"> 결빙 조건 운용 가능</label>
+      <select id="airSel" aria-label="기체"></select>
+      <div class="spec" id="spec"></div>
+      <details class="lims">
+        <summary>운용 한계 (추정값 · 바꿀 수 있음)</summary>
+        <div class="pair">
+          <label class="field">이착륙 풍속 m/s<input id="ac_xw" type="number" min="3" max="25" step="0.5"></label>
+          <label class="field">순항 풍속 m/s<input id="ac_wmax" type="number" min="5" max="40" step="1"></label>
+          <label class="field">돌풍 m/s<input id="ac_gust" type="number" min="5" max="40" step="1"></label>
+          <label class="field">EDR<input id="ac_edr" type="number" min="0.05" max="0.6" step="0.01"></label>
+          <label class="field">최저 시정 m<input id="ac_vis" type="number" min="200" max="8000" step="100"></label>
+          <label class="field">강우 mm/h<input id="ac_rain" type="number" min="1" max="60" step="1"></label>
+          <label class="field">강설 mm/h<input id="ac_snow" type="number" min="0.2" max="10" step="0.2"></label>
+        </div>
+        <label class="check"><input id="ac_icing" type="checkbox"> 결빙 조건 운용 가능</label>
+      </details>
     </fieldset>
   </section>
+
+  <section class="panel">
+    <div class="ctl-title"><h2>탑승 인원</h2></div>
+    <div class="pax">
+      <div class="prow"><span>조종사</span><b class="num" id="paxPilot">1</b></div>
+      <div class="prow"><span>성인</span><span class="step"><button type="button" data-pax="adult" data-d="-1" aria-label="성인 한 명 빼기">−</button><b class="num" id="paxAdult">0</b><button type="button" data-pax="adult" data-d="1" aria-label="성인 한 명 더하기">+</button></span></div>
+      <div class="prow"><span>어린이</span><span class="step"><button type="button" data-pax="child" data-d="-1" aria-label="어린이 한 명 빼기">−</button><b class="num" id="paxChild">0</b><button type="button" data-pax="child" data-d="1" aria-label="어린이 한 명 더하기">+</button></span></div>
+      <label class="row">1인당 수하물 <output id="bagOut" class="val"></output><input id="bag" type="range" min="0" max="20" step="5" value="10"></label>
+      <div class="pmass" id="paxMass"></div>
+      <div class="hint">표준 중량 가정: 조종사 85 kg, 성인 80 kg, 어린이 35 kg. 무인 기체는 조종사 없이 계산합니다.</div>
+    </div>
+  </section>
+
   <section class="panel">
     <div class="ctl-title"><h2>판정 기준</h2></div>
     <div class="notes" style="font-size:12.5px;color:var(--muted)">
-      항목별 여유율 = 1 − 예측값 ÷ 기체 한계. 가장 낮은 항목이 그 지점의 등급을 정합니다.<br>
-      <span class="chip c0">정상</span> 20% 이상 · <span class="chip c1">주의</span> 0~20% · <span class="chip c2">경고</span> 0 ~ −25% · <span class="chip c3">불가</span> −25% 미만
+      항목별 여유율 = 1 − 예측값 ÷ 기체 한계. 가장 낮은 항목이 그 지점의 위험도 지수(0~100)와 등급을 정합니다.<br>
+      <span class="chip c0">정상</span> 0~39 · <span class="chip c1">주의</span> 40~59 · <span class="chip c2">경고</span> 60~79 · <span class="chip c3">불가</span> 80~100<br>
+      반영 요소: 풍속, 돌풍, 난류, 급변풍(F-factor·수평·연직), 시정, 운고, 강우, 강설, 뇌우, 착빙
     </div>
   </section>
 </aside>
 
 <main>
   <section class="panel verdict" aria-live="polite">
-    <div id="vBig" class="big c0"><span class="lbl">경로 종합 판정</span><span class="val" id="vVal">—</span></div>
+    <div id="vBig" class="big c0"><span class="lbl">선택 항로 판정</span><span class="val" id="vVal">—</span></div>
     <div class="facts">
+      <div class="fact"><div class="k">항로</div><div class="v" id="fRoute">—</div></div>
+      <div class="fact"><div class="k">거리 · 비행시간</div><div class="v num" id="fDist">—</div></div>
+      <div class="fact"><div class="k">위험도 지수 평균 · 최대</div><div class="v num" id="fRI">—</div></div>
       <div class="fact"><div class="k">제한 요소</div><div class="v" id="fFactor">—</div></div>
-      <div class="fact"><div class="k">가장 위험한 구간</div><div class="v" id="fSeg">—</div></div>
-      <div class="fact"><div class="k">경로 거리 · 비행시간</div><div class="v num" id="fDist">—</div></div>
-      <div class="fact"><div class="k">급변풍·난류 경고</div><div class="v num" id="fAlerts">—</div></div>
-      <div class="fact"><div class="k">최소 여유율</div><div class="v num" id="fMargin">—</div></div>
+      <div class="fact"><div class="k">가장 위험한 지점</div><div class="v" id="fSeg">—</div></div>
+      <div class="fact"><div class="k">조종사 경고</div><div class="v num" id="fAlerts">—</div></div>
     </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>추천 항로</h2>
+      <span class="strip-cap" id="recCap">기상 위험, 비행시간, 한강 회랑을 따져 고른 3개입니다. 눌러서 선택하세요.</span>
+    </div>
+    <div class="recs" id="recs"></div>
   </section>
 
   <section class="panel timebar">
     <div class="panel-head" style="margin:0">
       <h2>출발 시각</h2>
-      <span class="strip-cap">칸마다 그 시각에 출발했을 때의 경로 판정입니다. 눌러서 고르세요.</span>
+      <span class="strip-cap">칸마다 그 시각에 선택 항로로 출발했을 때의 판정입니다. 바꾸면 추천 항로도 다시 계산합니다.</span>
     </div>
     <div class="trow">
-      <button id="play" class="primary" type="button">재생</button>
+      <button id="play" type="button">시각 넘기기</button>
       <input id="step" type="range" min="0" max="59" step="1" value="0" aria-label="출발 시각">
       <span class="tlabel" id="stepLbl">—</span>
       <span class="mode" id="modeLbl">준실시간</span>
@@ -911,14 +1050,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <h2>수평 지도</h2>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <select id="mapField" aria-label="지도 요소">
-            <option value="risk">위험도 (기체 기준)</option>
+            <option value="ri">위험도 지수 (기체 기준)</option>
             <option value="spd">풍속</option>
             <option value="edr">난류 EDR</option>
+            <option value="temp">기온</option>
+            <option value="rh">습도</option>
+            <option value="pr">강수 (비·눈)</option>
             <option value="vis">시정</option>
-          </select>
-          <select id="mapBase" aria-label="배경 지도">
-            <option value="vector">배경: 내장 지도</option>
-            <option value="osm">배경: OpenStreetMap</option>
           </select>
           <select id="mapWind" aria-label="바람 표시">
             <option value="flow">바람: 흐름 애니메이션</option>
@@ -932,19 +1070,27 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <option value="300">300 m</option>
             <option value="600">600 m</option>
           </select>
+          <select id="mapRouteColor" aria-label="항로 색">
+            <option value="ri">항로 색: 위험도</option>
+            <option value="kw">항로 색: 전력 소비</option>
+          </select>
+          <select id="mapBase" aria-label="배경 지도">
+            <option value="vector">배경: 내장 지도</option>
+            <option value="osm">배경: OpenStreetMap</option>
+          </select>
         </div>
       </div>
       <div id="map" class="lmap" role="region" aria-label="경로 수평 지도"></div>
       <div class="legend" id="mapLegend"></div>
-      <div class="readout" id="mapRead">지도는 확대·이동할 수 있습니다. 흐르는 선은 고른 고도의 바람이며, 빠를수록 진하고 빨리 움직입니다. 커서를 올리면 그 지점 값을, 경고 삼각형에 올리면 경고 문구를 보여줍니다.</div>
+      <div class="readout" id="mapRead">지도는 확대·이동할 수 있습니다. 굵은 선이 선택 항로이고 점선은 다른 추천 항로입니다(눌러서 선택). 흐르는 선은 고른 고도의 바람입니다.</div>
     </section>
 
     <section class="panel alerts">
       <div class="panel-head">
         <h2>조종사 경고</h2>
-        <span class="eyebrow">급변풍 · 난류</span>
+        <span class="eyebrow">급변풍 · 난류 · 뇌우 · 착빙</span>
       </div>
-      <div class="banner" id="banner">확인하지 않은 급변풍 경고가 있습니다</div>
+      <div class="banner" id="banner">확인하지 않은 경고가 있습니다</div>
       <div class="alist" id="alist"></div>
       <div class="limits" id="limits"></div>
     </section>
@@ -952,24 +1098,78 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   <section class="panel">
     <div class="panel-head">
-      <h2>연직 단면 · 경로 거리 × 고도</h2>
+      <h2>비행 재생 · 연직 단면</h2>
       <select id="secField" aria-label="단면 요소">
+        <option value="ri">위험도 지수</option>
         <option value="along">경로방향 바람 (배풍 +)</option>
         <option value="spd">풍속</option>
         <option value="edr">난류 EDR</option>
+        <option value="temp">기온</option>
+        <option value="rh">습도</option>
         <option value="vsh">30 m 연직시어</option>
         <option value="vis">시정</option>
       </select>
     </div>
-    <div class="cv-wrap"><canvas id="sec" aria-label="경로 연직 단면"></canvas></div>
+    <div class="fp">
+      <button id="fpPlay" class="primary" type="button">비행 재생</button>
+      <button id="fpReset" type="button">처음으로</button>
+      <input id="fpScrub" type="range" min="0" max="1000" step="1" value="0" aria-label="비행 진행">
+      <span class="tl" id="fpTime">00:00 / 00:00</span>
+      <select id="fpSpeed" aria-label="재생 배속">
+        <option value="30">30배속</option>
+        <option value="60" selected>60배속</option>
+        <option value="120">120배속</option>
+      </select>
+    </div>
+    <div class="live" id="live"></div>
+    <div class="cv-wrap"><canvas id="sec" aria-label="경로 연직 단면과 비행 위치"></canvas></div>
     <div class="legend" id="secLegend"></div>
-    <div class="readout" id="secRead">검은 선은 비행 프로파일이며 색은 지점별 판정입니다. 번호는 조종사 경고 위치입니다.</div>
+    <div class="sub-h">경로 기상 <span>기체가 지나는 고도·시각의 값</span></div>
+    <div class="cv-wrap"><canvas id="met" aria-label="경로상 기상 요소"></canvas></div>
+    <div class="readout" id="secRead">단면이나 경로 기상 위에 커서를 올리면 그 지점 값을 보여줍니다.</div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>배터리 소비</h2><span class="strip-cap" id="enCap"></span></div>
+    <div class="facts" id="enFacts"></div>
+    <div class="phase" id="phaseBar"></div>
+    <div class="legs">
+      <div><div class="sub-h">많이 쓰는 구간</div><ol class="leglist" id="enTop"></ol></div>
+      <div><div class="sub-h">적게 쓰는 구간</div><ol class="leglist" id="enLow"></ol></div>
+    </div>
+    <div class="btnrow" style="align-items:center"><button type="button" id="saveFlight">이 비행 기록 저장</button><span class="hint" id="saveMsg">비행 재생을 끝까지 보면 자동으로 기록합니다.</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>기체별 운항 민감도</h2><span class="strip-cap">같은 항로·기상·탑승 인원으로 기체마다 계산했습니다. 행을 누르면 그 기체로 바꿉니다.</span></div>
+    <div class="table-wrap"><table class="fleet">
+      <thead><tr><th>기체</th><th>국가</th><th>판정</th><th>최대 위험도</th><th>비행시간</th><th>소비 kWh</th><th>배터리</th><th>제한 요소</th></tr></thead>
+      <tbody id="fleetBody"></tbody>
+    </table></div>
+    <div class="sub-h">선택 기체의 상층풍 민감도 <span>600 m 일반풍 세기만 바꿨을 때 선택 항로의 최대 위험도와 배터리 사용률</span></div>
+    <div class="cv-wrap"><canvas id="sens" aria-label="상층풍 세기별 위험도와 배터리 사용률"></canvas></div>
+    <div class="legend" id="sensLegend"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>누적 비행 통계 · 소비량 학습</h2><span class="strip-cap" id="statCap"></span></div>
+    <div class="facts" id="statFacts"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>기체</th><th>비행 수</th><th>평균 kWh/km</th><th>평균 배터리</th><th>맞바람 1 m/s당 kWh/km</th><th>실측 건수</th><th>보정계수</th></tr></thead>
+      <tbody id="statBody"></tbody>
+    </table></div>
+    <label class="check" style="margin-top:10px"><input type="checkbox" id="learnOn" checked> 학습한 보정계수를 소비량 예측에 적용</label>
+    <div class="sub-h">최근 기록 <span>실제 측정한 소비량(kWh)을 넣고 저장하면 그 기체의 보정계수를 다시 학습합니다</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>시각</th><th>기체</th><th>항로</th><th>성인·어린이</th><th>기상</th><th>예측 kWh</th><th>실측 kWh</th><th></th></tr></thead>
+      <tbody id="recBody"></tbody>
+    </table></div>
   </section>
 
   <section class="panel">
     <div class="panel-head"><h2>구간별 요약</h2></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>구간</th><th>거리 km</th><th>고도 m</th><th>최대 풍속 m/s</th><th>최대 돌풍</th><th>최대 EDR</th><th>최저 시정 m</th><th>최소 여유율</th><th>제한 요소</th><th>판정</th></tr></thead>
+      <thead><tr><th>구간</th><th>거리 km</th><th>고도 m</th><th>최대 풍속 m/s</th><th>최대 돌풍</th><th>최대 EDR</th><th>기온 °C</th><th>최저 시정 m</th><th>강수</th><th>최대 위험도</th><th>제한 요소</th><th>판정</th></tr></thead>
       <tbody id="segBody"></tbody>
     </table></div>
   </section>
@@ -979,23 +1179,25 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="notes">
       <p>이 화면은 실측 자료 없이 시나리오 입력만으로 돌아가는 <b>단순 진단모델</b>입니다. 실제 운영 체계에서는 각 줄이 오른쪽 자료로 바뀝니다.</p>
       <ul>
-        <li><b>평균풍</b>: 600 m 일반풍에서 멱법칙 <code>U(z)=U₆₀₀(z/600)^α</code>. α는 지표 거칠기 z₀(한강 수면 0.0002 m, 도시 0.5 m, 농경지 0.1 m, 김포공항 0.03 m)와 대기안정도(낮 감소, 밤 증가)로 정함. 높이가 오를수록 z₀를 지역 평균으로 섞어 내부경계층을 흉내 냄. → LDAPS·ECMWF 블렌딩 풍장</li>
-        <li><b>버티포트 증폭</b>: 킨텍스 V5 반경 약 1.2 km, 저고도에서 MUKLIMO_3 민감도 결과(평균 약 1.58배, 북풍 최강·남풍 최약)를 풍향별 배율로 적용. → MUKLIMO DB 조견표 / 3D U-Net</li>
-        <li><b>저층제트·풍향 순전</b>: 야간 320 m 부근 제트, 지표로 갈수록 반시계로 풍향 회전.</li>
-        <li><b>난류 EDR</b>: <code>ε = u*³/(κz)</code> + 낮 대류항 + 제트 시어항 + 건물 후류(여의도), <code>EDR = ε^(1/3)</code>.</li>
-        <li><b>이착륙 구간</b>: 고도 150 m 미만 상승·하강 구간은 기체가 바람을 향해 이착륙한다고 보고 총풍속을 이착륙 풍속 한계와 비교.</li>
-        <li><b>돌풍</b>: <code>G = U(1 + 2.2·TI)</code>, <code>TI ≈ 1/ln(z/z₀)</code>.</li>
-        <li><b>급변풍 F-factor</b>: 비행경로를 따라 <code>F = (dWx/dt)/g − w/V</code>, 1 km 이동평균. 주의 0.07, 경고 0.105(대형기 기준 준용, eVTOL용 재설정 필요).</li>
-        <li><b>대류셀</b>: 하강기류와 방사형 유출풍, 강수, 강한 난류를 가진 이동 셀. → 레이더 외삽(pySTEPS)</li>
-        <li><b>안개·운고</b>: 상대습도·약풍·야간 조건으로 안개 강도, 한강 근처 가중. 이슬점차 2.5 °C 미만일 때만 낮은 구름, 운고 ≈ 125 × 이슬점차(m). 난류 길이척도는 50 m 이상. → 시정계·위성·ML 분류</li>
-        <li><b>착빙</b>: 0 ~ −12 °C이면서 구름·안개·강수 속.</li>
+        <li><b>평균풍</b>: 600 m 일반풍에서 멱법칙 <code>U(z)=U₆₀₀(z/600)^α</code>. α는 지표 거칠기 z₀(한강 0.0002 m, 도시 0.5 m, 농경지 0.1 m, 김포공항 0.03 m)와 대기안정도로 정함. → LDAPS·ECMWF 블렌딩 풍장</li>
+        <li><b>버티포트 증폭</b>: 킨텍스 V5 반경 약 1.2 km, 저고도에서 MUKLIMO_3 민감도 결과(평균 약 1.58배)를 풍향별 배율로 적용. → MUKLIMO DB 조견표 / 3D U-Net</li>
+        <li><b>고도별 기온·습도</b>: 기온 감률 6.5 °C/km, 야간 150 m 접지역전, 이슬점 감률 1.8 °C/km로 고도별 상대습도 계산. 운량은 습도 80% 이상에서 증가, 운고 위는 구름 속.</li>
+        <li><b>강수</b>: 층운형 강수(입력값을 이동하는 띠 모양으로 변동) + 대류셀 강수. 그 고도 기온 0.5 °C 이하면 눈, 위면 비. 눈은 시정을 크게 낮춤.</li>
+        <li><b>뇌우</b>: 대류셀 중심 반경 약 4 km에서 뇌우 지수(0~1). 0.25 이상이면 운용 한계 초과.</li>
+        <li><b>난류·돌풍·급변풍</b>: <code>EDR = ε^(1/3)</code>, <code>G = U(1 + 2.2·TI)</code>, 비행경로상 <code>F = (dWx/dt)/g − w/V</code>(주의 0.07, 경고 0.105).</li>
+        <li><b>착빙</b>: 0 ~ −12 °C이면서 구름·안개·비 속.</li>
+        <li><b>배터리 소비</b>: 호버 전력 = 중량×유도속도/효율(디스크하중·공기밀도 반영), 순항 전력 = 중량×속도/(양항비×효율), 상승은 위치에너지 증가분을 더하고 하강은 일부 회수. 난류는 소비를 늘리고(EDR 0.1당 +8%), 저온은 사용 가능 용량을 줄입니다(10 °C 아래 1 °C당 −1%). 배터리 용량은 공개 항속거리를 최대이륙중량·예비 20%로 비행한다고 보고 역산한 추정치입니다.</li>
+        <li><b>소비량 학습</b>: 저장한 비행 기록에 실측 소비량을 넣으면 기체별 보정계수 k = Σ(실측×예측)/Σ(예측²)를 다시 계산해 예측에 곱합니다. 맞바람에 따른 kWh/km 증가율은 기록 3건 이상부터 회귀로 구합니다.</li>
+        <li><b>항로 추천</b>: 300 m 미만 순항은 소음·장애물 여유 때문에 벌점을 주고 기상이 나쁠 때만 고릅니다. 0.4 km 격자에서 위험도 지수에 비례하는 비용으로 최단 비용 경로를 찾고(다익스트라), 직선으로 펴서 3가지 성격(최소 위험·한강 회랑·최단 시간)으로 만든 뒤 순항고도 후보(상한, −150 m, −300 m)마다 평가해 고릅니다. 김포공항 반경 2.6 km는 피합니다(출발·도착지가 공항이면 제외).</li>
+        <li><b>비행 프로파일</b>: 수직 이륙 30 m → 이륙 구간 속도·상승률로 순항고도까지 상승 → 정속 순항 → 착륙 구간 속도·하강률로 하강 → 수직 착륙. 대지속도 = 대기속도 + 경로방향 바람.</li>
       </ul>
-      <p>시간 축은 0~60분 5분 간격(준실시간), 2~48시간 1시간 간격(단기)입니다. 위치·고도·수치는 모두 설명용이며 운항 판단에 쓰면 안 됩니다.</p>
+      <p>시간 축은 0~60분 5분 간격(준실시간), 2~48시간 1시간 간격(단기)입니다. 버티포트 위치·수치는 모두 설명용이며 운항 판단에 쓰면 안 됩니다.</p>
     </div>
   </details>
 </main>
 </div>
-<div class="foot">좌표·지표 분류는 근사값입니다. 기체 프로필은 가상 기체이며 실제 제원으로 바꿔 넣어야 합니다.</div>
+<div class="foot">좌표·지표 분류와 버티포트 위치는 근사·가상값입니다. 기체 프로필은 가상 기체이며 실제 제원으로 바꿔 넣어야 합니다.</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -1005,16 +1207,24 @@ const BASE = {"river":{"type":"Polygon","coordinates":[[[126.69694,37.66468],[12
 (() => {
 const $ = s => document.querySelector(s);
 const G = 9.81, KAPPA = 0.4;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
 /* ---------- geography (km, origin = KINTEX V5, x east, y north) ---------- */
-const WP = [
-  {n:'킨텍스 V5', x:0, y:0}, {n:'일산대교', x:1.45, y:-3.94}, {n:'행주대교', x:5.67, y:-7.68},
-  {n:'방화대교', x:7.79, y:-9.57}, {n:'가양대교', x:10.26, y:-11.78}, {n:'성산대교', x:12.64, y:-13.15},
-  {n:'여의도', x:15.76, y:-15.89}];
 const RIVER = BASE.river_km;   // 한강 중심선 (Natural Earth 10m + 하류 근사 연장)
 const AIRPORT = {x:3.97, y:-12.26};
 const YEO = {x:15.78, y:-15.9};
 const EXT = {x0:-5, x1:21, y0:-19.5, y1:4};
+const LANDMARKS = [
+  {n:'킨텍스 V5',x:0,y:0},{n:'일산대교',x:1.45,y:-3.94},{n:'행주대교',x:5.67,y:-7.68},{n:'방화대교',x:7.79,y:-9.57},
+  {n:'가양대교',x:10.26,y:-11.78},{n:'성산대교',x:12.64,y:-13.15},{n:'여의도',x:15.76,y:-15.89},{n:'김포공항',x:3.97,y:-12.26},
+  {n:'상암 DMC',x:12.63,y:-10.07},{n:'마곡',x:7.87,y:-12.06},{n:'용산',x:19.3,y:-15.4},{n:'고양 창릉',x:10.5,y:-3.2},
+  {n:'일산 호수공원',x:1.71,y:-1.2},{n:'화정',x:7.4,y:-3.7},{n:'계양',x:-1.4,y:-14.3},{n:'부천',x:1.8,y:-18.3},
+  {n:'은평',x:16.2,y:-7.6},{n:'행주산성',x:7.43,y:-7.86}];
+const VERTIPORTS = ['킨텍스 V5','여의도','김포공항','상암 DMC','마곡','용산','고양 창릉','일산 호수공원'].map(n=>LANDMARKS.find(l=>l.n===n));
+function nearestName(x,y,maxKm=2.5){
+  let b=null, bd=1e9; for (const l of LANDMARKS){ const d=Math.hypot(l.x-x,l.y-y); if(d<bd){bd=d;b=l;} }
+  return b && bd<=maxKm ? b.n : null;
+}
 
 function polyDist(x, y, P){
   let best = 1e9, side = 1;
@@ -1027,38 +1237,92 @@ function polyDist(x, y, P){
   return {d:best, side};
 }
 const smooth = (e0,e1,v) => {const t=Math.max(0,Math.min(1,(v-e0)/(e1-e0)));return t*t*(3-2*t);};
-
-/* log10 z0 field */
+const LZ_CACHE = new Map();
 function logz0(x, y){
+  const key = (Math.round(x*20))+','+(Math.round(y*20));
+  const hit = LZ_CACHE.get(key); if (hit) return hit;
   const r = polyDist(x,y,RIVER);
-  let land = -0.3;                                         // urban 0.5 m
-  if (r.side<0) land = -0.3 + (-1.0+0.3)*(1-smooth(7,10,x)); // Gimpo farmland SW of river
-  if (r.side<0 && x>9) land = -0.2;                         // Gangseo/Yangcheon
-  if (r.side>0 && x>9) land = -0.1;                         // Mapo
+  let land = -0.3;
+  if (r.side<0) land = -0.3 + (-1.0+0.3)*(1-smooth(7,10,x));
+  if (r.side<0 && x>9) land = -0.2;
+  if (r.side>0 && x>9) land = -0.1;
   const ra = Math.hypot(x-AIRPORT.x, y-AIRPORT.y);
-  land += (-1.55-land)*Math.exp(-Math.pow(ra/1.7,4));       // airport 0.03 m
-  land += 0.45*Math.exp(-Math.pow(Math.hypot(x-YEO.x,y-YEO.y)/1.1,2)); // Yeouido towers
-  const wr = 1/(1+Math.exp((r.d-0.55)/0.12));               // Han river water
-  return {lz: land*(1-wr) + (-3.7)*wr, dRiver:r.d};
+  land += (-1.55-land)*Math.exp(-Math.pow(ra/1.7,4));
+  land += 0.45*Math.exp(-Math.pow(Math.hypot(x-YEO.x,y-YEO.y)/1.1,2));
+  const wr = 1/(1+Math.exp((r.d-0.55)/0.12));
+  const out = {lz: land*(1-wr) + (-3.7)*wr, dRiver:r.d};
+  if (LZ_CACHE.size<200000) LZ_CACHE.set(key,out);
+  return out;
 }
 
-/* ---------- scenarios & aircraft ---------- */
+/* ---------- scenarios ---------- */
 const SCN = {
-  calm:{label:'가을 맑음 · 약풍', issueH:14, U:6, dir:270, T:17, dep:7, llj:0, conv:false},
-  nw:{label:'겨울 강한 북서풍', issueH:9, U:17, dir:315, T:1, dep:9, llj:0, conv:false, front:{h:10,dU:5,dDir:15}},
-  llj:{label:'야간 저층제트', issueH:21, U:9, dir:235, T:13, dep:4, llj:9, conv:false},
-  conv:{label:'여름 대류성 돌풍전선', issueH:15, U:7, dir:250, T:28, dep:4, llj:0, conv:true},
-  fog:{label:'새벽 한강 복사안개', issueH:4, U:2, dir:80, T:9, dep:0.6, llj:0, conv:false}
+  calm:{label:'가을 맑음 · 약풍', issueH:14, U:6, dir:270, T:17, dep:7, pr:0, llj:0, conv:false},
+  nw:{label:'겨울 강한 북서풍', issueH:9, U:17, dir:315, T:1, dep:9, pr:0, llj:0, conv:false, front:{h:10,dU:5,dDir:15}},
+  llj:{label:'야간 저층제트', issueH:21, U:9, dir:235, T:13, dep:4, pr:0, llj:9, conv:false},
+  conv:{label:'여름 대류성 뇌우·돌풍전선', issueH:15, U:7, dir:250, T:28, dep:4, pr:0, llj:0, conv:true},
+  rain:{label:'장마 비 · 남서풍', issueH:11, U:11, dir:225, T:23, dep:2.2, pr:9, llj:0, conv:false},
+  snow:{label:'겨울 눈 · 약한 북서풍', issueH:7, U:8, dir:320, T:-2, dep:3.2, pr:1.0, llj:0, conv:false},
+  fog:{label:'새벽 한강 복사안개', issueH:4, U:2, dir:80, T:9, dep:0.6, pr:0, llj:0, conv:false}
 };
 const CONV = {t0:-0.8, t1:3.5, x0:-1, y0:-14, vx:5.5, vy:3, R:3, W:7, O:13, P:45};
-const AC = {
-  multi:{label:'멀티콥터형 · 2인승급', vc:100, alt:300, climb:3, desc:2.5, xw:8, tail:4, wmax:12, gust:13, edr:0.20, vis:1600, rain:5, icing:false},
-  lift:{label:'리프트+크루즈형 · 4인승급', vc:180, alt:450, climb:4, desc:3, xw:10, tail:5, wmax:18, gust:16, edr:0.25, vis:1600, rain:10, icing:false},
-  tilt:{label:'틸트로터형 · 5인승급', vc:240, alt:600, climb:5, desc:4, xw:12, tail:6, wmax:22, gust:19, edr:0.30, vis:1600, rain:15, icing:false}
-};
-const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 
-const state = {sc:{...SCN.conv}, scKey:'conv', ac:{...AC.lift}, acKey:'lift', step:0, acked:{}};
+/* ---------- fleet: published specs (sources) + estimated parameters ---------- */
+// cfg: multi = 멀티콥터, lift = 리프트+크루즈, vector = 틸트/벡터 추력
+// est 표시: 공개되지 않아 추정한 값. DL(디스크하중 N/m²), LD(순항 양항비), FM(호버 효율)은 모두 추정.
+const FLEET = [
+ {id:'joby', name:'Joby S4', maker:'Joby Aviation', country:'미국', cfg:'vector', cfgK:'틸트 프로펠러 6개', pilot:1, seats:4,
+  vc:322, range:161, mtow:2404, empty:1950, payload:453, DL:600, LD:13, FM:0.72,
+  status:'FAA 형식증명 최종 단계 진입(2025년 11월)', src:'https://evtol.news/joby-aviation-s4-production-prototype', srcN:'eVTOL News (VFS)',
+  note:'322 km/h는 최대 순항속도, 항속 161 km는 예비 포함. 팩 비에너지 235 Wh/kg'},
+ {id:'archer', name:'Archer Midnight', maker:'Archer Aviation', country:'미국', cfg:'vector', cfgK:'로터 12개(6개 틸트)', pilot:1, seats:4,
+  vc:241, range:161, mtow:2950, mtowEst:true, payload:454, DL:900, LD:11, FM:0.7,
+  status:'FAA 특별감항증명으로 시험비행(2023년 8월~)', src:'https://www.airforce-technology.com/projects/midnight-evtol-aircraft-us/', srcN:'Airforce Technology (2023-10)',
+  note:'최고 241 km/h(150 mph), 32 km 단거리 연속 운항을 겨냥한 설계'},
+ {id:'wisk', name:'Wisk Gen 6', maker:'Wisk Aero (Boeing)', country:'미국', cfg:'vector', cfgK:'틸트(앞)·리프트(뒤) 프로펠러 12개', pilot:0, seats:4,
+  vc:222, range:144, mtow:2700, mtowEst:true, payloadEst:true, payload:380, DL:800, LD:12, FM:0.7,
+  status:'무인 자율비행 형식증명 추진', src:'https://wisk.aero/newsroom/generation6', srcN:'Wisk 발표 (2022-10)',
+  note:'순항 120 kt, 항속 90 mi(예비 포함), 운항고도 2,500~4,000 ft. 조종사 없이 원격 감독'},
+ {id:'ehang', name:'EHang EH216-S', maker:'EHang', country:'중국', cfg:'multi', cfgK:'멀티콥터 프로펠러 16개', pilot:0, seats:2,
+  vc:100, vmax:130, range:35, mtow:620, mtowEst:true, payload:220, DL:230, LD:0, FM:0.65,
+  status:'CAAC 형식증명(2023-10)·생산증명(2024-04)·상업운항 인가(2025-03)', src:'https://evtol.news/ehang-216', srcN:'eVTOL News (VFS)',
+  note:'최고 130 km/h, 비행시간 21분. 무인 자율비행'},
+ {id:'autoflight', name:'AutoFlight Prosperity', maker:'AutoFlight', country:'중국', cfg:'lift', cfgK:'리프트 10 + 추진 3 프로펠러', pilot:1, seats:4,
+  vc:200, range:250, mtow:2220, empty:1870, payload:350, DL:700, LD:10, FM:0.7,
+  status:'CAAC 형식증명 심사 중(신청 2024-04), 2026년 목표', src:'https://evtol.news/autoflight-prosperity', srcN:'eVTOL News (VFS)',
+  note:'V2000EM 생산형 기준'},
+ {id:'volocity', name:'VoloCity', maker:'Volocopter (2025년 Diamond Aircraft 인수)', country:'독일', cfg:'multi', cfgK:'멀티콥터 로터 18개', pilot:1, seats:1,
+  vc:90, vmax:100, range:20, mtow:1000, payloadEst:true, payload:200, DL:150, LD:0, FM:0.65,
+  status:'EASA SC-VTOL 인증 추진', src:'https://www.volocopter.com/cdn/assets/vnrac6vfvrab/3lVLdBP4Wmbv4e8hipNS1V/2adb898d09dbdd784183c26bd8bac960/2025_SpecSheet_VoloCit.pdf', srcN:'Volocopter 2025 사양서',
+  note:'2인승(조종사+승객 1), 항속 약 20 km(예비·맞바람 포함), 배터리 교체식'},
+ {id:'valo', name:'Vertical Valo', maker:'Vertical Aerospace', country:'영국', cfg:'vector', cfgK:'틸트 프로펠러, 전기추진 8개', pilot:1, seats:4,
+  vc:241, range:161, mtow:3150, mtowEst:true, payload:550, DL:800, LD:12, FM:0.7,
+  status:'형식증명 2028년 목표(CAA/EASA)', src:'https://investor.vertical-aerospace.com/news/news-details/2025/Vertical-Aerospace-Unveils-Valo---the-eVTOL-Aircraft-Set-to-Redefine-Urban-Air-Mobility-and-Usher-in-a-New-Era-of-Flight/default.aspx', srcN:'Vertical 발표 (2025-12)',
+  note:'출시 4석, 최대 6석까지 확장 계획. 최고 241 km/h(150 mph)'},
+ {id:'eve', name:'Eve', maker:'Eve Air Mobility (Embraer)', country:'브라질', cfg:'lift', cfgK:'리프트 8 + 추진 프로펠러', pilot:1, seats:4,
+  vc:180, vcEst:true, range:100, mtow:2800, mtowEst:true, payloadEst:true, payload:450, DL:600, LD:11, FM:0.72,
+  status:'2026년 양산 시작 예상', src:'https://evtol.news/eve-air-mobility-eve-production-model', srcN:'eVTOL News (VFS)',
+  note:'순항속도 미공개(180 km/h로 가정). 자율비행 시 6석'},
+ {id:'skydrive', name:'SkyDrive SD-05', maker:'SkyDrive', country:'일본', cfg:'multi', cfgK:'멀티콥터 프로펠러 12개', pilot:1, seats:2,
+  vc:100, range:15, mtow:1400, payloadEst:true, payload:250, DL:370, LD:0, FM:0.65,
+  status:'시험비행에서 100 km/h 도달(2026년 보도)', src:'https://www.evtol.news/skydrive-sd-05', srcN:'eVTOL News (VFS)',
+  note:'출처 안에 항속 10/15 km, MTOW 1,100/1,400 kg이 섞여 있어 15 km·1,400 kg 사용'},
+ {id:'supernal', name:'Supernal S-A2', maker:'Supernal (현대차그룹)', country:'한국', cfg:'vector', cfgK:'틸트 프로펠러 8개', pilot:1, seats:3,
+  vc:193, range:100, rangeEst:true, mtow:2700, mtowEst:true, payloadEst:true, payload:380, DL:900, LD:12, FM:0.7,
+  status:'개발 일시 중단·재검토(2025년 9월)', src:'https://evtol.news/supernal-hyundai-motor-group-s-a2-concept-design', srcN:'eVTOL News (VFS) · Aviation Week',
+  note:'좌석 4석(조종사 포함으로 가정), 계획 순항고도 457 m. 항속 미공개(100 km 가정)'}
+];
+// 운용 한계·비행 기본값: 공개 자료가 없어 형식과 중량으로 추정
+FLEET.forEach(a=>{
+  const heavy = a.mtow>2000 ? 1 : 0;
+  const L = {multi:{xw:8,wmax:12,gust:13,edr:0.18,rain:5,snow:1, vto:40,vld:35,climb:3,desc:2.5,alt:300},
+             lift:{xw:10,wmax:17,gust:15,edr:0.24,rain:10,snow:2, vto:60,vld:50,climb:4,desc:3,alt:450},
+             vector:{xw:11,wmax:19,gust:17,edr:0.27,rain:12,snow:2, vto:80,vld:70,climb:4.5,desc:3.5,alt:450}}[a.cfg];
+  a.lim = {xw:L.xw+heavy, wmax:L.wmax+heavy, gust:L.gust+heavy, edr:L.edr, vis:1600, rain:L.rain, snow:L.snow, icing:false};
+  a.def = {vto:L.vto, vld:L.vld, climb:L.climb, desc:L.desc, alt:L.alt, vc:Math.min(a.vc, 330)};
+  if (!a.empty) a.empty = a.mtow - (a.payload || (a.seats*95 + a.pilot*90));
+});
+const MASS = {pilot:85, adult:80, child:35};
 
 /* ---------- the simple model ---------- */
 function met(x, y, z, t, sc){
@@ -1075,29 +1339,29 @@ function met(x, y, z, t, sc){
   let a = (0.096*lzE + 0.016*lzE*lzE + 0.24)*(1-0.45*Seff);
   a = Math.max(0.06, Math.min(0.5, a));
   let spd = zz<=600 ? Us*Math.pow(zz/600,a) : Us*(1+0.0003*(zz-600));
-  // nocturnal low-level jet
   let jet=0, dJ=0;
   if (S<0 && sc.llj>0){const jf=sc.llj*Math.min(1,-S/0.8); jet=jf*Math.exp(-Math.pow((zz-320)/110,2)); dJ=jet*(-2*(zz-320)/(110*110));}
-  // KINTEX V5 amplification (MUKLIMO_3 sensitivity, ~1.58x mean, N strongest)
   const r5 = Math.hypot(x,y);
   const A = 1.58 + 0.45*Math.cos(dir*Math.PI/180);
   const amp = 1 + (A-1)*Math.exp(-Math.pow(r5/1.2,2))*Math.exp(-zz/80);
-  // Yeouido building wake
   const bw = Math.exp(-Math.pow(Math.hypot(x-YEO.x,y-YEO.y)/0.9,2))*Math.exp(-zz/150);
   const base = spd*(1-0.25*bw) + jet;
   spd = spd*amp*(1-0.25*bw) + jet;
   const veer = (Seff<0?25:10)*(1-Math.min(zz,600)/600);
   const dr = (dir - veer)*Math.PI/180;
-  let u = -spd*Math.sin(dr), v = -spd*Math.cos(dr), w = 0, P = 0, epsC = 0, tiC = 0;
+  let u = -spd*Math.sin(dr), v = -spd*Math.cos(dr), w = 0, Pc = 0, epsC = 0, tiC = 0, ts = 0;
+  const sd = Math.sin(2*Math.PI*(h-9)/24);
+  const T0 = sc.T + 5*sd;
   if (sc.conv && t>=CONV.t0 && t<=CONV.t1){
     const tau=t-CONV.t0, life=Math.sin(Math.PI*tau/(CONV.t1-CONV.t0));
     const cx=CONV.x0+CONV.vx*tau, cy=CONV.y0+CONV.vy*tau, r=Math.max(0.01,Math.hypot(x-cx,y-cy)), R=CONV.R;
     const O = CONV.O*life*(r/R)*Math.exp(1-r/R)*Math.exp(-zz/450);
     u += O*(x-cx)/r; v += O*(y-cy)/r;
     w = -CONV.W*life*Math.exp(-Math.pow(r/(0.6*R),2))*Math.min(1,zz/250);
-    P = CONV.P*life*Math.exp(-Math.pow(r/(0.7*R),2));
+    Pc = CONV.P*life*Math.exp(-Math.pow(r/(0.7*R),2));
     epsC = 0.04*life*Math.exp(-Math.pow(r/R,2));
     tiC = 0.15*life*Math.exp(-Math.pow(r/R,2));
+    if (T0>15) ts = life*Math.exp(-Math.pow(r/(1.3*R),2));
   }
   const sH = Math.hypot(u,v);
   const lnz = Math.log(zz/z0e);
@@ -1106,113 +1370,205 @@ function met(x, y, z, t, sc){
   const us = KAPPA*(base + (sc.conv ? Math.max(0, sH - spd) : 0))/lnz;
   const eps = us*us*us/(KAPPA*Math.max(zz,50))*(1+bw) + 0.0015*Math.max(Seff,0)*Math.max(0,1-zz/1500) + 1.5*dJ*dJ + epsC;
   const edr = Math.cbrt(eps);
-  // thermo, fog, cloud, icing
-  const sd = Math.sin(2*Math.PI*(h-9)/24);
-  const T0 = sc.T + 5*sd;
+  // thermo by altitude
   const dep = Math.max(0.15, sc.dep*(1+0.75*sd));
   const es = T => Math.exp(17.625*T/(243.04+T));
-  const RH = 100*es(T0-dep)/es(T0);
-  const ceil = dep<2.5 ? Math.max(30, 125*dep) : 3000;
+  const RH0 = 100*es(T0-dep)/es(T0);
+  const inv = S<0 ? 3*Math.min(1,-S/0.8)*Math.min(zz,150)/150 : 0;
+  const Tz = T0 - 0.0065*zz + inv;
+  const Tdz = (T0-dep) - 0.0018*zz;
+  const RHz = Math.min(100, 100*es(Math.min(Tdz,Tz))/es(Tz));
+  const pr = sc.pr||0;
+  const ceil = (dep<2.5 || pr>0) ? Math.max(30, 125*dep) : 3000;
+  const inCloud = zz>ceil;
+  const cc = inCloud ? 1 : (RHz>=80 ? Math.min(0.9, 1-Math.sqrt((100-RHz)/20)) : 0);
+  // fog (surface-based)
   const U10 = Us*0.35;
-  let f = Math.max(0,Math.min(1,(RH-95)/4))*Math.max(0,Math.min(1,(5-U10)/3))*(S<0.25?1:Math.max(0,1-(S-0.25)*3));
+  let f = Math.max(0,Math.min(1,(RH0-95)/4))*Math.max(0,Math.min(1,(5-U10)/3))*(S<0.25?1:Math.max(0,1-(S-0.25)*3));
   f = Math.min(1, f*(1+0.4*Math.exp(-Math.pow(g.dRiver/1,2))));
   const fogTop = 60+200*f;
+  // precipitation: moving stratiform bands + convective core; phase by local temperature
+  let prS = 0;
+  if (pr>0) prS = pr*Math.max(0.15, 0.6+0.4*Math.sin(0.28*x+0.17*y-0.9*t)+0.25*Math.sin(0.11*x-0.23*y+0.5*t));
+  const Ptot = prS + Pc;
+  const snowy = Tz<=0.5;
+  const rain = snowy?0:Ptot, snow = snowy?Ptot:0;
   let vis = (zz<fogTop) ? 10000*Math.exp(-4.6*f) : 10000;
-  const inCloud = zz>ceil;
   if (inCloud) vis = Math.min(vis,300);
-  vis = Math.max(80, Math.min(vis, 12000/(1+0.3*P)));
-  const Tz = T0 - 0.0065*zz;
-  const icing = Tz<=0 && Tz>=-12 && (inCloud || (f>0.3 && zz<fogTop) || P>0.5);
-  return {u, v, w, spd:sH, gust, edr, vis, ceil, T:Tz, rh:RH, icing, P, z0:z0e, lz:g.lz};
+  vis = Math.min(vis, 12000/(1+0.3*rain));
+  if (snow>0.05) vis = Math.min(vis, 2500/(0.3+snow));
+  vis = Math.max(80, vis);
+  const icing = Tz<=0 && Tz>=-12 && (inCloud || (f>0.3 && zz<fogTop) || rain>0.2 || (snow>0.3 && Tz>-3 && RHz>95));
+  return {u, v, w, spd:sH, gust, edr, vis, ceil, T:Tz, rh:RHz, cc, inCloud, icing, P:Ptot, rain, snow, ts, z0:z0e, lz:g.lz};
 }
+const wdirOf = m => (Math.atan2(-m.u,-m.v)*180/Math.PI+360)%360;
+
+/* ---------- risk ---------- */
+const LV = ['정상','주의','경고','불가'];
+const FTH = [0.07,0.105], HSH=[5,7.5], VSH=[1.5,2.0];
+function riOf(m){ // margin → risk index 0..100
+  if (m>=0.2) return 40*clamp((1-m)/0.8,0,1);
+  if (m>=0) return 40+20*(0.2-m)/0.2;
+  if (m>=-0.25) return 60+20*(-m/0.25);
+  return Math.min(100, 80+20*Math.min(1,(-0.25-m)/0.75));
+}
+const catRI = ri => ri<40?0: ri<60?1: ri<80?2:3;
+function marginItems(m, z, lim, low){
+  const it = [];
+  it.push(low ? ['이착륙 풍속', 1-m.spd/lim.xw] : ['풍속', 1-m.spd/lim.wmax]);
+  it.push(['돌풍', 1-m.gust/lim.gust]);
+  it.push(['난류', 1-m.edr/lim.edr]);
+  it.push(['시정', 1-lim.vis/m.vis]);
+  it.push(['운고', 1-(z+60)/m.ceil]);
+  it.push(['강우', 1-m.rain/lim.rain]);
+  it.push(['강설', 1-m.snow/lim.snow]);
+  it.push(['뇌우', 1-m.ts/0.25]);
+  if (m.icing && !lim.icing) it.push(['착빙', -0.5]);
+  return it;
+}
+function minItem(items){ let mg=9, f=''; for (const it of items){ it[1]=clamp(it[1],-1,1); if (it[1]<mg){ mg=it[1]; f=it[0]; } } return [mg,f]; }
 
 /* ---------- route geometry ---------- */
 const DS = 0.1;
-const ROUTE = (() => {
-  const xs=[],ys=[],tx=[],ty=[],seg=[],s=[];
+function buildRoute(poly){
+  const xs=[],ys=[],tx=[],ty=[],s=[];
   let acc=0;
-  for (let i=0;i<WP.length-1;i++){
-    const a=WP[i], b=WP[i+1], len=Math.hypot(b.x-a.x,b.y-a.y), n=Math.max(1,Math.round(len/DS));
-    for (let k=0;k<n;k++){const f=k/n; xs.push(a.x+(b.x-a.x)*f); ys.push(a.y+(b.y-a.y)*f); tx.push((b.x-a.x)/len); ty.push((b.y-a.y)/len); seg.push(i); s.push(acc+len*f);}
+  for (let i=0;i<poly.length-1;i++){
+    const [ax,ay]=poly[i],[bx,by]=poly[i+1], len=Math.hypot(bx-ax,by-ay);
+    if (len<1e-6) continue;
+    const n=Math.max(1,Math.round(len/DS));
+    for (let k=0;k<n;k++){const f=k/n; xs.push(ax+(bx-ax)*f); ys.push(ay+(by-ay)*f); tx.push((bx-ax)/len); ty.push((by-ay)/len); s.push(acc+len*f);}
     acc+=len;
   }
-  const last=WP[WP.length-1]; xs.push(last.x); ys.push(last.y); tx.push(tx[tx.length-1]); ty.push(ty[ty.length-1]); seg.push(WP.length-2); s.push(acc);
-  return {xs,ys,tx,ty,seg,s,n:xs.length,L:acc};
-})();
-const wpS = (() => {const o=[0]; let a=0; for(let i=0;i<WP.length-1;i++){a+=Math.hypot(WP[i+1].x-WP[i].x,WP[i+1].y-WP[i].y); o.push(a);} return o;})();
-function nearestWP(i){let b=0,bd=1e9; for(let k=0;k<WP.length;k++){const d=Math.abs(wpS[k]-ROUTE.s[i]); if(d<bd){bd=d;b=k;}} return WP[b].n;}
-
-function profile(ac){
-  const n=ROUTE.n, L=ROUTE.L, Vc=ac.vc/3.6, Vcl=0.55*Vc;
-  let dc=ac.alt/ac.climb*Vcl/1000, dd=ac.alt/ac.desc*Vcl/1000, top=ac.alt;
-  if (dc+dd>L*0.9){const k=L*0.9/(dc+dd); dc*=k; dd*=k; top*=k;}
-  const alt=new Float64Array(n), vg=new Float64Array(n), cum=new Float64Array(n), phase=[];
-  for (let i=0;i<n;i++){
-    const s=ROUTE.s[i];
-    if (s<dc){alt[i]=top*s/dc; vg[i]=Vcl; phase.push('climb');}
-    else if (s>L-dd){alt[i]=top*(L-s)/dd; vg[i]=Vcl; phase.push('desc');}
-    else {alt[i]=top; vg[i]=Vc; phase.push('cruise');}
-    alt[i]=Math.max(alt[i],5);
-    if (i>0) cum[i]=cum[i-1]+(ROUTE.s[i]-ROUTE.s[i-1])*1000/vg[i];
-  }
-  return {alt,vg,cum,phase,top};
+  const [lx,ly]=poly[poly.length-1];
+  xs.push(lx); ys.push(ly); tx.push(tx[tx.length-1]||1); ty.push(ty[ty.length-1]||0); s.push(acc);
+  return {xs,ys,tx,ty,s,n:xs.length,L:acc,poly};
 }
 
-const LV = ['정상','주의','경고','불가'];
-const cat = m => m>=0.2?0 : m>=0?1 : m>=-0.25?2 : 3;
-const FTH = [0.07,0.105], HSH=[5,7.5], VSH=[1.5,2.0];
+/* ---------- aircraft performance & energy ---------- */
+function rhoAt(T){ return 1.225*288.15/(273.15+T); }
+function hoverPower(a, mass, T){ // W at the battery
+  const W=mass*G, rho=rhoAt(T), DL=a.DL*mass/a.mtow, vh=Math.sqrt(DL/(2*rho));
+  return W*vh/a.FM/0.9;
+}
+function levelPower(a, mass, V, T){ // W, steady level flight at airspeed V (m/s)
+  const Ph=hoverPower(a,mass,T), W=mass*G, vc=a.vc/3.6;
+  if (a.cfg==='multi') return Ph*(0.75 + 0.35*Math.pow(V/vc,2));
+  const Vt=0.45*vc, wing=W*V/(a.LD*0.8*0.9);
+  if (V<Vt) return Ph*(1-0.55*V/Vt) + wing*(V/Vt);
+  return wing*(0.75+0.25*Math.pow(V/vc,2)) + 0.04*Ph;
+}
+function auxPower(T){ return 3000 + (T<5?4000:0) + (T>28?3000:0); }
+function battUsable(T){ return clamp(1-0.01*Math.max(0,10-T),0.75,1); }
+// battery capacity estimate: published range at MTOW, 15 °C, no wind, 450 m cruise, 20 % reserve
+FLEET.forEach(a=>{
+  const m=a.mtow, T=15, vc=a.vc/3.6, vto=a.def.vto/3.6, vld=a.def.vld/3.6, H=450, H0=30;
+  const Ph=hoverPower(a,m,T);
+  let E = (Ph + m*G*a.def.climb/0.72)*(H0/a.def.climb) + 0.75*Ph*(H0/a.def.desc);
+  const tcl=(H-H0)/a.def.climb, tde=(H-H0)/a.def.desc;
+  E += (levelPower(a,m,vto,T)+m*G*a.def.climb/0.72)*tcl + Math.max(0.3*Ph, levelPower(a,m,vld,T)-0.5*m*G*a.def.desc*0.9)*tde;
+  const dcr = Math.max(0, a.range*1000 - vto*tcl - vld*tde);
+  E += levelPower(a,m,vc,T)*dcr/vc;
+  E += auxPower(T)*(2*H0/a.def.climb + tcl + tde + dcr/vc);
+  a.battKWh = Math.round(E/3.6e6/0.8);
+});
 
-function evalRoute(t0, ac, sc, full){
-  const pr = profile(ac), n=ROUTE.n;
-  const Wx=new Float64Array(n), W=new Float64Array(n), out=[];
+function profile(ac, R){
+  const n=R.n, L=R.L, H0=30, Vto=ac.vto/3.6, Vld=ac.vld/3.6, Vc=ac.vc/3.6;
+  let top=Math.max(ac.alt, H0+20), dc=(top-H0)/ac.climb*Vto/1000, dd=(top-H0)/ac.desc*Vld/1000;
+  if (dc+dd>L*0.9){ const k=L*0.9/(dc+dd); dc*=k; dd*=k; top=H0+(top-H0)*k; }
+  const alt=new Float64Array(n), va=new Float64Array(n), phase=[];
   for (let i=0;i<n;i++){
-    const x=ROUTE.xs[i], y=ROUTE.ys[i], z=pr.alt[i], eta=t0+pr.cum[i]/3600;
-    const m=met(x,y,z,eta,sc);
-    const zt=z+15, zb=Math.max(2,z-15), m1=met(x,y,zt,eta,sc), m0=met(x,y,zb,eta,sc);
-    const vsh=Math.hypot(m1.u-m0.u,m1.v-m0.v)*30/(zt-zb);
-    Wx[i]=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i]; W[i]=m.w;
-    out.push({i, m, z, eta, vsh, cross:Math.abs(-m.u*ROUTE.ty[i]+m.v*ROUTE.tx[i])});
+    const s=R.s[i];
+    if (s<dc){ alt[i]=H0+(top-H0)*s/dc; va[i]=Vto; phase.push('climb'); }
+    else if (s>L-dd){ alt[i]=H0+(top-H0)*(L-s)/dd; va[i]=Vld; phase.push('desc'); }
+    else { alt[i]=top; va[i]=Vc; phase.push('cruise'); }
   }
+  return {alt, va, phase, top, H0, dc, dd, tUp:H0/ac.climb, tDn:H0/ac.desc};
+}
+function timing(pr, R, Wx){
+  const n=R.n, gs=new Float64Array(n), cum=new Float64Array(n);
+  for (let i=0;i<n;i++) gs[i]=Math.max(4, pr.va[i]+(Wx?Wx[i]:0));
+  cum[0]=pr.tUp;
+  for (let i=1;i<n;i++) cum[i]=cum[i-1]+(R.s[i]-R.s[i-1])*1000/((gs[i]+gs[i-1])/2);
+  pr.gs=gs; pr.cum=cum; pr.total=cum[n-1]+pr.tDn;
+}
+
+/* evaluate one aircraft (ac = merged flight settings + limits + airframe) on route R */
+function evalRoute(t0, ac, sc, R, opt={}){
+  const pr=profile(ac, R), n=R.n, air=ac.air;
+  timing(pr, R, null);
+  const Wx=new Float64Array(n), W=new Float64Array(n), out=new Array(n);
+  for (let i=0;i<n;i++){
+    const x=R.xs[i], y=R.ys[i], z=pr.alt[i], eta=t0+pr.cum[i]/3600;
+    const m=met(x,y,z,eta,sc);
+    let vsh=0;
+    if (!opt.fast){ const zt=z+15, zb=Math.max(2,z-15), m1=met(x,y,zt,eta,sc), m0=met(x,y,zb,eta,sc); vsh=Math.hypot(m1.u-m0.u,m1.v-m0.v)*30/(zt-zb); }
+    Wx[i]=m.u*R.tx[i]+m.v*R.ty[i]; W[i]=m.w;
+    out[i]={i, m, z, vsh, cross:Math.abs(-m.u*R.ty[i]+m.v*R.tx[i])};
+  }
+  timing(pr, R, Wx);
+  for (let i=0;i<n;i++) out[i].eta=t0+pr.cum[i]/3600;
   const k=3, Fr=new Float64Array(n);
   for (let i=0;i<n;i++){
-    const a=Math.max(0,i-k), b=Math.min(n-1,i+k), ds=(ROUTE.s[b]-ROUTE.s[a])*1000;
-    const dWdt=(Wx[b]-Wx[a])/ds*pr.vg[i];
-    const Va=Math.max(15, pr.vg[i]-Wx[i]);
-    Fr[i]=dWdt/G - W[i]/Va;
-    out[i].hsh=Math.abs(Wx[b]-Wx[a])*0.5/((ROUTE.s[b]-ROUTE.s[a])||0.5);
+    const a=Math.max(0,i-k), b=Math.min(n-1,i+k), ds=(R.s[b]-R.s[a])*1000||100;
+    Fr[i]=(Wx[b]-Wx[a])/ds*pr.gs[i]/G - W[i]/Math.max(15, pr.va[i]);
+    out[i].hsh=Math.abs(Wx[b]-Wx[a])*0.5/((R.s[b]-R.s[a])||0.5);
   }
-  let worst={mg:9,i:0,f:''};
+  // energy
+  const mass=ac.mass, E=new Float64Array(n), Pw=new Float64Array(n);
+  let Etot=0, ph={vert:0, climb:0, cruise:0, desc:0};
+  const m0=out[0].m, mN=out[n-1].m;
+  const Ph0=hoverPower(air,mass,m0.T), PhN=hoverPower(air,mass,mN.T);
+  const eUp=((Ph0 + mass*G*ac.climb/0.72)*(1+0.8*m0.edr) + auxPower(m0.T))*pr.tUp/3.6e6;
+  const eDn=((0.75*PhN)*(1+0.8*mN.edr) + auxPower(mN.T))*pr.tDn/3.6e6;
+  ph.vert=eUp+eDn; Etot=eUp+eDn;
+  let worst={mg:9,i:0,f:''}, riSum=0, riMax=0;
   for (let i=0;i<n;i++){
     let sum=0,c=0; for(let j=Math.max(0,i-5);j<=Math.min(n-1,i+5);j++){sum+=Fr[j];c++;}
     const p=out[i], m=p.m, F=sum/c; p.F=F; p.Wx=Wx[i];
     const low = p.z<150 && pr.phase[i]!=='cruise';
-    const items = [];
-    items.push(low ? ['이착륙 풍속', 1-m.spd/ac.xw] : ['풍속', 1-m.spd/ac.wmax]);
-    items.push(['돌풍', 1-m.gust/ac.gust]);
-    items.push(['난류', 1-m.edr/ac.edr]);
-    items.push(['시정', 1-ac.vis/m.vis]);
-    items.push(['운고', 1-(p.z+100)/m.ceil]);
+    const items = marginItems(m, p.z, ac.lim, low);
     items.push(['급변풍', F>0 ? 1-F/FTH[1] : 1]);
     items.push(['수평시어', 1-p.hsh/HSH[1]]);
-    items.push(['연직시어', 1-p.vsh/VSH[1]]);
-    items.push(['강수', 1-m.P/ac.rain]);
-    if (m.icing && !ac.icing) items.push(['착빙', -0.5]);
-    for (const it of items) it[1]=Math.max(-1,Math.min(1,it[1]));
-    let mg=9, f=''; for (const [nm,v] of items){ if (v<mg){mg=v; f=nm;} }
-    p.items=items; p.mg=mg; p.f=f; p.c=cat(mg);
+    if (!opt.fast) items.push(['연직시어', 1-p.vsh/VSH[1]]);
+    const [mg,f]=minItem(items);
+    p.items=items; p.mg=mg; p.f=f; p.ri=riOf(mg); p.c=catRI(p.ri);
     if (mg<worst.mg) worst={mg,i,f};
+    riMax=Math.max(riMax,p.ri);
+    // power at this point
+    const V=pr.va[i]; let P=levelPower(air,mass,V,m.T);
+    if (pr.phase[i]==='climb') P += mass*G*ac.climb/0.72;
+    else if (pr.phase[i]==='desc') P = Math.max(0.3*hoverPower(air,mass,m.T), P-0.5*mass*G*ac.desc*0.9);
+    P = P*(1+0.8*m.edr) + auxPower(m.T);
+    Pw[i]=P/1000; p.kw=P/1000;
+    if (i>0){ const dt=pr.cum[i]-pr.cum[i-1], e=(Pw[i]+Pw[i-1])/2*dt/3600; E[i]=e; Etot+=e; ph[pr.phase[i]]+=e; riSum+=(p.ri+out[i-1].ri)/2*(R.s[i]-R.s[i-1]); }
+    p.e=E[i]; p.ecum=Etot - eDn;
   }
-  const res={pts:out, pr, worst, c:cat(worst.mg)};
-  if (full) res.alerts=makeAlerts(out, ac);
+  const corr = ac.corr || 1;
+  const Tmean = out.reduce((s,p)=>s+p.m.T,0)/n;
+  const usable = air.battKWh*battUsable(Math.min(m0.T, Tmean));
+  const used = Etot*corr, pct = used/usable*100;
+  const res = {pts:out, pr, worst, riMax, riMean:riSum/(R.L||1), R,
+    energy:{total:used, raw:Etot, phase:ph, usable, pct, left:100-pct, kwhkm:used/(R.L||1), eUp, eDn, corr}};
+  // route-level factors: battery reserve & weight
+  let c = catRI(riMax), limit = worst.f;
+  const battCat = pct>100?3 : pct>80?2 : pct>65?1 : 0;
+  if (battCat>c){ c=battCat; limit='배터리 여유'; }
+  if (ac.mass>air.mtow){ c=3; limit='중량 초과'; }
+  res.c=c; res.limit=limit; res.battCat=battCat;
+  if (opt.alerts) res.alerts=makeAlerts(out, ac, R);
   return res;
 }
 
-function makeAlerts(pts, ac){
+function makeAlerts(pts, ac, R){
   const defs=[
     {key:'F', name:'급변풍', val:p=>p.F, th:FTH, fmt:(p)=>`${p.Wx>=0?'배풍':'정풍'} 변화 · F ${p.F.toFixed(2)}`},
     {key:'H', name:'수평 급변풍', val:p=>p.hsh, th:HSH, fmt:(p)=>`경로성분 ${p.hsh.toFixed(1)} m/s / 0.5 km`},
     {key:'V', name:'연직 급변풍', val:p=>p.vsh, th:VSH, fmt:(p)=>`${p.vsh.toFixed(1)} m/s / 30 m`},
-    {key:'E', name:'난류', val:p=>p.m.edr, th:[ac.edr*0.8, ac.edr], fmt:(p)=>`EDR ${p.m.edr.toFixed(2)}`}
+    {key:'E', name:'난류', val:p=>p.m.edr, th:[ac.lim.edr*0.8, ac.lim.edr], fmt:(p)=>`EDR ${p.m.edr.toFixed(2)}`},
+    {key:'T', name:'뇌우', val:p=>p.m.ts, th:[0.12,0.25], fmt:(p)=>`뇌우 지수 ${p.m.ts.toFixed(2)}`},
+    {key:'I', name:'착빙', val:p=>(p.m.icing&&!ac.lim.icing)?1:0, th:[0.5,0.9], fmt:(p)=>`기온 ${p.m.T.toFixed(1)} °C, ${p.m.inCloud?'구름 속':'강수·안개 속'}`}
   ];
   const al=[];
   for (const d of defs){
@@ -1229,27 +1585,143 @@ function makeAlerts(pts, ac){
   }
   al.forEach(a=>{
     const p=pts[a.peak];
-    a.where=nearestWP(a.peak); a.alt=Math.round(p.z); a.s=ROUTE.s[a.peak];
-    a.len=Math.max(0.1,ROUTE.s[a.i1]-ROUTE.s[a.i0]);
+    a.where=nearestName(R.xs[a.peak],R.ys[a.peak]) || `${R.s[a.peak].toFixed(1)} km 지점`;
+    a.alt=Math.round(p.z); a.s=R.s[a.peak];
+    a.len=Math.max(0.1,R.s[a.i1]-R.s[a.i0]);
     a.detail=a.d.fmt(p);
     a.id=`${a.d.key}-${a.where}-${a.lv}`;
-    a.msg=`${a.d.name} ${a.lv===2?'경고':'주의'} · ${a.where} 부근 · 고도 ${a.alt} m · ${a.detail} · ${a.len.toFixed(1)} km 구간`;
+    a.msg=`${a.d.name} ${a.lv===2?'경고':'주의'} · ${a.where}${a.where.endsWith('지점')?'':' 부근'} · 고도 ${a.alt} m · ${a.detail} · ${a.len.toFixed(1)} km 구간`;
   });
   al.sort((a,b)=> b.lv-a.lv || a.s-b.s);
   return al;
 }
 
+/* ---------- route planner: risk-weighted grid search + string pulling ---------- */
+const PG_STEP = 0.4;
+const PROFILES = [
+  {key:'safe',  name:'최소 위험', wR:10,  river:1.0,  lam:3.0, why:'위험도 지수가 높은 구역을 가장 크게 돌아갑니다.'},
+  {key:'river', name:'한강 회랑', wR:4,   river:0.55, lam:1.5, why:'한강 위를 따라가 지상 위험과 소음을 줄이고, 위험 구역은 피합니다.'},
+  {key:'fast',  name:'최단 시간', wR:1.2, river:1.0,  lam:0.4, why:'불가 구역만 피하고 가장 짧게 갑니다.'}
+];
+function costGrid(z, t, sc, lim){
+  const g=PG_STEP, NX=Math.floor((EXT.x1-EXT.x0)/g)+1, NY=Math.floor((EXT.y1-EXT.y0)/g)+1, N=NX*NY;
+  const ri=new Float32Array(N), river=new Uint8Array(N), apt=new Float32Array(N);
+  for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
+    const x=EXT.x0+i*g, y=EXT.y0+j*g, k=j*NX+i, m=met(x,y,z,t,sc);
+    ri[k]=riOf(minItem(marginItems(m,z,lim,false))[0]);
+    river[k]=logz0(x,y).dRiver<0.6?1:0;
+    apt[k]=Math.hypot(x-AIRPORT.x,y-AIRPORT.y);
+  }
+  return {g,NX,NY,ri,river,apt};
+}
+const cellOf = (G,x,y) => [clamp(Math.round((x-EXT.x0)/G.g),0,G.NX-1), clamp(Math.round((y-EXT.y0)/G.g),0,G.NY-1)];
+function multGrid(G, prof, A, B, avoid){
+  const N=G.NX*G.NY, mult=new Float32Array(N);
+  const aptOK = Math.hypot(A.x-AIRPORT.x,A.y-AIRPORT.y)<3.2 || Math.hypot(B.x-AIRPORT.x,B.y-AIRPORT.y)<3.2;
+  let pts=null;
+  if (avoid && avoid.length){ pts=[]; avoid.forEach(R=>{ for (let i=0;i<R.n;i+=4) pts.push([R.xs[i],R.ys[i]]); }); }
+  for (let k=0;k<N;k++){
+    const r=G.ri[k], p=r<30?0:(r-30)/70;
+    let mu=(1+prof.wR*p+(r>=80?30:0))*(G.river[k]?prof.river:1);
+    if (!aptOK && G.apt[k]<2.6) mu=Infinity;
+    if (pts && isFinite(mu)){
+      const x=EXT.x0+(k%G.NX)*G.g, y=EXT.y0+Math.floor(k/G.NX)*G.g;
+      let d=1e9; for (const q of pts){ const dd=Math.abs(q[0]-x)+Math.abs(q[1]-y); if (dd<d) d=dd; }
+      if (d<1.0) mu+=3*(1-d);
+    }
+    mult[k]=mu;
+  }
+  return mult;
+}
+function dijkstra(G, mult, s, e){
+  const NX=G.NX, NY=G.NY, N=NX*NY, dist=new Float64Array(N).fill(Infinity), prev=new Int32Array(N).fill(-1), done=new Uint8Array(N);
+  const hk=[], hd=[];
+  const push=(k,d)=>{ hk.push(k); hd.push(d); let i=hk.length-1; while(i>0){ const p=(i-1)>>1; if (hd[p]<=hd[i]) break; [hk[p],hk[i]]=[hk[i],hk[p]]; [hd[p],hd[i]]=[hd[i],hd[p]]; i=p; } };
+  const pop=()=>{ const k=hk[0], d=hd[0], lk=hk.pop(), ld=hd.pop(); if (hk.length){ hk[0]=lk; hd[0]=ld; let i=0; for(;;){ const l=2*i+1, r=l+1; let m=i; if (l<hk.length&&hd[l]<hd[m]) m=l; if (r<hk.length&&hd[r]<hd[m]) m=r; if (m===i) break; [hk[m],hk[i]]=[hk[i],hk[m]]; [hd[m],hd[i]]=[hd[i],hd[m]]; i=m; } } return [k,d]; };
+  const sk=s[1]*NX+s[0], ek=e[1]*NX+e[0];
+  if (!isFinite(mult[sk])) mult[sk]=1; if (!isFinite(mult[ek])) mult[ek]=1;
+  dist[sk]=0; push(sk,0);
+  const nb=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,Math.SQRT2],[1,-1,Math.SQRT2],[-1,1,Math.SQRT2],[-1,-1,Math.SQRT2]];
+  while (hk.length){
+    const [k,d]=pop(); if (done[k]) continue; done[k]=1; if (k===ek) break;
+    const i=k%NX, j=(k-i)/NX;
+    for (const [di,dj,l] of nb){
+      const ii=i+di, jj=j+dj; if (ii<0||jj<0||ii>=NX||jj>=NY) continue;
+      const kk=jj*NX+ii; if (done[kk] || !isFinite(mult[kk])) continue;
+      const nd=d+l*G.g*(mult[k]+mult[kk])/2;
+      if (nd<dist[kk]){ dist[kk]=nd; prev[kk]=k; push(kk,nd); }
+    }
+  }
+  if (!isFinite(dist[ek])) return null;
+  const path=[]; for (let k=ek; k!==-1; k=prev[k]) path.push([EXT.x0+(k%NX)*G.g, EXT.y0+Math.floor(k/NX)*G.g]);
+  return path.reverse();
+}
+function segCost(G, mult, a, b){
+  const len=Math.hypot(b[0]-a[0],b[1]-a[1]), n=Math.max(1,Math.ceil(len/0.2)); let sum=0;
+  for (let t=0;t<=n;t++){ const x=a[0]+(b[0]-a[0])*t/n, y=a[1]+(b[1]-a[1])*t/n, [i,j]=cellOf(G,x,y), mu=mult[j*G.NX+i]; if (!isFinite(mu)) return Infinity; sum+=mu; }
+  return sum/(n+1)*len;
+}
+function pullString(G, mult, pts){
+  const cum=[0]; for (let i=1;i<pts.length;i++) cum.push(cum[i-1]+segCost(G,mult,pts[i-1],pts[i]));
+  const out=[pts[0]]; let i=0;
+  while (i<pts.length-1){
+    let j=pts.length-1;
+    for (; j>i+1; j--){ const direct=segCost(G,mult,pts[i],pts[j]); if (direct<=(cum[j]-cum[i])*1.02) break; }
+    out.push(pts[j]); i=j;
+  }
+  return out;
+}
+function solvePath(G, mult, A, B){
+  const path=dijkstra(G, mult, cellOf(G,A.x,A.y), cellOf(G,B.x,B.y));
+  if (!path) return null;
+  path[0]=[A.x,A.y]; path[path.length-1]=[B.x,B.y];
+  return pullString(G, mult, path);
+}
+function similarRoute(poly, R){
+  const Q=buildRoute(poly); let s=0, c=0;
+  for (let i=0;i<Q.n;i+=5){ let d=1e9; for (let k=0;k<R.n;k+=3){ const dd=Math.hypot(R.xs[k]-Q.xs[i],R.ys[k]-Q.ys[i]); if (dd<d) d=dd; } s+=d; c++; }
+  return s/c < 0.45;
+}
+function planRoutes(A, B, t0, sc, acBase, autoAlt){
+  if (Math.hypot(A.x-B.x,A.y-B.y)<1){ return [{prof:{key:'direct',name:'직선',why:'출발·도착이 1 km 안이라 직선으로 갑니다.'}, R:buildRoute([[A.x,A.y],[B.x,B.y]]), alt:Math.min(acBase.alt,150)}]; }
+  const top=acBase.alt;
+  const alts = autoAlt ? [...new Set([top, top-150, top-300].filter(z=>z>=150))] : [top];
+  const grids = alts.map(z=>({z, G:costGrid(z, t0+0.1, sc, acBase.lim)}));
+  const picks=[];
+  // 최단 시간을 먼저 찾고, 나머지는 앞서 고른 항로와 겹치지 않게 다양화
+  for (const prof of [PROFILES[2],PROFILES[0],PROFILES[1]]){
+    let best=null;
+    for (const {z,G} of grids){
+      let poly=solvePath(G, multGrid(G,prof,A,B,null), A, B);
+      if (poly && picks.some(p=>similarRoute(poly,p.R))){ const p2=solvePath(G, multGrid(G,prof,A,B,picks.map(p=>p.R)), A, B); if (p2) poly=p2; }
+      if (!poly) continue;
+      const R=buildRoute(poly), r=evalRoute(t0, {...acBase, alt:z}, sc, R, {fast:true});
+      const J = r.pr.total/60 + prof.lam*(r.riMean/10) + (r.riMax>=80?60:0) + r.energy.pct/20 + (z<300?4:0);   // 300 m 미만은 소음·장애물 여유 벌점
+      if (!best || J<best.J) best={prof, R, alt:z, J, r};
+    }
+    if (best) picks.push(best);
+  }
+  if (!picks.length) picks.push({prof:{key:'direct',name:'직선',why:'우회 경로를 찾지 못해 직선으로 표시합니다.'}, R:buildRoute([[A.x,A.y],[B.x,B.y]]), alt:top});
+  picks.forEach(p=>{ const r=p.r||evalRoute(t0,{...acBase,alt:p.alt},sc,p.R,{fast:true}); p.r=r; p.S = r.pr.total/60 + 2.5*(r.riMean/10) + (r.riMax>=80?50:r.riMax>=60?10:0) + r.energy.pct/15 + (r.c===3?40:0); });
+  picks.sort((a,b)=>a.S-b.S);
+  return picks;
+}
+
 /* ---------- colors ---------- */
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 const RAMPS = {
+  ri:{stops:[[0,'#CFE8D6'],[39,'#A9D8B8'],[40,'#F3DE8A'],[59,'#EDC14F'],[60,'#F0A066'],[79,'#DE6236'],[80,'#C8325A'],[100,'#7E0E33']], unit:'위험도 지수', fmt:v=>v, ticks:[0,20,40,60,80,100]},
   spd:{stops:[[0,'#EAF2F8'],[4,'#BFD9EC'],[8,'#7FB3D9'],[12,'#3E7FC1'],[16,'#2B4FA0'],[20,'#4B2C8C'],[26,'#7A1E6E']], unit:'m/s', fmt:v=>v},
   edr:{stops:[[0,'#F3F3EC'],[0.05,'#ECE8C0'],[0.1,'#F1D078'],[0.2,'#EE9A3F'],[0.3,'#D9531E'],[0.45,'#9E1F3A']], unit:'m²ᐟ³ s⁻¹', fmt:v=>v.toFixed(2)},
   vis:{stops:[[0,'#56376E'],[300,'#7E5C93'],[800,'#A487B5'],[1600,'#C9B6D4'],[5000,'#E5DDEA'],[10000,'#F4F2F5']], unit:'m', fmt:v=>v},
   along:{stops:[[-16,'#145F70'],[-8,'#5FA7B5'],[0,'#F2F2EE'],[8,'#E9A15A'],[16,'#B04E17']], unit:'m/s (− 정풍, + 배풍)', fmt:v=>v>0?'+'+v:v},
-  vsh:{stops:[[0,'#F3F3EC'],[0.75,'#D9E6C6'],[1.5,'#F1D078'],[2,'#EE9A3F'],[3,'#C2361F']], unit:'m/s / 30 m', fmt:v=>v}
+  vsh:{stops:[[0,'#F3F3EC'],[0.75,'#D9E6C6'],[1.5,'#F1D078'],[2,'#EE9A3F'],[3,'#C2361F']], unit:'m/s / 30 m', fmt:v=>v},
+  temp:{stops:[[-15,'#3B4CC0'],[-5,'#7FA6E8'],[0,'#DCE6F2'],[5,'#F3E6CF'],[15,'#F0B27A'],[25,'#D9603B'],[35,'#9E1F1F']], unit:'°C', fmt:v=>v},
+  rh:{stops:[[0,'#F4EFE6'],[40,'#DCE9D5'],[70,'#9FD0C7'],[90,'#4F9FB8'],[100,'#2E5E8C']], unit:'%', fmt:v=>v},
+  pr:{stops:[[0,'#EEF3F8'],[1,'#CFE3F5'],[3,'#8EC0EA'],[8,'#3F86CF'],[15,'#2A4FA3'],[30,'#5B2A86'],[50,'#A3195B']], unit:'mm/h (비·눈)', fmt:v=>v},
+  kw:{stops:[[0,'#3E9BC2'],[0.5,'#F0C24E'],[1,'#D1495B']], unit:'', fmt:v=>v}
 };
-const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-RAMPS.spd.rgb=null;
 for (const k in RAMPS) RAMPS[k].rgb = RAMPS[k].stops.map(s=>[s[0],hex(s[1])]);
 function ramp(key, v){
   const S=RAMPS[key].rgb;
@@ -1257,35 +1729,51 @@ function ramp(key, v){
   for (let i=1;i<S.length;i++) if (v<=S[i][0]){const f=(v-S[i-1][0])/(S[i][0]-S[i-1][0]), a=S[i-1][1], b=S[i][1]; return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f];}
   return S[S.length-1][1];
 }
+const rgbStr = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
 const catColor = c => css(['--ok','--caution','--warn','--nogo'][c]);
-const RISKRGB = () => [0,1,2,3].map(c=>hex(css(['--ok','--caution','--warn','--nogo'][c]).length===7?css(['--ok','--caution','--warn','--nogo'][c]):'#888888'));
-
-function legendHTML(key){
-  if (key==='risk'){
-    return LV.map((l,c)=>`<span class="sw" style="min-width:64px"><i style="background:${catColor(c)};opacity:.75"></i>${l}</span>`).join('') + `<span class="unit">여유율 기준</span>`;
-  }
+function legendHTML(key, extra){
+  if (key==='ri') return ['정상 0–39','주의 40–59','경고 60–79','불가 80–100'].map((l,c)=>`<span class="sw" style="min-width:86px"><i style="background:${RAMPS.ri.stops[c*2+1][1]}"></i>${l}</span>`).join('') + `<span class="unit">위험도 지수${extra==='map'?' · 정상은 지도에 칠하지 않음':''}</span>`;
+  if (key==='kw' && extra) return `<span class="sw" style="min-width:150px"><i style="background:linear-gradient(90deg,#3E9BC2,#F0C24E,#D1495B)"></i>${extra[0]} → ${extra[1]} kW</span><span class="unit">항로 색: 지점별 소비 전력</span>`;
   const R=RAMPS[key];
   return R.stops.map(s=>`<span class="sw"><i style="background:${s[1]}"></i>${R.fmt(s[0])}</span>`).join('') + `<span class="unit">${R.unit}</span>`;
 }
-
-/* ---------- canvas helpers ---------- */
-function fit(cv, aspect){
-  const dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth, h=Math.round(w*aspect);
+function fit(cv, h){
+  const dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth;
   cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+'px';
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
-  return {ctx,w,h};
+  return {ctx,w,h,dpr};
 }
+function offscreen(w,h,dpr){ const c=document.createElement('canvas'); c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); const x=c.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); return [c,x]; }
 function label(ctx, txt, x, y, opt={}){
   ctx.font = `${opt.w||500} ${opt.size||12}px ${css('--font-ui')}`;
   ctx.textAlign = opt.align||'left'; ctx.textBaseline = opt.base||'middle';
-  ctx.lineWidth=3.5; ctx.strokeStyle=css('--surface'); ctx.strokeText(txt,x,y);
+  if (opt.halo!==false){ ctx.lineWidth=3.5; ctx.strokeStyle=css('--surface'); ctx.strokeText(txt,x,y); }
   ctx.fillStyle=opt.color||css('--ink'); ctx.fillText(txt,x,y);
 }
+const fmtMS = s => { s=Math.max(0,Math.round(s)); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
+const COMPASS = ['북','북북동','북동','동북동','동','동남동','남동','남남동','남','남남서','남서','서남서','서','서북서','북서','북북서'];
+const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
-/* ---------- rendering ---------- */
-let current=null;
-
-function mapAlt(){ const v=$('#mapAlt').value; return v==='cruise'? state.ac.alt : +v; }
+/* ---------- state ---------- */
+const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
+const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
+  step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
+const AIR = () => FLEET.find(a=>a.id===state.airId);
+function setAircraft(id){
+  state.airId=id; const a=AIR();
+  state.lim={...a.lim}; state.fl={...a.def};
+  const seats=a.seats; state.pax.adult=Math.min(state.pax.adult, seats); state.pax.child=Math.min(state.pax.child, seats-state.pax.adult);
+}
+setAircraft('joby');
+function paxMass(air){ const n=state.pax.adult+state.pax.child; return {people: air.pilot*MASS.pilot + state.pax.adult*MASS.adult + state.pax.child*MASS.child, bag: n*state.bag, n}; }
+function buildAc(air, fl, lim, alt){
+  const pm=paxMass(air);
+  return {...fl, alt: alt ?? fl.alt, lim, air, mass: air.empty + pm.people + pm.bag, payloadKg: pm.people+pm.bag, corr: state.learn ? (state.corr[air.id]?.k || 1) : 1};
+}
+const acBase = () => buildAc(AIR(), state.fl, state.lim);
+const t0 = () => STEPS[state.step];
+let ROUTE=null, current=null, ACT=null;
+function routeSig(){ return ROUTE ? `${state.airId}|${ROUTE.poly.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join(';')}|${ACT.alt}` : ''; }
 
 /* ---------- Leaflet map ---------- */
 const LON0=126.7456, LAT0=37.6688, KXd=111.32*Math.cos(LAT0*Math.PI/180), KYd=110.95;
@@ -1299,11 +1787,14 @@ function lineStyle(){ return {
   sgg:{color:css('--map-boundary'), weight:1.4, fill:false, opacity:0.9, dashArray:'5 4'},
   road:{color:css('--map-road'), weight:2.4, opacity:0.95},
 };}
+const PIN = (kind) => { const lbl=kind==='a'?'출발':'도착', col=kind==='a'?'var(--accent)':'var(--nogo)';
+  return L.divIcon({className:'ab-pin', iconSize:[34,44], iconAnchor:[17,43], html:`<svg width="34" height="44" viewBox="0 0 34 44" aria-hidden="true"><path d="M17 43C17 43 2 26 2 16A15 15 0 0 1 32 16C32 26 17 43 17 43Z" style="fill:${col};stroke:var(--surface)" stroke-width="2"/><text x="17" y="20.5" text-anchor="middle" font-size="11" font-weight="700" style="fill:var(--on-accent)">${lbl}</text></svg>`}); };
+const UAM_SVG = `<svg class="uam-svg" width="38" height="38" viewBox="-19 -19 38 38" aria-hidden="true"><g style="fill:var(--accent);stroke:var(--surface)" stroke-width="1.6"><rect x="-15" y="-3" width="30" height="4.5" rx="2.2"/><ellipse cx="0" cy="0" rx="4.2" ry="12.5"/><circle cx="-11.5" cy="-8.5" r="4.6" fill-opacity=".85"/><circle cx="11.5" cy="-8.5" r="4.6" fill-opacity=".85"/><circle cx="-11.5" cy="8" r="4.6" fill-opacity=".85"/><circle cx="11.5" cy="8" r="4.6" fill-opacity=".85"/></g></svg>`;
 function initMap(){
   if (typeof L==='undefined'){ $('#map').innerHTML='<div class="empty" style="margin:24px">지도 라이브러리를 불러오지 못했습니다. 네트워크를 확인한 뒤 새로고침하세요.</div>'; return false; }
   LM=L.map('map',{preferCanvas:true, zoomSnap:0.25, minZoom:10, maxZoom:16, scrollWheelZoom:true, attributionControl:true});
   LM.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
-  [['basePane',250],['fieldPane',320],['linePane',360],['routePane',430],['markPane',620]].forEach(([n,z])=>{ LM.createPane(n).style.zIndex=z; });
+  [['basePane',250],['fieldPane',320],['linePane',360],['altPane',410],['routePane',430],['markPane',620]].forEach(([n,z])=>{ LM.createPane(n).style.zIndex=z; });
   LM.getPane('fieldPane').style.pointerEvents='none';
   const S=lineStyle();
   LY.urban=L.geoJSON(BASE.urban,{pane:'basePane',style:S.urban,interactive:false}).addTo(LM);
@@ -1312,15 +1803,12 @@ function initMap(){
   LY.sgg=L.geoJSON(BASE.sigungu,{pane:'linePane',style:S.sgg,interactive:false}).addTo(LM);
   LY.road=L.geoJSON(BASE.roads,{pane:'linePane',style:S.road,interactive:false}).addTo(LM);
   LY.sggLbl=L.layerGroup(BASE.sigungu.features.filter(f=>f.properties.c).map(f=>{
-    const nm=f.properties.name.replace(/^고양시/,'').replace(/^(.{2,3}구)$/,'$1');
+    const nm=f.properties.name.replace(/^고양시/,'');
     return L.marker([f.properties.c[1],f.properties.c[0]],{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'sgg-lbl',html:nm,iconSize:null})});
   })).addTo(LM);
   LY.riverLbl=L.marker(LL(-1.3,-2.1),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'river-lbl',html:'한강',iconSize:null})}).addTo(LM);
-  LY.airport=L.layerGroup([
-    L.circle(LL(AIRPORT.x,AIRPORT.y),{radius:1700,pane:'linePane',color:css('--muted'),weight:1.5,dashArray:'4 4',fill:false,interactive:false}),
-    L.marker(LL(AIRPORT.x,AIRPORT.y-1.95),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'poi-lbl',html:'김포공항',iconSize:null})})
-  ]).addTo(LM);
-  LY.field=null; LY.arrows=L.layerGroup().addTo(LM); LY.route=L.layerGroup().addTo(LM); LY.marks=L.layerGroup().addTo(LM); LY.cell=L.layerGroup().addTo(LM);
+  LY.airport=L.layerGroup().addTo(LM);
+  LY.field=null; LY.arrows=L.layerGroup().addTo(LM); LY.alt=L.layerGroup().addTo(LM); LY.route=L.layerGroup().addTo(LM); LY.marks=L.layerGroup().addTo(LM); LY.cell=L.layerGroup().addTo(LM);
   LY.osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'&copy; OpenStreetMap contributors'});
   LY.osm.on('tileerror',()=>{ if(!LY.osmWarned){ LY.osmWarned=true; $('#mapRead').textContent='이 화면에서는 외부 지도 타일을 불러올 수 없어 내장 지도만 보입니다. GitHub Pages 주소로 열면 OpenStreetMap 배경이 보입니다.'; } });
   LM.attributionControl.addAttribution('<a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> · 통계청 경계 2018');
@@ -1329,10 +1817,18 @@ function initMap(){
   LM.fitBounds([LL(-1.5,-17.5),LL(17.5,1.2)],{paddingTopLeft:[44,16],paddingBottomRight:[16,28]});
   LM.on('zoomend',()=>{ const z=LM.getZoom(); if(z>=12.5) LY.dong.addTo(LM); else LY.dong.remove(); $('#map').classList.toggle('far',z<11.5); });
   LM.on('mousemove',e=>{
-    const q=KM(e.latlng.lat,e.latlng.lng), z=mapAlt(), m=met(q.x,q.y,z,STEPS[state.step],state.sc), wd=(Math.atan2(-m.u,-m.v)*180/Math.PI+360)%360;
-    $('#mapRead').textContent=`${e.latlng.lat.toFixed(4)}N ${e.latlng.lng.toFixed(4)}E · ${z} m · 풍향 ${wd.toFixed(0)}° 풍속 ${m.spd.toFixed(1)} m/s 돌풍 ${m.gust.toFixed(1)} · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m · z₀ ${m.z0<0.01?m.z0.toExponential(0):m.z0.toFixed(2)} m${m.P>0.5?' · 강수 '+m.P.toFixed(0)+' mm/h':''}`;
+    const q=KM(e.latlng.lat,e.latlng.lng), z=mapAlt(), m=met(q.x,q.y,z,t0(),state.sc), wd=wdirOf(m);
+    const ri=riOf(minItem(marginItems(m,z,state.lim,false))[0]);
+    $('#mapRead').textContent=`${e.latlng.lat.toFixed(4)}N ${e.latlng.lng.toFixed(4)}E · ${z} m · 위험도 ${ri.toFixed(0)} · ${dirName(wd)}풍 ${m.spd.toFixed(1)} m/s(돌풍 ${m.gust.toFixed(1)}) · 기온 ${m.T.toFixed(1)} °C · 습도 ${m.rh.toFixed(0)}% · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m${m.rain>0.1?' · 비 '+m.rain.toFixed(1)+' mm/h':''}${m.snow>0.05?' · 눈 '+m.snow.toFixed(1)+' mm/h':''}${m.ts>0.05?' · 뇌우 '+m.ts.toFixed(2):''}`;
   });
+  LM.on('click',e=>{ if(!state.pick) return; const q=KM(e.latlng.lat,e.latlng.lng); setPoint(state.pick, q.x, q.y); setPick(null); });
+  LM.on('contextmenu',e=>{ LY.ctxLL=e.latlng; L.popup({closeButton:false}).setLatLng(e.latlng).setContent('<div class="ctx"><button type="button" data-ctx="a">여기서 출발</button><button type="button" data-ctx="b">여기로 도착</button></div>').openOn(LM); });
   $('#mapBase').addEventListener('change',e=>{ if(e.target.value==='osm'){ LY.osm.addTo(LM); LY.urban.remove(); } else { LY.osm.remove(); LY.urban.addTo(LM); } });
+  LY.pinA=L.marker(LL(state.A.x,state.A.y),{icon:PIN('a'),draggable:true,keyboard:true,title:'출발 (끌어서 옮기기)',zIndexOffset:900}).addTo(LM);
+  LY.pinB=L.marker(LL(state.B.x,state.B.y),{icon:PIN('b'),draggable:true,keyboard:true,title:'도착 (끌어서 옮기기)',zIndexOffset:900}).addTo(LM);
+  LY.pinA.on('dragend',e=>{ const q=KM(e.target.getLatLng().lat,e.target.getLatLng().lng); setPoint('a',q.x,q.y); });
+  LY.pinB.on('dragend',e=>{ const q=KM(e.target.getLatLng().lat,e.target.getLatLng().lng); setPoint('b',q.x,q.y); });
+  LY.uam=L.marker(LL(state.A.x,state.A.y),{icon:L.divIcon({className:'uam-mk',html:UAM_SVG,iconSize:[38,38],iconAnchor:[19,19]}),interactive:false,keyboard:false,zIndexOffset:1000}).addTo(LM);
   flowInit();
   $('#mapWind').addEventListener('change',drawMap);
   LM.fire('zoomend');
@@ -1342,9 +1838,11 @@ function restyleBase(){
   if(!LM) return; const S=lineStyle();
   LY.urban.setStyle(S.urban); LY.river.setStyle(S.river); LY.dong.setStyle(S.dong); LY.sgg.setStyle(S.sgg); LY.road.setStyle(S.road);
 }
+function mapAlt(){ const v=$('#mapAlt').value; return v==='cruise'? Math.round(current?current.pr.top:state.fl.alt) : +v; }
+
 /* ---------- animated wind particles (windy-style) ---------- */
 const FLOW={cv:null,ctx:null,parts:[],grid:null,raf:0,T:null,w:0,h:0,rgb:[20,32,43]};
-const FLOW_SPD=0.08;          // 화면 이동량: 프레임당 px / (m/s)
+const FLOW_SPD=0.08;
 function flowInit(){
   const pane=LM.createPane('flowPane'); pane.style.zIndex=390; pane.style.pointerEvents='none';
   FLOW.cv=L.DomUtil.create('canvas','flow-cv',pane); FLOW.ctx=FLOW.cv.getContext('2d');
@@ -1373,10 +1871,10 @@ function flowSpawn(p, initial){
   }
   p.max=45+Math.random()*70; p.age=initial?Math.floor(Math.random()*p.max):0; return p;
 }
-function flowGrid(z,t0,sc){
+function flowGrid(z,t,sc){
   const NX=80, NY=72, u=new Float32Array(NX*NY), v=new Float32Array(NX*NY);
   for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
-    const m=met(EXT.x0+i/(NX-1)*(EXT.x1-EXT.x0), EXT.y0+j/(NY-1)*(EXT.y1-EXT.y0), z, t0, sc);
+    const m=met(EXT.x0+i/(NX-1)*(EXT.x1-EXT.x0), EXT.y0+j/(NY-1)*(EXT.y1-EXT.y0), z, t, sc);
     u[j*NX+i]=m.u; v[j*NX+i]=m.v;
   }
   FLOW.grid={NX,NY,u,v};
@@ -1418,69 +1916,143 @@ function arrowLines(x,y,m,len){
   const l1=[b[0]-h*Math.cos(an-0.45), b[1]-h*Math.sin(an-0.45)], l2=[b[0]-h*Math.cos(an+0.45), b[1]-h*Math.sin(an+0.45)];
   return [[LL(...a),LL(...b)],[LL(...l1),LL(...b),LL(...l2)]];
 }
+
 function drawMap(){
   if(!LM && !initMap()) return;
   LM.invalidateSize();
-  const field=$('#mapField').value, z=mapAlt(), t0=STEPS[state.step], sc=state.sc, ac=state.ac;
-  // weather field as image overlay
+  const field=$('#mapField').value, z=mapAlt(), t=t0(), sc=state.sc, lim=state.lim;
   const NX=130, NY=120, off=document.createElement('canvas'); off.width=NX; off.height=NY;
-  const oc=off.getContext('2d'), img=oc.createImageData(NX,NY), rr=RISKRGB();
+  const oc=off.getContext('2d'), img=oc.createImageData(NX,NY);
   for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
     const x=EXT.x0+(i+0.5)/NX*(EXT.x1-EXT.x0), y=EXT.y1-(j+0.5)/NY*(EXT.y1-EXT.y0);
-    const m=met(x,y,z,t0,sc); let c, a=150;
-    if (field==='risk'){
-      const mg=Math.min(1-m.spd/ac.wmax,1-m.gust/ac.gust,1-m.edr/ac.edr,1-ac.vis/m.vis,1-m.P/ac.rain,1-(z+100)/m.ceil,(m.icing&&!ac.icing)?-0.5:1);
-      const k=cat(mg); c=rr[k]; a=k===0?0:k===1?120:150;
-    } else { c=ramp(field, field==='spd'?m.spd: field==='edr'?m.edr : m.vis); a=150; }
+    const m=met(x,y,z,t,sc); let c, a=150;
+    if (field==='ri'){ const ri=riOf(minItem(marginItems(m,z,lim,false))[0]); c=ramp('ri',ri); a=ri<35?0: ri<40?60 : ri<60?120:160; }
+    else if (field==='pr'){ c=ramp('pr',m.P); a=m.P<0.1?0:160; }
+    else { const v=field==='spd'?m.spd: field==='edr'?m.edr: field==='temp'?m.T: field==='rh'?m.rh : m.vis; c=ramp(field,v); a=140; }
     const k=(j*NX+i)*4; img.data[k]=c[0]; img.data[k+1]=c[1]; img.data[k+2]=c[2]; img.data[k+3]=a;
   }
   oc.putImageData(img,0,0);
   const url=off.toDataURL(), bnds=[LL(EXT.x0,EXT.y0),LL(EXT.x1,EXT.y1)];
   if (LY.field) LY.field.setUrl(url); else LY.field=L.imageOverlay(url,bnds,{pane:'fieldPane',interactive:false,className:'field-img'}).addTo(LM);
-  // wind: animated particles or arrows
   LY.arrows.clearLayers();
   const ink=css('--ink'), wmode=$('#mapWind').value;
   if (/^#[0-9a-f]{6}$/i.test(ink)) FLOW.rgb=hex(ink);
-  flowGrid(z,t0,sc); flowLoop();
+  flowGrid(z,t,sc); flowLoop();
   if (wmode==='arrows') for (let gx=-4; gx<=20; gx+=2) for (let gy=-18; gy<=3; gy+=2){
-    const m=met(gx,gy,z,t0,sc), len=Math.min(1.7,0.35+m.spd*0.075), [shaft,head]=arrowLines(gx,gy,m,len);
+    const m=met(gx,gy,z,t,sc), len=Math.min(1.7,0.35+m.spd*0.075), [shaft,head]=arrowLines(gx,gy,m,len);
     LY.arrows.addLayer(L.polyline(shaft,{pane:'linePane',color:ink,weight:1.3,opacity:0.6,interactive:false}));
     LY.arrows.addLayer(L.polyline(head,{pane:'linePane',color:ink,weight:1.3,opacity:0.6,interactive:false}));
   }
-  // convective cell
+  LY.airport.clearLayers();
+  LY.airport.addLayer(L.circle(LL(AIRPORT.x,AIRPORT.y),{radius:2600,pane:'linePane',color:css('--muted'),weight:1.3,dashArray:'4 4',fill:true,fillColor:css('--muted'),fillOpacity:0.06,interactive:false}));
+  LY.airport.addLayer(L.marker(LL(AIRPORT.x,AIRPORT.y-2.85),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'poi-lbl',html:'김포공항 회피 구역',iconSize:null})}));
   LY.cell.clearLayers();
-  if (sc.conv && t0>=CONV.t0 && t0<=CONV.t1){
-    const tau=t0-CONV.t0, cx=CONV.x0+CONV.vx*tau, cy=CONV.y0+CONV.vy*tau;
-    LY.cell.addLayer(L.circle(LL(cx,cy),{radius:CONV.R*1000,pane:'linePane',color:css('--nogo'),weight:1.6,dashArray:'6 5',fill:false,interactive:false}));
-    LY.cell.addLayer(L.marker(LL(cx,cy+CONV.R+0.35),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'cell-lbl',html:'대류셀 · 돌풍전선',iconSize:null})}));
+  if (sc.conv && t>=CONV.t0 && t<=CONV.t1){
+    const tau=t-CONV.t0, cx=CONV.x0+CONV.vx*tau, cy=CONV.y0+CONV.vy*tau;
+    LY.cell.addLayer(L.circle(LL(cx,cy),{radius:CONV.R*1300,pane:'linePane',color:css('--nogo'),weight:1.6,dashArray:'6 5',fill:false,interactive:false}));
+    LY.cell.addLayer(L.marker(LL(cx,cy+CONV.R*1.3+0.35),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'cell-lbl',html:'뇌우·돌풍전선',iconSize:null})}));
   }
-  // route colored by verdict
-  LY.route.clearLayers(); LY.marks.clearLayers();
+  // alternative routes
+  LY.alt.clearLayers(); LY.route.clearLayers(); LY.marks.clearLayers();
+  state.routes.forEach((r,k)=>{
+    if (k===state.sel) return;
+    const pts=r.R.xs.map((x,i)=>LL(x,r.R.ys[i]));
+    const pl=L.polyline(pts,{pane:'altPane',color:css('--muted'),weight:4,opacity:0.85,dashArray:'7 6',lineCap:'round'});
+    pl.on('click',()=>selectRoute(k)); pl.bindTooltip(`추천 ${k+1} · ${r.prof.name} (눌러서 선택)`,{sticky:true,className:'wp-tip'});
+    LY.alt.addLayer(pl);
+    const mi=Math.floor(r.R.n*0.42);
+    LY.alt.addLayer(L.marker(LL(r.R.xs[mi],r.R.ys[mi]),{pane:'altPane',icon:L.divIcon({className:'rank-mk',html:`<b>${k+1}</b>`,iconSize:[22,22],iconAnchor:[11,11]})}).on('click',()=>selectRoute(k)));
+  });
   if (current){
-    const P=current.pts, pts=P.map((p,i)=>LL(ROUTE.xs[i],ROUTE.ys[i]));
+    const P=current.pts, pts=P.map((p,i)=>LL(ROUTE.xs[i],ROUTE.ys[i])), mode=$('#mapRouteColor').value;
     LY.route.addLayer(L.polyline(pts,{pane:'routePane',color:css('--surface'),weight:11,opacity:0.95,interactive:false,lineCap:'round'}));
+    let kwMin=1e9, kwMax=0; P.forEach(p=>{ kwMin=Math.min(kwMin,p.kw); kwMax=Math.max(kwMax,p.kw); });
+    const colOf = p => mode==='kw' ? rgbStr(ramp('kw',(p.kw-kwMin)/((kwMax-kwMin)||1))) : catColor(p.c);
+    const keyOf = p => mode==='kw' ? Math.round((p.kw-kwMin)/((kwMax-kwMin)||1)*12) : p.c;
     let start=0;
     for (let i=1;i<=P.length;i++){
-      if (i===P.length || P[i].c!==P[start].c){
-        LY.route.addLayer(L.polyline(pts.slice(start, Math.min(i+1,P.length)),{pane:'routePane',color:catColor(P[start].c),weight:6,opacity:1,interactive:false,lineCap:'round'}));
+      if (i===P.length || keyOf(P[i])!==keyOf(P[start])){
+        LY.route.addLayer(L.polyline(pts.slice(start, Math.min(i+1,P.length)),{pane:'routePane',color:colOf(P[start]),weight:6,opacity:1,interactive:false,lineCap:'round'}));
         start=i;
       }
     }
-    WP.forEach((p,k)=>{
-      const end=k===0||k===WP.length-1;
-      LY.marks.addLayer(L.circleMarker(LL(p.x,p.y),{pane:'markPane',radius:end?7:4,color:css('--surface'),weight:2,fillColor:css('--ink'),fillOpacity:1})
-        .bindTooltip(p.n,{permanent:true,direction:k===0?'right':k===WP.length-1?'left':'right',offset:k===0?[10,0]:end?[-10,0]:[6,0],className:end?'wp-tip end':'wp-tip'}));
-    });
+    const mid=Math.floor(P.length*0.42);
+    LY.marks.addLayer(L.marker(pts[mid],{pane:'markPane',interactive:false,icon:L.divIcon({className:'rank-mk sel',html:`<b>${state.sel+1}</b>`,iconSize:[22,22],iconAnchor:[11,11]})}));
     (current.alerts||[]).forEach((a,n)=>{
       const i=a.peak;
       LY.marks.addLayer(L.marker(LL(ROUTE.xs[i],ROUTE.ys[i]),{pane:'markPane',keyboard:false,title:a.msg,
         icon:L.divIcon({className:'alert-pin l'+a.lv,html:`<span>${n+1}</span>`,iconSize:[22,20],iconAnchor:[-4,-4]})}).bindTooltip(a.msg,{direction:'top',className:'alert-tip'}));
     });
-  }
+    $('#mapLegend').innerHTML = legendHTML(field,'map') + (mode==='kw' ? `<span style="flex-basis:100%;height:4px"></span>`+legendHTML('kw',[kwMin.toFixed(0),kwMax.toFixed(0)]) : '');
+  } else $('#mapLegend').innerHTML=legendHTML(field,'map');
+  LY.pinA.setLatLng(LL(state.A.x,state.A.y)); LY.pinB.setLatLng(LL(state.B.x,state.B.y));
   $('#mapInfo').textContent=`고도 ${z} m · ${$('#mapField').selectedOptions[0].text}`;
-  $('#mapLegend').innerHTML=legendHTML(field);
+  fpUpdate();
 }
 
+/* ---------- vertical section + route meteogram (cached backgrounds, live overlay) ---------- */
+const SEC={bg:null}, MET={bg:null}, PADL=64, PADR=16;
+const HOV={s:null};
+function drawSection(){
+  if (!current) return;
+  const cv=$('#sec'), wide=cv.parentElement.clientWidth, H=wide<560?300:Math.round(Math.min(380,Math.max(280,wide*0.3)));
+  const {ctx,w,h,dpr}=fit(cv,H);
+  const padT=26, padB=40, iw=w-PADL-PADR, ih=h-padT-padB, L=ROUTE.L, pr=current.pr;
+  const ZMAX=Math.max(600, Math.ceil((pr.top+200)/100)*100);
+  const X=s=>PADL+s/L*iw, Y=z=>padT+(1-z/ZMAX)*ih;
+  Object.assign(SEC,{X,Y,iw,ih,padT,w,h,dpr,ZMAX,L});
+  const [bg,b]=offscreen(w,h,dpr);
+  const field=$('#secField').value, sc=state.sc;
+  const NC=Math.min(220,Math.round(iw/3)), NR=70;
+  const off=document.createElement('canvas'); off.width=NC; off.height=NR;
+  const oc=off.getContext('2d'), img=oc.createImageData(NC,NR);
+  for (let c=0;c<NC;c++){
+    const sv=(c+0.5)/NC*L, i=Math.min(ROUTE.n-1,Math.round(sv/DS)), x=ROUTE.xs[i], y=ROUTE.ys[i], eta=current.pts[i].eta;
+    for (let r=0;r<NR;r++){
+      const z=(1-(r+0.5)/NR)*ZMAX, m=met(x,y,z,eta,sc); let v, key=field, a=230;
+      if (field==='along') v=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i];
+      else if (field==='ri'){ v=riOf(minItem(marginItems(m,z,state.lim,false))[0]); }
+      else if (field==='spd') v=m.spd; else if (field==='edr') v=m.edr; else if (field==='vis') v=m.vis; else if (field==='temp') v=m.T; else if (field==='rh') v=m.rh;
+      else { const p=met(x,y,z+15,eta,sc), q=met(x,y,Math.max(2,z-15),eta,sc); v=Math.hypot(p.u-q.u,p.v-q.v)*30/(z+15-Math.max(2,z-15)); }
+      const col=ramp(key,v), k=(r*NC+c)*4; img.data[k]=col[0]; img.data[k+1]=col[1]; img.data[k+2]=col[2]; img.data[k+3]=a;
+    }
+  }
+  oc.putImageData(img,0,0);
+  b.imageSmoothingEnabled=true; b.drawImage(off,PADL,padT,iw,ih);
+  // cloud base & precipitation along route
+  b.save(); b.setLineDash([5,4]); b.strokeStyle=css('--muted'); b.lineWidth=1.2; b.beginPath(); let on=false;
+  for (let i=0;i<ROUTE.n;i+=2){ const cz=current.pts[i].m.ceil; if (cz<ZMAX){ const px=X(ROUTE.s[i]), py=Y(cz); if(!on){b.moveTo(px,py);on=true;} else b.lineTo(px,py);} else on=false; }
+  b.stroke(); b.restore();
+  for (let c=0;c<iw;c+=2){
+    const i=Math.min(ROUTE.n-1,Math.round((c/iw*L)/DS)), lz=logz0(ROUTE.xs[i],ROUTE.ys[i]).lz;
+    b.fillStyle= lz<-2.5? css('--accent') : lz<-0.8? css('--caution') : css('--muted');
+    b.globalAlpha= lz<-2.5?0.7:0.55; b.fillRect(PADL+c,padT+ih+1,2,5);
+  }
+  b.globalAlpha=1;
+  b.strokeStyle=css('--line'); b.lineWidth=1; b.fillStyle=css('--muted');
+  b.font=`11px ${css('--font-data')}`; b.textAlign='right'; b.textBaseline='middle';
+  for (let z=0;z<=ZMAX;z+=200){ b.beginPath(); b.moveTo(PADL,Y(z)); b.lineTo(PADL+iw,Y(z)); b.globalAlpha=0.6; b.stroke(); b.globalAlpha=1; b.fillText(z+' m',PADL-6,Y(z)); }
+  b.textAlign='center'; b.textBaseline='top';
+  const step=L>40?10:5; for (let s=0;s<=L+0.01;s+=step) b.fillText(s+' km',X(s),padT+ih+9);
+  // names along route
+  const names=[]; for (let i=0;i<ROUTE.n;i+=5){ const nm=nearestName(ROUTE.xs[i],ROUTE.ys[i],1.2); if (nm && !names.some(q=>q.n===nm)) names.push({n:nm,s:ROUTE.s[i]}); }
+  b.textBaseline='bottom'; let lastX=-99;
+  names.forEach(q=>{ const x=X(q.s); if (x-lastX<70) return; b.save(); b.setLineDash([2,3]); b.strokeStyle=css('--muted'); b.globalAlpha=0.5; b.beginPath(); b.moveTo(x,padT); b.lineTo(x,padT+ih); b.stroke(); b.restore();
+    b.fillStyle=css('--ink'); b.font=`500 11px ${css('--font-ui')}`; b.textAlign= x<PADL+30?'left': x>PADL+iw-30?'right':'center'; b.fillText(q.n,x,padT-6); lastX=x; });
+  b.fillStyle=css('--muted'); b.font=`11px ${css('--font-ui')}`; b.textAlign='left'; b.textBaseline='top';
+  b.fillText('점선: 운고 · 지표 띠: 파랑 수면 · 노랑 농경지·공항 · 회색 도시', PADL, padT+ih+24);
+  // flight profile incl. vertical take-off/landing
+  b.save(); b.lineCap='round'; b.lineJoin='round';
+  const prof=new Path2D(); prof.moveTo(X(0),Y(0)); current.pts.forEach((p,i)=>prof.lineTo(X(ROUTE.s[i]),Y(p.z))); prof.lineTo(X(L),Y(0));
+  b.strokeStyle=css('--surface'); b.lineWidth=7; b.stroke(prof);
+  b.strokeStyle=css('--ink'); b.lineWidth=2; b.stroke(prof);
+  for (let i=1;i<current.pts.length;i++){ const p=current.pts[i]; if(p.c===0) continue; b.strokeStyle=catColor(p.c); b.lineWidth=4; b.beginPath(); b.moveTo(X(ROUTE.s[i-1]),Y(current.pts[i-1].z)); b.lineTo(X(ROUTE.s[i]),Y(p.z)); b.stroke(); }
+  b.restore();
+  (current.alerts||[]).forEach((a,n)=> drawMarker(b, X(a.s), Y(a.alt)-16, n+1, a.lv));
+  SEC.bg=bg;
+  $('#secLegend').innerHTML=legendHTML(field);
+  secPaint();
+}
 function drawMarker(ctx,x,y,num,lv){
   ctx.save(); ctx.fillStyle=lv===2?css('--warn'):css('--caution');
   ctx.beginPath(); ctx.moveTo(x,y-10); ctx.lineTo(x+10,y+8); ctx.lineTo(x-10,y+8); ctx.closePath(); ctx.fill();
@@ -1488,84 +2060,170 @@ function drawMarker(ctx,x,y,num,lv){
   ctx.fillStyle=css('--surface'); ctx.font=`700 10.5px ${css('--font-data')}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(num),x,y+2.5);
   ctx.restore();
 }
-
-function drawSection(){
-  const cv=$('#sec'), wide=cv.parentElement.clientWidth;
-  const {ctx,w,h}=fit(cv, wide<560?0.62:0.36);
-  const padL=46, padR=14, padT=26, padB=40, ZMAX=800;
-  const iw=w-padL-padR, ih=h-padT-padB, L=ROUTE.L;
-  const X=s=>padL+s/L*iw, Y=z=>padT+(1-z/ZMAX)*ih;
-  const field=$('#secField').value, t0=STEPS[state.step], sc=state.sc, pr=current.pr;
-  const NC=Math.min(240,Math.round(iw/3)), NR=80;
-  const off=document.createElement('canvas'); off.width=NC; off.height=NR;
-  const oc=off.getContext('2d'), img=oc.createImageData(NC,NR);
-  for (let c=0;c<NC;c++){
-    const sv=(c+0.5)/NC*L, i=Math.min(ROUTE.n-1,Math.round(sv/DS)), x=ROUTE.xs[i], y=ROUTE.ys[i], eta=t0+pr.cum[i]/3600;
-    for (let r=0;r<NR;r++){
-      const z=(1-(r+0.5)/NR)*ZMAX, m=met(x,y,z,eta,sc); let v;
-      if (field==='along') v=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i];
-      else if (field==='spd') v=m.spd; else if (field==='edr') v=m.edr; else if (field==='vis') v=m.vis;
-      else { const a=met(x,y,z+15,eta,sc), b=met(x,y,Math.max(2,z-15),eta,sc); v=Math.hypot(a.u-b.u,a.v-b.v)*30/(z+15-Math.max(2,z-15)); }
-      const col=ramp(field,v), k=(r*NC+c)*4; img.data[k]=col[0]; img.data[k+1]=col[1]; img.data[k+2]=col[2]; img.data[k+3]=230;
-    }
-  }
-  oc.putImageData(img,0,0);
-  ctx.clearRect(0,0,w,h);
-  ctx.imageSmoothingEnabled=true; ctx.drawImage(off,padL,padT,iw,ih);
-  // surface strip
-  for (let c=0;c<iw;c+=2){
-    const i=Math.min(ROUTE.n-1,Math.round((c/iw*L)/DS)), lz=logz0(ROUTE.xs[i],ROUTE.ys[i]).lz;
-    ctx.fillStyle= lz<-2.5? css('--accent') : lz<-0.8? css('--caution') : css('--muted');
-    ctx.globalAlpha= lz<-2.5?0.7:0.55; ctx.fillRect(padL+c,padT+ih+1,2,5);
-  }
-  ctx.globalAlpha=1;
-  // axes
-  ctx.strokeStyle=css('--line'); ctx.lineWidth=1; ctx.fillStyle=css('--muted');
-  ctx.font=`11px ${css('--font-data')}`; ctx.textAlign='right'; ctx.textBaseline='middle';
-  for (let z=0;z<=ZMAX;z+=200){ ctx.beginPath(); ctx.moveTo(padL,Y(z)); ctx.lineTo(padL+iw,Y(z)); ctx.globalAlpha=0.6; ctx.stroke(); ctx.globalAlpha=1; ctx.fillText(z+' m',padL-5,Y(z)); }
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  for (let s=0;s<=L;s+=5) ctx.fillText(s+' km',X(s),padT+ih+9);
-  ctx.textBaseline='bottom';
-  let lastX=-99;
-  WP.forEach((p,k)=>{ const x=X(wpS[k]); ctx.save(); ctx.setLineDash([2,3]); ctx.strokeStyle=css('--muted'); ctx.globalAlpha=0.5; ctx.beginPath(); ctx.moveTo(x,padT); ctx.lineTo(x,padT+ih); ctx.stroke(); ctx.restore();
-    if (x-lastX>58 || k===WP.length-1){ ctx.fillStyle=css('--ink'); ctx.font=`500 11px ${css('--font-ui')}`; ctx.textAlign= k===0?'left': k===WP.length-1?'right':'center'; ctx.fillText(p.n,x,padT-6); lastX=x; } });
-  ctx.fillStyle=css('--muted'); ctx.font=`11px ${css('--font-ui')}`; ctx.textAlign='left'; ctx.textBaseline='top';
-  ctx.fillText('지표: 파랑 수면 · 노랑 농경지·공항 · 회색 도시', padL, padT+ih+24);
-  // flight profile
-  ctx.save(); ctx.lineCap='round';
-  ctx.strokeStyle=css('--surface'); ctx.lineWidth=7; ctx.beginPath();
-  current.pts.forEach((p,i)=> i?ctx.lineTo(X(ROUTE.s[i]),Y(p.z)):ctx.moveTo(X(ROUTE.s[i]),Y(p.z))); ctx.stroke();
-  ctx.strokeStyle=css('--ink'); ctx.lineWidth=2; ctx.stroke();
-  for (let i=1;i<current.pts.length;i+=1){ const p=current.pts[i]; if(p.c===0) continue; ctx.strokeStyle=catColor(p.c); ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(X(ROUTE.s[i-1]),Y(current.pts[i-1].z)); ctx.lineTo(X(ROUTE.s[i]),Y(p.z)); ctx.stroke(); }
+function drawUAMSide(ctx,x,y){
+  const acc=css('--accent'), sf=css('--surface');
+  ctx.save(); ctx.translate(x,y);
+  ctx.globalAlpha=0.18; ctx.fillStyle=acc; ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+  ctx.fillStyle=acc; ctx.strokeStyle=sf; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(-13,-1); ctx.quadraticCurveTo(-13,-6,-4,-6); ctx.lineTo(7,-6); ctx.quadraticCurveTo(14,-5,14,1); ctx.quadraticCurveTo(13,5,6,5); ctx.lineTo(-10,5); ctx.quadraticCurveTo(-13,4,-13,-1); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-12,-2); ctx.lineTo(-17,-9); ctx.lineTo(-14,-9); ctx.lineTo(-8,-4); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.lineWidth=2; ctx.strokeStyle=acc; [-7,7].forEach(px=>{ ctx.beginPath(); ctx.moveTo(px,-6); ctx.lineTo(px,-10); ctx.stroke(); ctx.beginPath(); ctx.moveTo(px-7,-10.5); ctx.lineTo(px+7,-10.5); ctx.stroke(); });
+  ctx.fillStyle=sf; ctx.beginPath(); ctx.ellipse(8,-2,3,2,0,0,Math.PI*2); ctx.fill();
   ctx.restore();
-  (current.alerts||[]).forEach((a,n)=> drawMarker(ctx, X(a.s), Y(a.alt)-16, n+1, a.lv));
-  $('#secLegend').innerHTML=legendHTML(field);
-  cv._inv=(px,py)=>({s:(px-padL)/iw*L, z:(1-(py-padT)/ih)*ZMAX, ok:px>=padL&&px<=padL+iw&&py>=padT&&py<=padT+ih});
+}
+function cursorS(){ if (FP.playing || HOV.s===null) return FP.t>0 || FP.playing ? flightAt(FP.t).s : null; return HOV.s; }
+function secPaint(){
+  if (!SEC.bg) return;
+  const cv=$('#sec'), ctx=cv.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(SEC.bg,0,0);
+  ctx.setTransform(SEC.dpr,0,0,SEC.dpr,0,0);
+  const s=cursorS();
+  if (s!==null){ const x=SEC.X(s); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.globalAlpha=0.55; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x,SEC.padT); ctx.lineTo(x,SEC.padT+SEC.ih); ctx.stroke(); ctx.restore(); }
+  const f=flightAt(FP.t); drawUAMSide(ctx, SEC.X(f.s), SEC.Y(Math.max(f.z,0))-10);
+}
+const MROWS=[{k:'ri',n:'위험도',u:'지수'},{k:'kw',n:'전력',u:'kW'},{k:'T',n:'기온',u:'°C'},{k:'wind',n:'바람',u:'m/s'},{k:'rh',n:'습도',u:'%'},{k:'cc',n:'구름',u:'운량'},{k:'pr',n:'강수',u:'mm/h'}];
+function drawMeteo(){
+  if (!current) return;
+  const cv=$('#met'), rowH=32, top=6, H=top+MROWS.length*rowH+30;
+  const {w,h,dpr}=fit(cv,H), iw=w-PADL-PADR, L=ROUTE.L, P=current.pts;
+  const X=s=>PADL+s/L*iw;
+  Object.assign(MET,{X,dpr,top,rowH,h,iw});
+  const [bg,b]=offscreen(w,h,dpr);
+  const ink=css('--ink'), muted=css('--muted'), line=css('--line');
+  MROWS.forEach((r,ri)=>{
+    const y0=top+ri*rowH, y1=y0+rowH-6, mid=(y0+y1)/2;
+    b.fillStyle=css('--surface-2'); b.fillRect(PADL,y0,iw,rowH-6);
+    b.fillStyle=ink; b.font=`600 12px ${css('--font-ui')}`; b.textAlign='right'; b.textBaseline='middle'; b.fillText(r.n,PADL-8,mid-6);
+    b.fillStyle=muted; b.font=`10.5px ${css('--font-data')}`; b.fillText(r.u,PADL-8,mid+7);
+    const hgt=rowH-6;
+    if (r.k==='ri'){ for (let i=1;i<P.length;i++){ const x=X(ROUTE.s[i-1]), wpx=X(ROUTE.s[i])-x+0.6, v=P[i].ri; b.fillStyle=catColor(P[i].c); b.globalAlpha=0.9; b.fillRect(x,y1-hgt*v/100,wpx,hgt*v/100); } b.globalAlpha=1;
+      b.strokeStyle=line; [40,60,80].forEach(v=>{ b.beginPath(); b.moveTo(PADL,y1-hgt*v/100); b.lineTo(PADL+iw,y1-hgt*v/100); b.stroke(); }); }
+    if (r.k==='kw'){ let mx=0, mn=1e9, imx=0, imn=0; P.forEach((p,i)=>{ if(p.kw>mx){mx=p.kw;imx=i;} if(p.kw<mn){mn=p.kw;imn=i;} });
+      for (let i=1;i<P.length;i++){ const x=X(ROUTE.s[i-1]), wpx=X(ROUTE.s[i])-x+0.6, f=(P[i].kw-mn)/((mx-mn)||1); b.fillStyle=rgbStr(ramp('kw',f)); b.fillRect(x,y1-hgt*(0.15+0.85*P[i].kw/mx),wpx,hgt*(0.15+0.85*P[i].kw/mx)); }
+      label(b,`최대 ${mx.toFixed(0)}`,clamp(X(ROUTE.s[imx]),PADL+30,PADL+iw-30),y0+7,{size:10.5,align:'center'}); label(b,`최소 ${mn.toFixed(0)}`,clamp(X(ROUTE.s[imn]),PADL+30,PADL+iw-30),y1-7,{size:10.5,align:'center',color:muted}); }
+    if (r.k==='T' || r.k==='rh'){ const vals=P.map(p=>r.k==='T'?p.m.T:p.m.rh); let mn=Math.min(...vals), mx=Math.max(...vals); if (r.k==='rh'){mn=0;mx=100;} else {mn-=1;mx+=1;}
+      const Yv=v=>y1-(v-mn)/(mx-mn)*hgt;
+      if (r.k==='rh'){ b.fillStyle=css('--accent'); b.globalAlpha=0.22; b.beginPath(); b.moveTo(X(0),y1); vals.forEach((v,i)=>b.lineTo(X(ROUTE.s[i]),Yv(v))); b.lineTo(X(L),y1); b.closePath(); b.fill(); b.globalAlpha=1; }
+      b.strokeStyle=r.k==='T'?css('--warn'):css('--accent'); b.lineWidth=1.8; b.beginPath(); vals.forEach((v,i)=>i?b.lineTo(X(ROUTE.s[i]),Yv(v)):b.moveTo(X(ROUTE.s[i]),Yv(v))); b.stroke();
+      for (let q=0;q<5;q++){ const i=Math.round((P.length-1)*(q+0.5)/5), v=vals[i]; label(b, r.k==='T'?v.toFixed(1):v.toFixed(0), X(ROUTE.s[i]), clamp(Yv(v)-8,y0+6,y1-4), {size:10.5,align:'center'}); } }
+    if (r.k==='wind'){ const nA=Math.max(6,Math.round(iw/70)); for (let q=0;q<nA;q++){ const i=Math.round((P.length-1)*(q+0.5)/nA), m=P[i].m, x=X(ROUTE.s[i]), wd=wdirOf(m)*Math.PI/180;
+        const dx=-Math.sin(wd), dy=Math.cos(wd), Lr=9; const col=rgbStr(ramp('spd',m.spd)); b.save(); b.translate(x-14,mid); b.strokeStyle=ink; b.fillStyle=ink; b.lineWidth=1.6;
+        const ax=dx*Lr, ay=dy*Lr; b.beginPath(); b.moveTo(-ax,-ay); b.lineTo(ax,ay); b.stroke();
+        const an=Math.atan2(ay,ax); b.beginPath(); b.moveTo(ax,ay); b.lineTo(ax-5*Math.cos(an-0.5),ay-5*Math.sin(an-0.5)); b.lineTo(ax-5*Math.cos(an+0.5),ay-5*Math.sin(an+0.5)); b.closePath(); b.fill(); b.restore();
+        b.fillStyle=col; b.beginPath(); b.arc(x+3,mid,3,0,Math.PI*2); b.fill();
+        b.fillStyle=ink; b.font=`500 11px ${css('--font-data')}`; b.textAlign='left'; b.textBaseline='middle'; b.fillText(m.spd.toFixed(0),x+8,mid); } }
+    if (r.k==='cc'){ b.fillStyle=muted; b.globalAlpha=0.45; for (let i=1;i<P.length;i++){ const x=X(ROUTE.s[i-1]), wpx=X(ROUTE.s[i])-x+0.6, v=P[i].m.cc; b.fillRect(x,y1-hgt*v,wpx,hgt*v); } b.globalAlpha=1;
+      let a=-1; for (let i=0;i<=P.length;i++){ const inC=i<P.length && P[i].m.inCloud; if (inC && a<0) a=i; if (!inC && a>=0){ if (ROUTE.s[i-1]-ROUTE.s[a]>0.8) label(b,'구름 속',(X(ROUTE.s[a])+X(ROUTE.s[i-1]))/2,mid,{size:10.5,align:'center',w:600}); a=-1; } } }
+    if (r.k==='pr'){ const mx=Math.max(5,...P.map(p=>p.m.P));
+      for (let i=1;i<P.length;i++){ const m=P[i].m, x=X(ROUTE.s[i-1]), wpx=X(ROUTE.s[i])-x+0.6; if (m.rain>0.05){ b.fillStyle=css('--accent'); b.fillRect(x,y1-hgt*m.rain/mx,wpx,hgt*m.rain/mx); } if (m.snow>0.05){ b.fillStyle='#9DD3EA'; b.fillRect(x,y1-hgt*m.snow/mx,wpx,hgt*m.snow/mx); } }
+      let lastT=-99; for (let i=0;i<P.length;i+=3){ if (P[i].m.ts>0.12){ const x=X(ROUTE.s[i]); if (x-lastT<26) continue; lastT=x; b.save(); b.fillStyle=css('--nogo'); b.translate(x,y0+3); b.beginPath(); b.moveTo(2,0); b.lineTo(-4,10); b.lineTo(0,10); b.lineTo(-2,19); b.lineTo(5,7); b.lineTo(1,7); b.lineTo(4,0); b.closePath(); b.fill(); b.restore(); } }
+      const any = P.some(p=>p.m.P>0.05) || P.some(p=>p.m.ts>0.12);
+      b.font=`10.5px ${css('--font-ui')}`; b.textAlign='right'; b.textBaseline='middle'; b.fillStyle=muted;
+      b.fillText(any ? '파랑 비 · 하늘 눈 · 번개 뇌우' : '강수 없음', PADL+iw-6, y0+8); }
+  });
+  b.fillStyle=muted; b.font=`11px ${css('--font-data')}`; b.textAlign='center'; b.textBaseline='top';
+  const step=L>40?10:5; for (let s=0;s<=L+0.01;s+=step) b.fillText(s+' km',X(s),top+MROWS.length*rowH+4);
+  MET.bg=bg; meteoPaint();
+}
+function meteoPaint(){
+  if (!MET.bg) return;
+  const cv=$('#met'), ctx=cv.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(MET.bg,0,0);
+  ctx.setTransform(MET.dpr,0,0,MET.dpr,0,0);
+  const s=cursorS(); if (s===null) return;
+  const x=MET.X(s); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.lineWidth=1.5; ctx.globalAlpha=0.7; ctx.beginPath(); ctx.moveTo(x,MET.top); ctx.lineTo(x,MET.top+MROWS.length*MET.rowH-6); ctx.stroke(); ctx.restore();
 }
 
-function fmtTime(d){const p=n=>String(n).padStart(2,'0'); return `${d.getMonth()+1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
-function issueDate(){ const d=new Date(); d.setHours(state.sc.issueH,0,0,0); return d; }
+/* ---------- flight playback ---------- */
+const FP={t:0, playing:false, raf:0, last:0};
+function flightAt(t){
+  if (!current) return {s:0,z:0,i:0,phase:'대기',va:0,gs:0,vz:0};
+  const pr=current.pr, R=ROUTE, cum=pr.cum, n=R.n;
+  if (t<=pr.tUp) return {s:0, z:pr.H0*Math.max(0,t)/pr.tUp, i:0, phase:t<=0?'출발 대기':'수직 이륙', va:0, gs:0, vz:t>0?pr.H0/pr.tUp:0};
+  const tEnd=cum[n-1];
+  if (t>=tEnd){ const f=Math.min(1,(t-tEnd)/pr.tDn); return {s:R.L, z:pr.H0*(1-f), i:n-1, phase:f>=1?'도착':'수직 착륙', va:0, gs:0, vz:f>=1?0:-pr.H0/pr.tDn}; }
+  let lo=0, hi=n-1; while (hi-lo>1){ const m=(lo+hi)>>1; if (cum[m]<=t) lo=m; else hi=m; }
+  const f=(t-cum[lo])/((cum[hi]-cum[lo])||1), s=R.s[lo]+(R.s[hi]-R.s[lo])*f, z=pr.alt[lo]+(pr.alt[hi]-pr.alt[lo])*f;
+  const ph={climb:'상승',cruise:'정속 순항',desc:'하강'}[pr.phase[lo]];
+  const vz=(pr.alt[hi]-pr.alt[lo])/((cum[hi]-cum[lo])||1);
+  return {s, z, i:f<0.5?lo:hi, phase:ph, va:pr.va[lo], gs:pr.gs[lo]+(pr.gs[hi]-pr.gs[lo])*f, vz};
+}
+function fpUpdate(){
+  if (!current) return;
+  const f=flightAt(FP.t), total=current.pr.total, p=current.pts[f.i], m=p.m;
+  $('#fpTime').textContent=`${fmtMS(FP.t)} / ${fmtMS(total)}`;
+  if (!FP.dragging) $('#fpScrub').value=Math.round(FP.t/total*1000);
+  if (LY.uam){ const x=ROUTE.xs[f.i], y=ROUTE.ys[f.i]; const pos = (f.s<=0) ? [state.A.x,state.A.y] : (f.s>=ROUTE.L ? [state.B.x,state.B.y] : interpXY(f.s));
+    LY.uam.setLatLng(LL(pos[0],pos[1])); const el=LY.uam.getElement(); if (el){ const sv=el.querySelector('svg'); if (sv) sv.style.transform=`rotate(${Math.atan2(ROUTE.tx[f.i],ROUTE.ty[f.i])*180/Math.PI}deg)`; } }
+  const eNow = f.s<=0 ? current.energy.eUp*Math.min(1,FP.t/current.pr.tUp) : (f.s>=ROUTE.L ? current.energy.raw : p.ecum);
+  const pctNow = eNow*current.energy.corr/current.energy.usable*100;
+  const wd=wdirOf(m), Wx=p.Wx;
+  const items=[
+    ['경과', `${fmtMS(FP.t)}`], ['비행 단계', f.phase], ['고도', `${Math.round(f.z)} m`], ['수직속도', `${f.vz>=0?'+':''}${f.vz.toFixed(1)} m/s`],
+    ['대기속도 · 대지속도', `${Math.round(f.va*3.6)} · ${Math.round(f.gs*3.6)} km/h`],
+    ['바람', `${dirName(wd)} ${m.spd.toFixed(1)} m/s (${Wx<0?'맞바람':'뒷바람'} ${Math.abs(Wx).toFixed(1)})`],
+    ['기온 · 습도', `${m.T.toFixed(1)} °C · ${m.rh.toFixed(0)}%`],
+    ['구름 · 강수', `${m.inCloud?'구름 속':`운량 ${(m.cc*10).toFixed(0)}/10`} · ${m.snow>0.05?'눈 '+m.snow.toFixed(1):m.rain>0.05?'비 '+m.rain.toFixed(1):'없음'}${m.ts>0.12?' · 뇌우':''}`],
+    ['소비 전력', `${(f.s<=0||f.s>=ROUTE.L)?'수직 비행':p.kw.toFixed(0)+' kW'}`], ['누적 소비', `${(eNow*current.energy.corr).toFixed(1)} kWh · ${pctNow.toFixed(0)}%`],
+    ['위험도 지수', `<span class="chip c${p.c}">${p.ri.toFixed(0)} ${LV[p.c]}</span>`]
+  ];
+  $('#live').innerHTML=items.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  secPaint(); meteoPaint();
+}
+function interpXY(s){ const i=Math.min(ROUTE.n-2,Math.max(0,Math.floor(s/DS))); const f=clamp((s-ROUTE.s[i])/((ROUTE.s[i+1]-ROUTE.s[i])||1),0,1); return [ROUTE.xs[i]+(ROUTE.xs[i+1]-ROUTE.xs[i])*f, ROUTE.ys[i]+(ROUTE.ys[i+1]-ROUTE.ys[i])*f]; }
+function fpPlay(){
+  if (!current) return;
+  if (FP.playing){ fpStop(); return; }
+  if (FP.t>=current.pr.total) FP.t=0;
+  FP.playing=true; FP.last=performance.now(); $('#fpPlay').textContent='일시정지';
+  const tick=now=>{ if(!FP.playing) return; const dt=(now-FP.last)/1000; FP.last=now; FP.t=Math.min(current.pr.total, FP.t+dt*(+$('#fpSpeed').value));
+    fpUpdate(); if (FP.t>=current.pr.total){ fpStop(); onArrive(); return; } FP.raf=requestAnimationFrame(tick); };
+  FP.raf=requestAnimationFrame(tick);
+}
+function fpStop(){ FP.playing=false; cancelAnimationFrame(FP.raf); $('#fpPlay').textContent=FP.t>=(current?current.pr.total:0)?'다시 재생':'비행 재생'; fpUpdate(); }
 
+/* ---------- panels ---------- */
+function issueDate(){ const d=new Date(); d.setHours(state.sc.issueH,0,0,0); return d; }
+function fmtTime(d){const p=n=>String(n).padStart(2,'0'); return `${d.getMonth()+1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+const ptName = P => P.n || nearestName(P.x,P.y) && `${nearestName(P.x,P.y)} 부근` || `지도 지정 (${LL(P.x,P.y)[0].toFixed(3)}, ${LL(P.x,P.y)[1].toFixed(3)})`;
 function renderSummary(){
-  const r=current, w=r.worst, p=r.pts[w.i];
-  const big=$('#vBig'); big.className='big c'+r.c; $('#vVal').textContent=LV[r.c];
-  $('#fFactor').textContent= r.c===0 ? '없음' : w.f;
-  $('#fSeg').innerHTML = `${WP[ROUTE.seg[w.i]].n} → ${WP[ROUTE.seg[w.i]+1].n} <small class="num">${ROUTE.s[w.i].toFixed(1)} km · ${Math.round(p.z)} m</small>`;
-  const ft=r.pr.cum[ROUTE.n-1]/60;
-  $('#fDist').innerHTML=`${ROUTE.L.toFixed(1)} km <small>· ${ft.toFixed(0)}분</small>`;
+  const r=current, w=r.worst, p=r.pts[w.i], sel=state.routes[state.sel];
+  $('#vBig').className='big c'+r.c; $('#vVal').textContent=LV[r.c];
+  $('#fRoute').innerHTML=`추천 ${state.sel+1} · ${sel.prof.name} <small>${ptName(state.A)} → ${ptName(state.B)} · ${AIR().name}</small>`;
+  $('#fDist').innerHTML=`${ROUTE.L.toFixed(1)} km · ${fmtMS(r.pr.total)} <small>순항 ${Math.round(r.pr.top)} m · ${state.fl.vc} km/h</small>`;
+  $('#fRI').innerHTML=`${r.riMean.toFixed(0)} · ${r.riMax.toFixed(0)} <small>배터리 ${r.energy.pct.toFixed(0)}% 사용</small>`;
+  $('#fFactor').textContent= r.c===0 ? '없음' : r.limit;
+  $('#fSeg').innerHTML = `${nearestName(ROUTE.xs[w.i],ROUTE.ys[w.i])||'경로'} 부근 <small class="num">${ROUTE.s[w.i].toFixed(1)} km · ${Math.round(p.z)} m</small>`;
   const a=r.alerts, nW=a.filter(x=>x.lv===2).length;
   $('#fAlerts').innerHTML=`${nW} <small>경고 · ${a.length-nW} 주의</small>`;
-  $('#fMargin').textContent=`${(w.mg*100).toFixed(0)}%`;
-  const iss=issueDate(), val=new Date(iss.getTime()+STEPS[state.step]*3600e3);
+  const iss=issueDate(), val=new Date(iss.getTime()+t0()*3600e3);
   $('#tIssue').textContent=fmtTime(iss); $('#tValid').textContent=fmtTime(val);
-  const t=STEPS[state.step];
-  $('#stepLbl').textContent = (t<=1 ? `출발 +${Math.round(t*60)}분` : `출발 +${t}시간`) + ` · ${fmtTime(val)} KST`;
-  $('#modeLbl').textContent = t<=1 ? '준실시간 · 5분 갱신' : '단기예측 · 1시간 갱신';
+  const t=t0();
+  $('#stepLbl').textContent=(t<=1?`출발 +${Math.round(t*60)}분`:`출발 +${t}시간`)+` · ${fmtTime(val)} KST`;
+  $('#modeLbl').textContent=t<=1?'준실시간 · 5분 갱신':'단기예측 · 1시간 갱신';
 }
-
+function riGradient(r){
+  const n=24, st=[]; for (let k=0;k<n;k++){ const i=Math.round((r.pts.length-1)*k/(n-1)); st.push(`${RAMPS.ri.stops[[1,3,5,7][r.pts[i].c]][1]} ${(k/(n-1)*100).toFixed(1)}%`); }
+  return `linear-gradient(90deg,${st.join(',')})`;
+}
+function renderRecs(){
+  const box=$('#recs');
+  if (!state.routes.length){ box.innerHTML='<div class="empty recs-empty">출발지와 도착지를 정하고 ‘경로 탐색’을 누르세요.</div>'; return; }
+  box.innerHTML=state.routes.map((p,k)=>{
+    const r=p.r;
+    return `<button type="button" class="rec${k===state.sel?' sel':''}" data-rec="${k}" aria-pressed="${k===state.sel}">
+      <div class="rh"><span class="rank"><i>${k+1}</i>추천 ${k+1}</span><span class="chip c${r.c}">${LV[r.c]}</span></div>
+      <div class="nm">${p.prof.name}</div>
+      <dl><div><dt>거리</dt><dd>${p.R.L.toFixed(1)} km</dd></div><div><dt>비행시간</dt><dd>${fmtMS(r.pr.total)}</dd></div><div><dt>순항고도</dt><dd>${Math.round(r.pr.top)} m</dd></div>
+      <div><dt>최대 위험도</dt><dd>${r.riMax.toFixed(0)}</dd></div><div><dt>평균 위험도</dt><dd>${r.riMean.toFixed(0)}</dd></div><div><dt>배터리</dt><dd>${r.energy.pct.toFixed(0)}%</dd></div></dl>
+      <div class="ribar" style="background:${riGradient(r)}" title="경로를 따라 본 위험도"></div>
+      <div class="why">${p.prof.why}</div></button>`;
+  }).join('');
+  $('#recCap').textContent = state.routes.length<3 ? '조건에 맞는 항로만 표시합니다.' : '기상 위험, 비행시간, 배터리, 한강 회랑을 따져 고른 3개입니다. 눌러서 선택하세요.';
+}
 function renderAlerts(){
   const list=$('#alist'), al=current.alerts;
-  if (!al.length){ list.innerHTML='<div class="empty">이 출발 시각에는 경로상 급변풍·난류 경고가 없습니다.</div>'; }
+  if (!al.length){ list.innerHTML='<div class="empty">이 항로·출발 시각에는 급변풍·난류·뇌우·착빙 경고가 없습니다.</div>'; }
   else list.innerHTML = al.map((a,n)=>{
     const ack=state.acked[a.id];
     return `<article class="alert l${a.lv}${ack?' acked':''}">
@@ -1575,97 +2233,323 @@ function renderAlerts(){
       ${ack?`<span class="num">확인 ${ack}</span>`:`<button type="button" data-ack="${a.id}">확인</button>`}</div></article>`;
   }).join('');
   $('#banner').classList.toggle('on', al.some(a=>a.lv===2 && !state.acked[a.id]));
-  // limiting factors at worst point
   const p=current.pts[current.worst.i];
   const items=[...p.items].sort((a,b)=>a[1]-b[1]).slice(0,5);
   $('#limits').innerHTML = `<div class="eyebrow">가장 위험한 지점의 여유율</div>` + items.map(([nm,v])=>{
-    const c=cat(v), wd=Math.max(2,Math.min(100,(v+0.5)/1.5*100));
+    const c=catRI(riOf(v)), wd=Math.max(2,Math.min(100,(v+0.5)/1.5*100));
     return `<div class="lim"><span>${nm}</span><span class="bar"><i style="width:${wd}%;background:${catColor(c)}"></i></span><span class="num" style="text-align:right">${(v*100).toFixed(0)}%</span></div>`;
   }).join('');
 }
-
-function renderSegments(){
-  const rows=[];
-  for (let k=0;k<WP.length-1;k++){
-    const ps=current.pts.filter((p,i)=>ROUTE.seg[i]===k);
-    if (!ps.length) continue;
-    let mg=9,f='',mxS=0,mxG=0,mxE=0,mnV=1e9,zmin=1e9,zmax=0;
-    ps.forEach(p=>{mxS=Math.max(mxS,p.m.spd);mxG=Math.max(mxG,p.m.gust);mxE=Math.max(mxE,p.m.edr);mnV=Math.min(mnV,p.m.vis);zmin=Math.min(zmin,p.z);zmax=Math.max(zmax,p.z);if(p.mg<mg){mg=p.mg;f=p.f;}});
-    const c=cat(mg);
-    rows.push(`<tr><td>${WP[k].n} → ${WP[k+1].n}</td><td class="num">${(wpS[k+1]-wpS[k]).toFixed(1)}</td><td class="num">${Math.round(zmin)}–${Math.round(zmax)}</td><td class="num">${mxS.toFixed(1)}</td><td class="num">${mxG.toFixed(1)}</td><td class="num">${mxE.toFixed(2)}</td><td class="num">${Math.round(mnV).toLocaleString()}</td><td class="num">${(mg*100).toFixed(0)}%</td><td>${c===0?'—':f}</td><td><span class="chip c${c}">${LV[c]}</span></td></tr>`);
+function legsOf(){
+  const L=ROUTE.L, nL=clamp(Math.round(L/4),2,6), out=[];
+  const nameAt=i=> i===0 ? ptName(state.A) : i===ROUTE.n-1 ? ptName(state.B) : (nearestName(ROUTE.xs[i],ROUTE.ys[i]) ? nearestName(ROUTE.xs[i],ROUTE.ys[i])+' 부근' : `${ROUTE.s[i].toFixed(1)} km`);
+  for (let k=0;k<nL;k++){
+    const a=Math.round((ROUTE.n-1)*k/nL), b=Math.round((ROUTE.n-1)*(k+1)/nL);
+    const ps=current.pts.slice(a,b+1); let e=0; for (let i=a+1;i<=b;i++) e+=current.pts[i].e;
+    if (k===0) e+=current.energy.eUp; if (k===nL-1) e+=current.energy.eDn;
+    e*=current.energy.corr;
+    const d=ROUTE.s[b]-ROUTE.s[a], ph={}; for (let i=a;i<=b;i++){ const q=current.pr.phase[i]; ph[q]=(ph[q]||0)+1; }
+    const main=Object.entries(ph).sort((x,y)=>y[1]-x[1])[0][0];
+    const wx=ps.reduce((s,p)=>s+p.Wx,0)/ps.length, edr=Math.max(...ps.map(p=>p.m.edr));
+    out.push({a,b,from:nameAt(a),to:nameAt(b),d,e,kwhkm:e/(d||1),ps,main,wx,edr,vert:k===0||k===nL-1});
   }
+  return out;
+}
+function renderSegments(){
+  const rows=legsOf().map(L=>{
+    let mg=9,f='',mxS=0,mxG=0,mxE=0,mnV=1e9,zmin=1e9,zmax=0,tmn=99,tmx=-99,pr=0,sn=0,ts=0,riM=0;
+    L.ps.forEach(p=>{mxS=Math.max(mxS,p.m.spd);mxG=Math.max(mxG,p.m.gust);mxE=Math.max(mxE,p.m.edr);mnV=Math.min(mnV,p.m.vis);zmin=Math.min(zmin,p.z);zmax=Math.max(zmax,p.z);tmn=Math.min(tmn,p.m.T);tmx=Math.max(tmx,p.m.T);pr=Math.max(pr,p.m.rain);sn=Math.max(sn,p.m.snow);ts=Math.max(ts,p.m.ts);riM=Math.max(riM,p.ri);if(p.mg<mg){mg=p.mg;f=p.f;}});
+    const c=catRI(riM), prTxt=[pr>0.05?`비 ${pr.toFixed(1)}`:'',sn>0.05?`눈 ${sn.toFixed(1)}`:'',ts>0.12?'뇌우':''].filter(Boolean).join(' · ')||'—';
+    return `<tr><td>${L.from} → ${L.to}</td><td class="num">${L.d.toFixed(1)}</td><td class="num">${Math.round(zmin)}–${Math.round(zmax)}</td><td class="num">${mxS.toFixed(1)}</td><td class="num">${mxG.toFixed(1)}</td><td class="num">${mxE.toFixed(2)}</td><td class="num">${tmn.toFixed(0)}~${tmx.toFixed(0)}</td><td class="num">${Math.round(mnV).toLocaleString()}</td><td>${prTxt}</td><td class="num">${riM.toFixed(0)}</td><td>${c===0?'—':f}</td><td><span class="chip c${c}">${LV[c]}</span></td></tr>`;
+  });
   $('#segBody').innerHTML=rows.join('');
 }
-
+function legReason(L){
+  const r=[]; if (L.vert) r.push(L.a===0?'수직 이륙·상승 포함':'하강·수직 착륙 포함'); else r.push({climb:'상승 구간',cruise:'정속 순항',desc:'하강 구간'}[L.main]);
+  if (L.wx<-1) r.push(`맞바람 ${(-L.wx).toFixed(1)} m/s`); else if (L.wx>1) r.push(`뒷바람 ${L.wx.toFixed(1)} m/s`);
+  if (L.edr>0.2) r.push(`난류 EDR ${L.edr.toFixed(2)}`); return r.join(' · ');
+}
+function renderEnergy(){
+  const E=current.energy, air=AIR(), pm=paxMass(air);
+  let kwMax=0, iMax=0; current.pts.forEach((p,i)=>{ if (p.kw>kwMax){kwMax=p.kw;iMax=i;} });
+  const left=E.left;
+  $('#enFacts').innerHTML=[
+    ['총 소비', `${E.total.toFixed(1)} kWh`], ['배터리 사용', `${E.pct.toFixed(0)}% <small>사용 가능 ${E.usable.toFixed(0)} kWh</small>`],
+    ['도착 잔량', `<span class="chip c${current.battCat}">${left.toFixed(0)}%</span>`], ['평균', `${E.kwhkm.toFixed(2)} kWh/km`],
+    ['최대 전력', `${kwMax.toFixed(0)} kW <small>${current.pr.phase[iMax]==='climb'?'상승':current.pr.phase[iMax]==='desc'?'하강':'순항'} 중</small>`],
+    ['비행 중량', `${Math.round(current.R? ACT.mass : 0).toLocaleString()} kg <small>탑재 ${Math.round(pm.people+pm.bag)} kg</small>`]
+  ].map(([k,v])=>`<div class="fact"><div class="k">${k}</div><div class="v num">${v}</div></div>`).join('');
+  const ph=E.phase, tot=E.raw||1, parts=[['수직 이착륙',ph.vert,'--nogo'],['상승',ph.climb,'--warn'],['정속 순항',ph.cruise,'--accent'],['하강',ph.desc,'--ok']];
+  $('#phaseBar').innerHTML=`<div class="pbar">${parts.map(([n,v,c])=>`<i style="width:${(v/tot*100).toFixed(1)}%;background:var(${c})" title="${n} ${(v*E.corr).toFixed(1)} kWh"></i>`).join('')}</div>
+    <div class="plg">${parts.map(([n,v,c])=>`<span><b style="background:var(${c})"></b>${n} ${(v*E.corr).toFixed(1)} kWh (${(v/tot*100).toFixed(0)}%)</span>`).join('')}</div>`;
+  const legs=legsOf().sort((a,b)=>b.kwhkm-a.kwhkm);
+  const li=L=>`<li><b>${L.from} → ${L.to}</b><span class="num">${L.kwhkm.toFixed(2)} kWh/km · ${L.e.toFixed(1)} kWh</span><span class="why">${legReason(L)}</span></li>`;
+  $('#enTop').innerHTML=legs.slice(0,3).map(li).join('');
+  $('#enLow').innerHTML=legs.slice(-3).reverse().map(li).join('');
+  const corrTxt = E.corr!==1 ? `학습 보정계수 ×${E.corr.toFixed(2)} 적용` : '학습 보정 없음(실측 기록이 쌓이면 적용)';
+  $('#enCap').textContent=`${air.name} · 배터리 ${air.battKWh} kWh(추정) · ${corrTxt}`;
+}
 function renderStrip(){
   const strip=$('#strip');
   if (!strip.children.length){
     strip.innerHTML = STEPS.map((t,i)=>`<button type="button" data-step="${i}" aria-label="${t<=1?Math.round(t*60)+'분':t+'시간'}"></button>`).join('');
     const ax=$('#stripAxis'), marks=[[0,'지금'],[6,'+30분'],[12,'+1시간'],[16,'+6시간'],[22,'+12시간'],[34,'+24시간'],[46,'+36시간'],[58,'+48시간']];
-    const total=13*1.3+47; // proportional to fr widths approx
+    const total=13*1.3+47;
     ax.innerHTML = marks.map(([i,t])=>{ const pos = i<13 ? (i+0.5)*1.3 : 13*1.3+(i-13+0.5); return `<span style="left:${pos/total*100}%">${t}</span>`; }).join('');
     strip.style.gridTemplateColumns = `repeat(13,minmax(9px,1.3fr)) repeat(47,minmax(7px,1fr))`;
   }
   STEPS.forEach((t,i)=>{
-    const r=evalRoute(t,state.ac,state.sc,false), b=strip.children[i];
+    const r=evalRoute(t,ACT,state.sc,ROUTE,{fast:true}), b=strip.children[i];
     b.className='k'+r.c+(i===state.step?' sel':'');
-    b.title=`${t<=1?'+'+Math.round(t*60)+'분':'+'+t+'시간'} · ${LV[r.c]}${r.c?' · '+r.worst.f:''}`;
+    b.title=`${t<=1?'+'+Math.round(t*60)+'분':'+'+t+'시간'} · ${LV[r.c]}${r.c?' · '+r.limit:''}`;
   });
 }
 function markStrip(){ [...$('#strip').children].forEach((b,i)=>b.classList.toggle('sel',i===state.step)); }
-
-function recompute(stripToo){
-  current = evalRoute(STEPS[state.step], state.ac, state.sc, true);
-  renderSummary(); renderAlerts(); renderSegments(); drawMap(); drawSection();
-  if (stripToo) renderStrip(); else markStrip();
+function renderFleet(){
+  const n=state.pax.adult+state.pax.child, rows=[];
+  FLEET.forEach(a=>{
+    const sel=a.id===state.airId;
+    if (n>a.seats){ rows.push(`<tr class="${sel?'on':''}" data-air="${a.id}"><td><b>${a.name}</b></td><td>${a.country}</td><td colspan="6" class="muted">좌석 부족 (승객 ${a.seats}석)</td></tr>`); return; }
+    const fl=sel?state.fl:a.def, lim=sel?state.lim:a.lim, ac=buildAc(a, fl, lim, Math.min(ACT.alt, sel?ACT.alt:a.def.alt));
+    const r=evalRoute(t0(), ac, state.sc, ROUTE, {fast:true});
+    rows.push(`<tr class="${sel?'on':''}" data-air="${a.id}" tabindex="0"><td><b>${a.name}</b><div class="muted">${a.cfgK}</div></td><td>${a.country}</td><td><span class="chip c${r.c}">${LV[r.c]}</span></td><td class="num">${r.riMax.toFixed(0)}</td><td class="num">${fmtMS(r.pr.total)}</td><td class="num">${r.energy.total.toFixed(1)}</td><td class="num">${r.energy.pct.toFixed(0)}%</td><td>${r.c===0?'—':r.limit}</td></tr>`);
+  });
+  $('#fleetBody').innerHTML=rows.join('');
+}
+function renderSens(){
+  const cv=$('#sens'), {ctx,w,h}=fit(cv,200), air=AIR();
+  const Us=[0,5,10,15,20,25,30], ri=[], bp=[];
+  Us.forEach(U=>{ const r=evalRoute(t0(), ACT, {...state.sc, U}, ROUTE, {fast:true}); ri.push(r.riMax); bp.push(r.energy.pct); });
+  const padL=44, padR=16, padT=14, padB=34, iw=w-padL-padR, ih=h-padT-padB, ymax=Math.max(100, Math.ceil(Math.max(...bp)/20)*20);
+  const X=U=>padL+U/30*iw, Y=v=>padT+(1-v/ymax)*ih;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle=css('--ok-soft'); ctx.fillRect(padL,Y(40),iw,Y(0)-Y(40));
+  ctx.fillStyle=css('--nogo-soft'); ctx.fillRect(padL,Y(ymax),iw,Y(80)-Y(ymax));
+  ctx.strokeStyle=css('--line'); ctx.fillStyle=css('--muted'); ctx.font=`11px ${css('--font-data')}`; ctx.lineWidth=1;
+  ctx.textAlign='right'; ctx.textBaseline='middle';
+  for (let v=0;v<=ymax;v+=20){ ctx.beginPath(); ctx.moveTo(padL,Y(v)); ctx.lineTo(padL+iw,Y(v)); ctx.stroke(); ctx.fillText(v,padL-6,Y(v)); }
+  ctx.textAlign='center'; ctx.textBaseline='top'; Us.forEach(U=>ctx.fillText(U+' m/s',X(U),padT+ih+6));
+  const series=[[ri,css('--warn'),'최대 위험도 지수'],[bp,css('--accent'),'배터리 사용률 %']];
+  series.forEach(([vals,col])=>{ ctx.strokeStyle=col; ctx.lineWidth=2.2; ctx.beginPath(); vals.forEach((v,i)=>i?ctx.lineTo(X(Us[i]),Y(v)):ctx.moveTo(X(Us[i]),Y(v))); ctx.stroke();
+    ctx.fillStyle=col; vals.forEach((v,i)=>{ ctx.beginPath(); ctx.arc(X(Us[i]),Y(v),3,0,Math.PI*2); ctx.fill(); }); });
+  const cu=clamp(state.sc.U,0,30); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(X(cu),padT); ctx.lineTo(X(cu),padT+ih); ctx.stroke(); ctx.restore();
+  label(ctx,`현재 ${state.sc.U} m/s`,clamp(X(cu)+4,padL+4,padL+iw-80),padT+8,{size:11});
+  $('#sensLegend').innerHTML=series.map(([v,c,n])=>`<span class="sw" style="min-width:150px"><i style="background:${c}"></i>${n}</span>`).join('')+`<span class="unit">${air.name} · 초록 띠 정상, 붉은 띠 불가</span>`;
+}
+function renderSpec(){
+  const a=AIR(), e=v=>v?'<abbr title="공개 자료가 없어 추정한 값">추정</abbr>':'';
+  $('#spec').innerHTML=`<div class="spec-h"><b>${a.name}</b><span>${a.country} · ${a.maker}</span></div>
+   <dl class="spec-dl">
+    <div><dt>형식</dt><dd>${a.cfgK}</dd></div>
+    <div><dt>좌석</dt><dd>${a.pilot?'조종사 1 + ':'무인 · '}승객 ${a.seats}</dd></div>
+    <div><dt>순항속도</dt><dd>${a.vc} km/h ${e(a.vcEst)}</dd></div>
+    <div><dt>항속거리</dt><dd>${a.range} km ${e(a.rangeEst)}</dd></div>
+    <div><dt>최대이륙중량</dt><dd>${a.mtow.toLocaleString()} kg ${e(a.mtowEst)}</dd></div>
+    <div><dt>최대 탑재량</dt><dd>${a.payload?a.payload+' kg':'—'} ${e(a.payloadEst)}</dd></div>
+    <div><dt>배터리</dt><dd>${a.battKWh} kWh ${e(true)}</dd></div>
+    <div><dt>상태</dt><dd>${a.status}</dd></div>
+   </dl>
+   <div class="hint">${a.note?a.note+'. ':''}출처: <a href="${a.src}" target="_blank" rel="noopener">${a.srcN}</a> · 2026-11-17 확인. 배터리 용량과 운용 한계는 형식·중량으로 추정한 값입니다.</div>`;
+}
+function renderPax(){
+  const a=AIR(), pm=paxMass(a), n=pm.n, payload=pm.people+pm.bag, cap=a.payload||((a.seats*95)+(a.pilot*90)), mass=a.empty+payload;
+  $('#paxPilot').textContent=a.pilot?'1 (필수)':'0 (무인)';
+  $('#paxAdult').textContent=state.pax.adult; $('#paxChild').textContent=state.pax.child;
+  $('#bagOut').textContent=`${state.bag} kg`;
+  document.querySelectorAll('[data-pax]').forEach(b=>{ const k=b.dataset.pax, d=+b.dataset.d; b.disabled = d>0 ? n>=a.seats : state.pax[k]<=0; });
+  const pct=Math.min(100,payload/cap*100), over=mass>a.mtow;
+  $('#paxMass').innerHTML=`<div class="mrow"><span>좌석</span><b class="num">${n} / ${a.seats}</b></div>
+    <div class="mrow"><span>탑재 중량</span><b class="num">${Math.round(payload)} / ${cap} kg</b></div>
+    <div class="bar"><i style="width:${pct}%;background:var(${over?'--nogo':pct>85?'--caution':'--ok'})"></i></div>
+    <div class="mrow"><span>비행 중량</span><b class="num">${Math.round(mass).toLocaleString()} kg${over?' · 최대이륙중량 초과':''}</b></div>`;
 }
 
-/* ---------- controls ---------- */
-const scSel=$('#scn'), acSel=$('#acPreset');
-scSel.innerHTML=Object.entries(SCN).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-acSel.innerHTML=Object.entries(AC).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('') + '<option value="custom">직접 입력</option>';
-const scFields=['U','dir','T','dep','llj'];
-const scOut={U:v=>v.toFixed(1)+' m/s', dir:v=>{const n=['북','북북동','북동','동북동','동','동남동','남동','남남동','남','남남서','남서','서남서','서','서북서','북서','북북서'][Math.round(v/22.5)%16]; return `${v}° ${n}풍`;}, T:v=>v+' °C', dep:v=>v.toFixed(1)+' °C', llj:v=>v+' m/s'};
-function syncSc(){ scFields.forEach(f=>{ $('#'+f).value=state.sc[f]; $('#o'+f[0].toUpperCase()+f.slice(1)).textContent=scOut[f](+state.sc[f]); }); $('#conv').checked=!!state.sc.conv; scSel.value=state.scKey; }
-const acFields=['vc','alt','climb','desc','xw','wmax','gust','edr','vis','rain'];
-function syncAc(){ acFields.forEach(f=>$('#ac_'+f).value=state.ac[f]); $('#ac_icing').checked=!!state.ac.icing; acSel.value=state.acKey; }
+/* ---------- statistics & learning (db capability; session fallback) ---------- */
+let DB=null, FLIGHTS=[], dbReady=false;
+const savedSigs=new Set();
+function learnFromRecords(){
+  const by={};
+  FLIGHTS.forEach(f=>{ (by[f.air] ||= []).push(f); });
+  state.corr={}; state.slope={};
+  Object.entries(by).forEach(([id,rs])=>{
+    const act=rs.filter(r=>r.actualKWh>0 && r.predRaw>0);
+    if (act.length){ let sap=0, spp=0; act.forEach(r=>{ sap+=r.actualKWh*r.predRaw; spp+=r.predRaw*r.predRaw; }); state.corr[id]={k:clamp(sap/spp,0.5,2), n:act.length}; }
+    const xs=rs.map(r=>r.headwind||0), ys=rs.map(r=>(r.actualKWh>0?r.actualKWh:r.predKWh)/(r.distKm||1));
+    if (rs.length>=3){ const mx=xs.reduce((a,b)=>a+b,0)/xs.length, my=ys.reduce((a,b)=>a+b,0)/ys.length; let sxy=0,sxx=0; xs.forEach((x,i)=>{ sxy+=(x-mx)*(ys[i]-my); sxx+=(x-mx)*(x-mx); }); if (sxx>0.5) state.slope[id]=sxy/sxx; }
+  });
+}
+function renderStats(){
+  const F=FLIGHTS;
+  const tot=F.reduce((s,f)=>s+(f.actualKWh>0?f.actualKWh:f.predKWh),0), dist=F.reduce((s,f)=>s+(f.distKm||0),0);
+  $('#statFacts').innerHTML=[['비행 기록',`${F.length}건`],['누적 거리',`${dist.toFixed(0)} km`],['누적 소비',`${tot.toFixed(0)} kWh`],['평균',`${dist?(tot/dist).toFixed(2):'—'} kWh/km`],['실측 입력',`${F.filter(f=>f.actualKWh>0).length}건`]]
+    .map(([k,v])=>`<div class="fact"><div class="k">${k}</div><div class="v num">${v}</div></div>`).join('');
+  const by={}; F.forEach(f=>{ (by[f.air] ||= []).push(f); });
+  const rows=Object.entries(by).map(([id,rs])=>{
+    const a=FLEET.find(x=>x.id===id); const kk=rs.map(r=>(r.actualKWh>0?r.actualKWh:r.predKWh)/(r.distKm||1)); const pc=rs.map(r=>r.pct||0);
+    const c=state.corr[id], sl=state.slope[id];
+    return `<tr><td>${a?a.name:id}</td><td class="num">${rs.length}</td><td class="num">${(kk.reduce((x,y)=>x+y,0)/kk.length).toFixed(2)}</td><td class="num">${(pc.reduce((x,y)=>x+y,0)/pc.length).toFixed(0)}%</td><td class="num">${sl!==undefined?(sl>=0?'+':'')+sl.toFixed(3):'기록 3건 이상 필요'}</td><td class="num">${c?c.n:0}</td><td class="num">${c?'×'+c.k.toFixed(2):'—'}</td></tr>`;
+  });
+  $('#statBody').innerHTML=rows.join('') || '<tr><td colspan="7" class="muted">아직 기록이 없습니다. 비행 재생을 끝까지 보거나 ‘이 비행 기록 저장’을 누르면 쌓입니다.</td></tr>';
+  $('#recBody').innerHTML=F.slice(0,12).map(f=>`<tr><td class="num">${fmtTime(new Date(f.ts))}</td><td>${f.airName}</td><td>${f.from} → ${f.to}<div class="muted">${f.route} · ${f.distKm.toFixed(1)} km</div></td><td>${f.pax.adult}·${f.pax.child}${f.pax.pilot?' +조종사':''}</td><td>${f.scLabel}</td><td class="num">${f.predKWh.toFixed(1)}</td>
+    <td><input class="act" type="number" min="0" step="0.1" value="${f.actualKWh>0?f.actualKWh:''}" placeholder="실측" aria-label="실측 소비 kWh" data-actin="${f.id}"></td><td><button type="button" data-act="${f.id}">저장</button></td></tr>`).join('') || '<tr><td colspan="8" class="muted">기록이 없습니다.</td></tr>';
+}
+async function initDb(){
+  const note=t=>{ $('#statCap').textContent=t; };
+  if (!(window.claude && typeof window.claude.use==='function')){ note('저장 기능을 쓸 수 없는 화면이라 이번 방문 동안만 기록합니다.'); renderStats(); return; }
+  try { DB = await window.claude.use('db'); } catch(e){ DB=null; }
+  if (!DB){ note('저장 기능을 쓸 수 없는 화면이라 이번 방문 동안만 기록합니다.'); renderStats(); return; }
+  note('기록을 불러오는 중…');
+  const timer=setTimeout(()=>note('기록을 아직 불러오지 못했습니다. 잠시 뒤 자동으로 다시 표시됩니다.'),10000);
+  DB.collection('flights').orderBy('ts','desc').limit(500).onSnapshot(snap=>{
+    if (!snap.metadata.fromCache){ clearTimeout(timer); }
+    FLIGHTS=snap.docs.map(d=>({id:d.id, ...d.data()})); dbReady=true;
+    note('비행 기록은 이 페이지에 저장되어 다음에 열어도 남습니다. 함께 보는 사람과 공유됩니다.');
+    learnFromRecords(); renderStats();
+  }, err=>{ clearTimeout(timer); note('기록을 불러오지 못했습니다. 이번 방문 동안만 기록합니다.'); DB=null; renderStats(); });
+}
+function flightRecord(){
+  const a=AIR(), r=current, cruise=r.pts.filter((p,i)=>r.pr.phase[i]==='cruise');
+  const hw = cruise.length ? -cruise.reduce((s,p)=>s+p.Wx,0)/cruise.length : 0;
+  return {ts:Date.now(), air:a.id, airName:a.name, from:ptName(state.A), to:ptName(state.B), route:state.routes[state.sel].prof.name,
+    distKm:+ROUTE.L.toFixed(2), timeMin:+(r.pr.total/60).toFixed(1), alt:Math.round(r.pr.top), vc:state.fl.vc,
+    pax:{pilot:a.pilot, adult:state.pax.adult, child:state.pax.child}, massKg:Math.round(ACT.mass),
+    scn:state.scKey, scLabel:SCN[state.scKey]?SCN[state.scKey].label:'직접 설정', U:state.sc.U, T:state.sc.T, headwind:+hw.toFixed(2),
+    riMax:+r.riMax.toFixed(1), predRaw:+r.energy.raw.toFixed(2), predKWh:+r.energy.total.toFixed(2), pct:+r.energy.pct.toFixed(1), actualKWh:0};
+}
+async function saveFlight(auto){
+  if (!current) return;
+  const sig=routeSig()+`|${state.step}|${state.pax.adult},${state.pax.child},${state.bag}|${state.scKey}|${state.sc.U}`;
+  if (auto && savedSigs.has(sig)) return;
+  savedSigs.add(sig);
+  const rec=flightRecord(), msg=$('#saveMsg');
+  if (DB){ try { await DB.collection('flights').add(rec); msg.textContent='기록을 저장했습니다.'; }
+    catch(e){ msg.textContent = e && e.code==='quota_exceeded' ? '저장 공간이 가득 찼습니다. 오래된 기록을 지워야 합니다.' : '저장하지 못했습니다. 이 페이지에 기록할 권한이 있는지 확인하세요.'; savedSigs.delete(sig); } }
+  else { FLIGHTS.unshift({id:'local-'+Date.now(), ...rec}); learnFromRecords(); renderStats(); msg.textContent='이번 방문 동안만 기록했습니다.'; }
+}
+function onArrive(){ saveFlight(true); }
 
-let deb=null; const later = (fn,ms=120)=>{ clearTimeout(deb); deb=setTimeout(fn,ms); };
-scSel.addEventListener('change',()=>{ state.scKey=scSel.value; state.sc={...SCN[scSel.value]}; state.acked={}; syncSc(); recompute(true); });
-scFields.forEach(f=>$('#'+f).addEventListener('input',e=>{ state.sc[f]=+e.target.value; $('#o'+f[0].toUpperCase()+f.slice(1)).textContent=scOut[f](+e.target.value); later(()=>recompute(true)); }));
-$('#conv').addEventListener('change',e=>{ state.sc.conv=e.target.checked; recompute(true); });
-acSel.addEventListener('change',()=>{ if (acSel.value!=='custom'){ state.acKey=acSel.value; state.ac={...AC[acSel.value]}; syncAc(); recompute(true);} });
-acFields.forEach(f=>$('#ac_'+f).addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(!isFinite(v)) return; state.ac[f]=v; state.acKey='custom'; acSel.value='custom'; later(()=>recompute(true),250); }));
-$('#ac_icing').addEventListener('change',e=>{ state.ac.icing=e.target.checked; state.acKey='custom'; acSel.value='custom'; recompute(true); });
-$('#step').addEventListener('input',e=>{ state.step=+e.target.value; recompute(false); });
-$('#strip').addEventListener('click',e=>{ const b=e.target.closest('[data-step]'); if(!b) return; state.step=+b.dataset.step; $('#step').value=state.step; recompute(false); });
-$('#mapField').addEventListener('change',drawMap); $('#mapAlt').addEventListener('change',drawMap);
+/* ---------- planning / selection / rendering pipeline ---------- */
+function setPoint(which, x, y, name){
+  x=clamp(x,EXT.x0+0.3,EXT.x1-0.3); y=clamp(y,EXT.y0+0.3,EXT.y1-0.3);
+  const P={x,y,n:name||null};
+  if (which==='a'){ state.A=P; $('#selA').value=name||'custom'; } else { state.B=P; $('#selB').value=name||'custom'; }
+  syncPointSelect(); update('plan');
+}
+function syncPointSelect(){
+  [['#selA',state.A],['#selB',state.B]].forEach(([id,P])=>{ const sel=$(id); const cust=sel.querySelector('option[value="custom"]'); cust.textContent = P.n ? '지도에서 지정' : `지도 지정: ${ptName(P)}`; sel.value = P.n || 'custom'; });
+}
+function setPick(w){ state.pick=w; $('#pickA').classList.toggle('on',w==='a'); $('#pickB').classList.toggle('on',w==='b'); $('#map').classList.toggle('picking',!!w);
+  $('#mapRead').textContent = w ? `지도에서 ${w==='a'?'출발':'도착'} 지점을 클릭하세요. (Esc로 취소)` : $('#mapRead').textContent; }
+function selectRoute(k){ state.sel=k; state.selKey=state.routes[k].prof.key; evalSelected(); renderAll('select'); }
+function evalSelected(){
+  const p=state.routes[state.sel]; ROUTE=p.R;
+  ACT=buildAc(AIR(), state.fl, state.lim, p.alt);
+  const prevSig=FP.sig;
+  current=evalRoute(t0(), ACT, state.sc, ROUTE, {alerts:true});
+  p.r=evalRoute(t0(), ACT, state.sc, ROUTE, {fast:true});
+  FP.sig=routeSig();
+  if (FP.sig!==prevSig && !FP.playing){ FP.t=0; $('#fpPlay').textContent='비행 재생'; }
+  if (FP.t>current.pr.total) FP.t=current.pr.total;
+}
+function renderAll(kind){
+  renderSummary(); renderRecs(); renderAlerts(); renderSegments(); renderEnergy(); renderSpec(); renderPax();
+  drawMap(); drawSection(); drawMeteo();
+  if (kind!=='step') { renderStrip(); } else markStrip();
+  renderFleet(); renderSens(); fpUpdate();
+}
+function update(kind){
+  if (kind==='plan'){
+    state.routes=planRoutes(state.A, state.B, t0(), state.sc, acBase(), state.autoAlt);
+    const k=state.routes.findIndex(p=>p.prof.key===state.selKey);
+    state.sel = k>=0 ? k : 0; state.selKey=state.routes[state.sel].prof.key;
+  }
+  evalSelected(); renderAll(kind);
+}
+let deb=null; const later=(fn,ms=200)=>{ clearTimeout(deb); deb=setTimeout(fn,ms); };
+
+/* ---------- controls ---------- */
+const scSel=$('#scn');
+scSel.innerHTML=Object.entries(SCN).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+const scFields=['U','dir','T','dep','pr','llj'];
+const scOut={U:v=>v.toFixed(1)+' m/s', dir:v=>`${v}° ${dirName(v)}풍`, T:v=>v+' °C', dep:v=>v.toFixed(1)+' °C', pr:v=>v.toFixed(1)+' mm/h', llj:v=>v+' m/s'};
+const oid=f=>'#o'+f[0].toUpperCase()+f.slice(1);
+function syncSc(){ scFields.forEach(f=>{ $('#'+f).value=state.sc[f]||0; $(oid(f)).textContent=scOut[f](+(state.sc[f]||0)); }); $('#conv').checked=!!state.sc.conv; scSel.value=state.scKey; }
+const flFields=['vto','vc','vld','alt','climb','desc'];
+const flOut={vto:v=>v+' km/h', vc:v=>v+' km/h', vld:v=>v+' km/h', alt:v=>v+' m', climb:v=>v.toFixed(1)+' m/s', desc:v=>v.toFixed(1)+' m/s'};
+function syncFl(){ flFields.forEach(f=>{ $('#'+f).value=state.fl[f]; $(oid(f)).textContent=flOut[f](+state.fl[f]); }); $('#autoAlt').checked=state.autoAlt; }
+const limFields=['xw','wmax','gust','edr','vis','rain','snow'];
+function syncLim(){ limFields.forEach(f=>$('#ac_'+f).value=state.lim[f]); $('#ac_icing').checked=!!state.lim.icing; }
+const airSel=$('#airSel');
+const countries=[...new Set(FLEET.map(a=>a.country))];
+airSel.innerHTML=countries.map(c=>`<optgroup label="${c}">${FLEET.filter(a=>a.country===c).map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</optgroup>`).join('');
+const vOpts=VERTIPORTS.map(v=>`<option value="${v.n}">${v.n}</option>`).join('')+'<option value="custom">지도에서 지정</option>';
+$('#selA').innerHTML=vOpts; $('#selB').innerHTML=vOpts;
+
+scSel.addEventListener('change',()=>{ state.scKey=scSel.value; state.sc={...SCN[scSel.value]}; state.acked={}; syncSc(); update('plan'); });
+scFields.forEach(f=>$('#'+f).addEventListener('input',e=>{ state.sc[f]=+e.target.value; $(oid(f)).textContent=scOut[f](+e.target.value); later(()=>update('plan')); }));
+$('#conv').addEventListener('change',e=>{ state.sc.conv=e.target.checked; update('plan'); });
+flFields.forEach(f=>$('#'+f).addEventListener('input',e=>{ state.fl[f]=+e.target.value; $(oid(f)).textContent=flOut[f](+e.target.value); later(()=>update('plan'),250); }));
+$('#autoAlt').addEventListener('change',e=>{ state.autoAlt=e.target.checked; update('plan'); });
+limFields.forEach(f=>$('#ac_'+f).addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(!isFinite(v)||v<=0) return; state.lim[f]=v; later(()=>update('plan'),300); }));
+$('#ac_icing').addEventListener('change',e=>{ state.lim.icing=e.target.checked; update('plan'); });
+airSel.addEventListener('change',()=>{ setAircraft(airSel.value); syncFl(); syncLim(); update('plan'); });
+document.addEventListener('click',e=>{
+  const pb=e.target.closest('[data-pax]'); if (pb){ const k=pb.dataset.pax; state.pax[k]=Math.max(0,state.pax[k]+(+pb.dataset.d)); update('plan'); return; }
+  const rc=e.target.closest('[data-rec]'); if (rc){ selectRoute(+rc.dataset.rec); return; }
+  const fr=e.target.closest('tr[data-air]'); if (fr && fr.dataset.air!==state.airId){ airSel.value=fr.dataset.air; setAircraft(fr.dataset.air); syncFl(); syncLim(); update('plan'); return; }
+  const cx=e.target.closest('[data-ctx]'); if (cx && LY.ctxLL){ const q=KM(LY.ctxLL.lat,LY.ctxLL.lng); LM.closePopup(); setPoint(cx.dataset.ctx,q.x,q.y); return; }
+  const ab=e.target.closest('[data-act]'); if (ab){ const id=ab.dataset.act, inp=document.querySelector(`[data-actin="${id}"]`), v=parseFloat(inp.value);
+    if (!(v>0)){ inp.focus(); return; }
+    if (DB && !id.startsWith('local-')) DB.doc('flights/'+id).update({actualKWh:v}).then(()=>{ ab.textContent='저장됨'; }).catch(()=>{ ab.textContent='실패'; });
+    else { const f=FLIGHTS.find(x=>x.id===id); if (f){ f.actualKWh=v; learnFromRecords(); renderStats(); update('select'); } }
+    return; }
+});
+document.addEventListener('keydown',e=>{ if (e.key==='Escape' && state.pick) setPick(null); const fr=e.target.closest && e.target.closest('tr[data-air]'); if (fr && e.key==='Enter') fr.click(); });
+$('#bag').addEventListener('input',e=>{ state.bag=+e.target.value; $('#bagOut').textContent=`${state.bag} kg`; later(()=>update('plan'),250); });
+$('#selA').addEventListener('change',e=>{ if (e.target.value==='custom'){ setPick('a'); return; } const v=VERTIPORTS.find(q=>q.n===e.target.value); setPoint('a',v.x,v.y,v.n); });
+$('#selB').addEventListener('change',e=>{ if (e.target.value==='custom'){ setPick('b'); return; } const v=VERTIPORTS.find(q=>q.n===e.target.value); setPoint('b',v.x,v.y,v.n); });
+$('#pickA').addEventListener('click',()=>setPick(state.pick==='a'?null:'a'));
+$('#pickB').addEventListener('click',()=>setPick(state.pick==='b'?null:'b'));
+$('#swap').addEventListener('click',()=>{ const a=state.A; state.A=state.B; state.B=a; syncPointSelect(); update('plan'); });
+$('#search').addEventListener('click',()=>update('plan'));
+$('#learnOn').addEventListener('change',e=>{ state.learn=e.target.checked; update('plan'); });
+$('#saveFlight').addEventListener('click',()=>saveFlight(false));
+$('#step').addEventListener('input',e=>{ state.step=+e.target.value; later(()=>update('plan'),120); });
+$('#strip').addEventListener('click',e=>{ const b=e.target.closest('[data-step]'); if(!b) return; state.step=+b.dataset.step; $('#step').value=state.step; update('plan'); });
+['#mapField','#mapAlt','#mapRouteColor'].forEach(id=>$(id).addEventListener('change',drawMap));
 $('#secField').addEventListener('change',drawSection);
 $('#alist').addEventListener('click',e=>{ const b=e.target.closest('[data-ack]'); if(!b) return; const d=new Date(); state.acked[b.dataset.ack]=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; renderAlerts(); });
 let timer=null;
 $('#play').addEventListener('click',()=>{
-  if (timer){ clearInterval(timer); timer=null; $('#play').textContent='재생'; return; }
-  $('#play').textContent='정지';
-  timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; recompute(false); }, 900);
+  if (timer){ clearInterval(timer); timer=null; $('#play').textContent='시각 넘기기'; return; }
+  $('#play').textContent='멈춤';
+  timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; update('step'); }, 1200);
 });
+$('#fpPlay').addEventListener('click',fpPlay);
+$('#fpReset').addEventListener('click',()=>{ fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
+$('#fpScrub').addEventListener('input',e=>{ if(!current) return; FP.dragging=true; FP.t=+e.target.value/1000*current.pr.total; fpUpdate(); });
+$('#fpScrub').addEventListener('change',()=>{ FP.dragging=false; });
+function hoverOn(cv, X0getter){
+  cv.addEventListener('mousemove',e=>{
+    if (!current) return; const rc=cv.getBoundingClientRect(), px=e.clientX-rc.left, iw=rc.width-PADL-PADR;
+    if (px<PADL || px>PADL+iw) return; HOV.s=(px-PADL)/iw*ROUTE.L;
+    const i=Math.min(ROUTE.n-1,Math.max(0,Math.round(HOV.s/DS))), p=current.pts[i], m=p.m;
+    $('#secRead').textContent=`${HOV.s.toFixed(1)} km${nearestName(ROUTE.xs[i],ROUTE.ys[i])?' ('+nearestName(ROUTE.xs[i],ROUTE.ys[i])+' 부근)':''} · 고도 ${Math.round(p.z)} m · 위험도 ${p.ri.toFixed(0)} · ${dirName(wdirOf(m))} ${m.spd.toFixed(1)} m/s(${p.Wx<0?'맞바람':'뒷바람'} ${Math.abs(p.Wx).toFixed(1)}) · 기온 ${m.T.toFixed(1)} °C · 습도 ${m.rh.toFixed(0)}% · ${m.inCloud?'구름 속':'운량 '+(m.cc*10).toFixed(0)+'/10'} · EDR ${m.edr.toFixed(2)} · ${p.kw.toFixed(0)} kW`;
+    secPaint(); meteoPaint();
+  });
+  cv.addEventListener('mouseleave',()=>{ HOV.s=null; secPaint(); meteoPaint(); });
+}
+hoverOn($('#sec')); hoverOn($('#met'));
 
-// readouts
-$('#sec').addEventListener('mousemove',e=>{
-  const cv=e.currentTarget; if(!cv._inv) return; const rc=cv.getBoundingClientRect(), q=cv._inv(e.clientX-rc.left,e.clientY-rc.top); if(!q.ok) return;
-  const i=Math.min(ROUTE.n-1,Math.max(0,Math.round(q.s/DS))), eta=STEPS[state.step]+current.pr.cum[i]/3600, m=met(ROUTE.xs[i],ROUTE.ys[i],q.z,eta,state.sc);
-  const al=m.u*ROUTE.tx[i]+m.v*ROUTE.ty[i];
-  $('#secRead').textContent=`${q.s.toFixed(1)} km · ${Math.round(q.z)} m · 풍속 ${m.spd.toFixed(1)} m/s · ${al>=0?'배풍':'정풍'} ${Math.abs(al).toFixed(1)} · EDR ${m.edr.toFixed(2)} · 연직속도 ${m.w.toFixed(1)} m/s · 기온 ${m.T.toFixed(1)} °C`;
-});
-
-// redraw on resize / theme
-let rz=null; new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(current){drawMap();drawSection();} },120); }).observe($('main'));
-const redraw=()=>{ if(current){ restyleBase(); drawMap(); drawSection(); renderStrip(); } };
+let rz=null; new ResizeObserver(()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(current){ drawMap(); drawSection(); drawMeteo(); renderSens(); } },150); }).observe($('main'));
+const redraw=()=>{ if(current){ restyleBase(); renderAll('select'); } };
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
-syncSc(); syncAc();
+syncSc(); syncFl(); syncLim(); airSel.value=state.airId; syncPointSelect();
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) $('#mapWind').value='arrows';
-recompute(true);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ drawMap(); drawSection(); });
+update('plan');
+initDb();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ if(current){ drawSection(); drawMeteo(); renderSens(); } });
 })();
 </script>
