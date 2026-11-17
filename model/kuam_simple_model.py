@@ -1,5 +1,7 @@
 """K-UAM 경로 기상 위험 · 배터리 · 항로 추천 단순 진단모델 (참조 구현).
 
+작성자: 이동원 (Dong-Won Yi) <yidongwonyi@gmail.com> · 버전: 1.2.0
+
 웹 화면(web/index.html)의 JavaScript 모델과 같은 식을 쓴다. 기체 제원은 data/fleet.json.
 실측 연결 시 met() 안의 각 항을 LDAPS/ECMWF/관측 자료로 교체한다.
 

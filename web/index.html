@@ -897,6 +897,14 @@ table.fleet tr[data-air]:hover td{background:var(--surface-2)}
 table.fleet td .muted{font-weight:400}
 input.act{width:86px;font:inherit;font-family:var(--font-data);font-size:12.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
 .rank-mk.sel b{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.byline{font-size:12px;color:var(--muted);margin-top:2px}
+.tag.ver{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.home-ctl a{display:grid!important;place-items:center;color:var(--ink)}
+.mt{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:8px}
+.mt input[type=range]{flex:1 1 180px;accent-color:var(--accent);min-width:0}
+.mt .tl{font-family:var(--font-data);font-size:12.5px;min-width:170px}
+.chip.sync{background:var(--accent-soft);color:var(--accent)}
+.vlog{margin:0;padding-left:18px}
 [hidden]{display:none!important}
 .crash-ovl{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:min(480px,calc(100% - 16px));background:var(--surface);color:var(--ink);border:2px solid var(--nogo);border-radius:10px;padding:14px 16px;display:grid;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.28);z-index:5}
 .crash-ovl.pre{border-color:var(--warn)}
@@ -922,8 +930,10 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="eyebrow">K-UAM 경로 기상 · 초안</div>
     <h1>K-UAM 회랑 기상 콘솔</h1>
     <div class="sub">출발·도착을 정하면 기상 위험을 따져 항로 3개를 추천하고 비행을 재생합니다 · 단순 진단모델 시연</div>
+    <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
+    <span class="tag ver">v1.2.0 · 2026-11-17</span>
     <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1062,7 +1072,6 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     </div>
   </section>
 
-  <div class="grid2">
     <section class="panel">
       <div class="panel-head">
         <h2>수평 지도</h2>
@@ -1098,21 +1107,23 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
           </select>
         </div>
       </div>
+      <div class="mt">
+        <button id="mtPlay" type="button" aria-pressed="true">지도 시간 멈춤</button>
+        <input id="mtRange" type="range" min="0" max="1000" step="1" value="0" aria-label="지도 시각">
+        <span class="tl" id="mtLabel">—</span>
+        <select id="mtSpan" aria-label="지도 시간 반복 범위">
+          <option value="1">반복 1시간</option>
+          <option value="3">반복 3시간</option>
+          <option value="6">반복 6시간</option>
+          <option value="24">반복 24시간</option>
+        </select>
+        <span class="chip sync" id="mtSync" hidden>비행과 시간 동기화</span>
+      </div>
       <div id="map" class="lmap" role="region" aria-label="경로 수평 지도"></div>
       <div class="legend" id="mapLegend"></div>
       <div class="readout" id="mapRead">지도는 확대·이동할 수 있습니다. 굵은 선이 선택 항로이고 점선은 다른 추천 항로입니다(눌러서 선택). 흐르는 선은 고른 고도의 바람입니다.</div>
     </section>
 
-    <section class="panel alerts">
-      <div class="panel-head">
-        <h2>조종사 경고</h2>
-        <span class="eyebrow">급변풍 · 난류 · 뇌우 · 착빙</span>
-      </div>
-      <div class="banner" id="banner">확인하지 않은 경고가 있습니다</div>
-      <div class="alist" id="alist"></div>
-      <div class="limits" id="limits"></div>
-    </section>
-  </div>
 
   <section class="panel">
     <div class="panel-head">
@@ -1134,9 +1145,14 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
       <input id="fpScrub" type="range" min="0" max="1000" step="1" value="0" aria-label="비행 진행">
       <span class="tl" id="fpTime">00:00 / 00:00</span>
       <select id="fpSpeed" aria-label="재생 배속">
+        <option value="1">실시간 (1배속)</option>
+        <option value="5">5배속</option>
+        <option value="10">10배속</option>
+        <option value="20">20배속</option>
         <option value="30">30배속</option>
         <option value="60" selected>60배속</option>
         <option value="120">120배속</option>
+        <option value="300">300배속</option>
       </select>
     </div>
     <div class="live" id="live"></div>
@@ -1147,16 +1163,27 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="readout" id="secRead">단면이나 경로 기상 위에 커서를 올리면 그 지점 값을 보여줍니다.</div>
   </section>
 
-  <section class="panel">
-    <div class="panel-head"><h2>배터리 소비</h2><span class="strip-cap" id="enCap"></span></div>
-    <div class="facts" id="enFacts"></div>
-    <div class="phase" id="phaseBar"></div>
-    <div class="legs">
-      <div><div class="sub-h">많이 쓰는 구간</div><ol class="leglist" id="enTop"></ol></div>
-      <div><div class="sub-h">적게 쓰는 구간</div><ol class="leglist" id="enLow"></ol></div>
-    </div>
-    <div class="btnrow" style="align-items:center"><button type="button" id="saveFlight">이 비행 기록 저장</button><span class="hint" id="saveMsg">비행 재생을 끝까지 보면 자동으로 기록합니다.</span></div>
-  </section>
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><h2>배터리 소비</h2><span class="strip-cap" id="enCap"></span></div>
+      <div class="facts" id="enFacts"></div>
+      <div class="phase" id="phaseBar"></div>
+      <div class="legs">
+        <div><div class="sub-h">많이 쓰는 구간</div><ol class="leglist" id="enTop"></ol></div>
+        <div><div class="sub-h">적게 쓰는 구간</div><ol class="leglist" id="enLow"></ol></div>
+      </div>
+      <div class="btnrow" style="align-items:center"><button type="button" id="saveFlight">이 비행 기록 저장</button><span class="hint" id="saveMsg">비행 재생을 끝까지 보면 자동으로 기록합니다.</span></div>
+    </section>
+    <section class="panel alerts">
+      <div class="panel-head">
+        <h2>조종사 경고</h2>
+        <span class="eyebrow">급변풍 · 난류 · 뇌우 · 착빙</span>
+      </div>
+      <div class="banner" id="banner">확인하지 않은 경고가 있습니다</div>
+      <div class="alist" id="alist"></div>
+      <div class="limits" id="limits"></div>
+    </section>
+  </div>
 
   <section class="panel">
     <div class="panel-head"><h2>기체별 운항 민감도</h2><span class="strip-cap">같은 항로·기상·탑승 인원으로 기체마다 계산했습니다. 행을 누르면 그 기체로 바꿉니다.</span></div>
@@ -1193,6 +1220,20 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </section>
 
   <details class="panel">
+    <summary>버전 이력</summary>
+    <div class="notes">
+      <ul class="vlog">
+        <li><b>v1.2.0</b> (2026-11-17) 지도 시간 자동 반복과 비행 재생 시간 동기화, 지도 바로 아래 비행 재생 배치, 재생 배속 1~300배, 버전·작성자 표시</li>
+        <li><b>v1.1.0</b> (2026-11-17) 불가 조건 이륙 경고와 사고 재현 애니메이션, 사고 보고</li>
+        <li><b>v1.0.0</b> (2026-11-17) 출발·도착 지정, 항로 3개 추천, 비행 재생, 국가별 eVTOL 10종, 탑승 인원, 배터리 소비, 기체별 민감도, 누적 통계 학습</li>
+        <li><b>v0.3.0</b> (2026-11-17) 바람 흐름 애니메이션</li>
+        <li><b>v0.2.0</b> (2026-10-26) 실제 지형 기반 지도(한강·행정경계·도로)</li>
+        <li><b>v0.1.0</b> (2026-10-21) 단순 진단모델과 웹 표출 초안</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="panel">
     <summary>모델 설명과 한계</summary>
     <div class="notes">
       <p>이 화면은 실측 자료 없이 시나리오 입력만으로 돌아가는 <b>단순 진단모델</b>입니다. 실제 운영 체계에서는 각 줄이 오른쪽 자료로 바뀝니다.</p>
@@ -1214,7 +1255,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">좌표·지표 분류와 버티포트 위치는 근사·가상값입니다. 기체 프로필은 가상 기체이며 실제 제원으로 바꿔 넣어야 합니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.2.0 (2026-11-17) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1773,6 +1814,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
+const APP_VERSION='1.2.0', APP_DATE='2026-11-17', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -1832,10 +1874,15 @@ function initMap(){
   LM.attributionControl.addAttribution('<a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> · 통계청 경계 2018');
   const info=L.control({position:'topright'}); info.onAdd=()=>{ const d=L.DomUtil.create('div','map-info'); d.id='mapInfo'; return d; }; info.addTo(LM);
   L.control.scale({imperial:false, position:'bottomleft'}).addTo(LM);
-  LM.fitBounds([LL(-1.5,-17.5),LL(17.5,1.2)],{paddingTopLeft:[44,16],paddingBottomRight:[16,28]});
+  const homeView=()=>LM.fitBounds([LL(-1.5,-17.5),LL(17.5,1.2)],{paddingTopLeft:[44,16],paddingBottomRight:[16,28]});
+  homeView();
+  const home=L.control({position:'topleft'}); home.onAdd=()=>{ const d=L.DomUtil.create('div','leaflet-bar home-ctl');
+    d.innerHTML='<a href="#" role="button" title="원래 크기로" aria-label="지도 원래 크기로"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a>';
+    L.DomEvent.disableClickPropagation(d); d.querySelector('a').addEventListener('click',ev=>{ ev.preventDefault(); homeView(); }); return d; };
+  home.addTo(LM);
   LM.on('zoomend',()=>{ const z=LM.getZoom(); if(z>=12.5) LY.dong.addTo(LM); else LY.dong.remove(); $('#map').classList.toggle('far',z<11.5); });
   LM.on('mousemove',e=>{
-    const q=KM(e.latlng.lat,e.latlng.lng), z=mapAlt(), m=met(q.x,q.y,z,t0(),state.sc), wd=wdirOf(m);
+    const q=KM(e.latlng.lat,e.latlng.lng), z=mapAlt(), m=met(q.x,q.y,z,MT.h,state.sc), wd=wdirOf(m);
     const ri=riOf(minItem(marginItems(m,z,state.lim,false))[0]);
     $('#mapRead').textContent=`${e.latlng.lat.toFixed(4)}N ${e.latlng.lng.toFixed(4)}E · ${z} m · 위험도 ${ri.toFixed(0)} · ${dirName(wd)}풍 ${m.spd.toFixed(1)} m/s(돌풍 ${m.gust.toFixed(1)}) · 기온 ${m.T.toFixed(1)} °C · 습도 ${m.rh.toFixed(0)}% · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m${m.rain>0.1?' · 비 '+m.rain.toFixed(1)+' mm/h':''}${m.snow>0.05?' · 눈 '+m.snow.toFixed(1)+' mm/h':''}${m.ts>0.05?' · 뇌우 '+m.ts.toFixed(2):''}`;
   });
@@ -1935,10 +1982,9 @@ function arrowLines(x,y,m,len){
   return [[LL(...a),LL(...b)],[LL(...l1),LL(...b),LL(...l2)]];
 }
 
-function drawMap(){
-  if(!LM && !initMap()) return;
-  LM.invalidateSize();
-  const field=$('#mapField').value, z=mapAlt(), t=t0(), sc=state.sc, lim=state.lim;
+function drawMapField(){
+  if (!LM) return;
+  const field=$('#mapField').value, z=mapAlt(), t=MT.h, sc=state.sc, lim=state.lim;
   const NX=130, NY=120, off=document.createElement('canvas'); off.width=NX; off.height=NY;
   const oc=off.getContext('2d'), img=oc.createImageData(NX,NY);
   for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
@@ -1970,6 +2016,14 @@ function drawMap(){
     LY.cell.addLayer(L.circle(LL(cx,cy),{radius:CONV.R*1300,pane:'linePane',color:css('--nogo'),weight:1.6,dashArray:'6 5',fill:false,interactive:false}));
     LY.cell.addLayer(L.marker(LL(cx,cy+CONV.R*1.3+0.35),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'cell-lbl',html:'뇌우·돌풍전선',iconSize:null})}));
   }
+  $('#mapInfo').textContent=`${fmtTime(new Date(issueDate().getTime()+t*3600e3))} · 고도 ${z} m · ${$('#mapField').selectedOptions[0].text}`;
+  MT.drawn=t; MT.lastDraw=performance.now(); mtLabel();
+}
+function drawMap(){
+  if(!LM && !initMap()) return;
+  LM.invalidateSize();
+  drawMapField();
+  const field=$('#mapField').value;
   // alternative routes
   LY.alt.clearLayers(); LY.route.clearLayers(); LY.marks.clearLayers();
   state.routes.forEach((r,k)=>{
@@ -2004,7 +2058,6 @@ function drawMap(){
     $('#mapLegend').innerHTML = legendHTML(field,'map') + (mode==='kw' ? `<span style="flex-basis:100%;height:4px"></span>`+legendHTML('kw',[kwMin.toFixed(0),kwMax.toFixed(0)]) : '');
   } else $('#mapLegend').innerHTML=legendHTML(field,'map');
   LY.pinA.setLatLng(LL(state.A.x,state.A.y)); LY.pinB.setLatLng(LL(state.B.x,state.B.y));
-  $('#mapInfo').textContent=`고도 ${z} m · ${$('#mapField').selectedOptions[0].text}`;
   fpUpdate();
 }
 
@@ -2153,6 +2206,31 @@ function meteoPaint(){
   const x=MET.X(s); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.lineWidth=1.5; ctx.globalAlpha=0.7; ctx.beginPath(); ctx.moveTo(x,MET.top); ctx.lineTo(x,MET.top+MROWS.length*MET.rowH-6); ctx.stroke(); ctx.restore();
 }
 
+
+/* ---------- map clock: loops on its own, follows the flight while it plays ---------- */
+const MT={h:0, base:0, span:1, playing:true, drawn:null, lastDraw:0};
+function flightActive(){ return !!current && !CRASH.on && (FP.playing || (FP.t>0 && FP.t<current.pr.total)); }
+function mtLabel(){
+  const el=$('#mtLabel'); if (!el) return;
+  const d=MT.h-MT.base, mins=Math.floor(d*60+1e-6);
+  el.textContent=`${fmtTime(new Date(issueDate().getTime()+MT.h*3600e3))} (출발 +${mins>=60?Math.floor(mins/60)+'시간 '+(mins%60)+'분':mins+'분'})`;
+  if (!MT.dragging) $('#mtRange').value=Math.round(clamp(d/MT.span,0,1)*1000);
+  $('#mtSync').hidden=!flightActive();
+}
+function mtSetBase(t){ if (Math.abs(t-MT.base)>1e-9 || MT.h<t || MT.h>t+MT.span){ MT.base=t; MT.h=t; } }
+function mtSync(force){
+  if (!current) return;
+  if (!(flightActive() || CRASH.on)) return;
+  const target=MT.base+FP.t/3600;
+  if (force || Math.abs(target-(MT.drawn??-1))>8/3600 && performance.now()-MT.lastDraw>220){ MT.h=target; drawMapField(); }
+  else mtLabel();
+}
+setInterval(()=>{
+  if (!LM || document.hidden || !MT.playing || flightActive() || CRASH.on || MT.dragging) return;
+  MT.h += MT.span/40; if (MT.h>MT.base+MT.span+1e-9) MT.h=MT.base;
+  drawMapField();
+}, 700);
+
 /* ---------- flight playback ---------- */
 const FP={t:0, playing:false, raf:0, last:0};
 function flightAt(t){
@@ -2187,7 +2265,7 @@ function fpUpdate(){
     ['위험도 지수', `<span class="chip c${p.c}">${p.ri.toFixed(0)} ${LV[p.c]}</span>`]
   ];
   $('#live').innerHTML=items.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
-  secPaint(); meteoPaint();
+  secPaint(); meteoPaint(); mtSync(false);
 }
 function interpXY(s){ const i=Math.min(ROUTE.n-2,Math.max(0,Math.floor(s/DS))); const f=clamp((s-ROUTE.s[i])/((ROUTE.s[i+1]-ROUTE.s[i])||1),0,1); return [ROUTE.xs[i]+(ROUTE.xs[i+1]-ROUTE.xs[i])*f, ROUTE.ys[i]+(ROUTE.ys[i+1]-ROUTE.ys[i])*f]; }
 function fpPlay(){
@@ -2582,6 +2660,7 @@ function update(kind){
     const k=state.routes.findIndex(p=>p.prof.key===state.selKey);
     state.sel = k>=0 ? k : 0; state.selKey=state.routes[state.sel].prof.key;
   }
+  mtSetBase(t0());
   evalSelected(); renderAll(kind);
 }
 let deb=null; const later=(fn,ms=200)=>{ clearTimeout(deb); deb=setTimeout(fn,ms); };
@@ -2645,6 +2724,10 @@ $('#play').addEventListener('click',()=>{
   timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; update('step'); }, 1200);
 });
 $('#fpPlay').addEventListener('click',fpPlay);
+$('#mtPlay').addEventListener('click',()=>{ MT.playing=!MT.playing; $('#mtPlay').textContent=MT.playing?'지도 시간 멈춤':'지도 시간 자동 반복'; $('#mtPlay').setAttribute('aria-pressed',MT.playing); });
+$('#mtRange').addEventListener('input',e=>{ MT.dragging=true; MT.h=MT.base+(+e.target.value/1000)*MT.span; drawMapField(); });
+$('#mtRange').addEventListener('change',()=>{ MT.dragging=false; });
+$('#mtSpan').addEventListener('change',e=>{ MT.span=+e.target.value; if (MT.h>MT.base+MT.span) MT.h=MT.base; drawMapField(); });
 $('#crashOvl').addEventListener('click',e=>{ const b=e.target.closest('[data-ovl]'); if(!b) return; const k=b.dataset.ovl;
   if (k==='cancel'){ hideOvl(); }
   else if (k==='force'){ FP.override=true; hideOvl(); fpPlay(); }
