@@ -905,6 +905,14 @@ input.act{width:86px;font:inherit;font-family:var(--font-data);font-size:12.5px;
 .mt .tl{font-family:var(--font-data);font-size:12.5px;min-width:170px}
 .chip.sync{background:var(--accent-soft);color:var(--accent)}
 .vlog{margin:0;padding-left:18px}
+.rr{display:grid;gap:8px;margin:4px 0 6px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px}
+.rrnote{padding:8px 10px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:13px}
+.rrlog{margin:0;padding-left:20px;display:grid;gap:4px;font-size:12.5px}
+.rrlog li.bad{color:var(--nogo)}
+button.pick#hazPick.on{background:var(--nogo-soft);border-color:var(--nogo);color:var(--nogo)}
+.rr-mk,.rr-dest{background:none;border:0}
+.rr-mk b{display:grid;place-items:center;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--on-accent);font:700 11px var(--font-data);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.rr-dest b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--warn);color:var(--on-accent);font:700 13px var(--font-ui);border:2px solid var(--surface)}
 [hidden]{display:none!important}
 .crash-ovl{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:min(480px,calc(100% - 16px));background:var(--surface);color:var(--ink);border:2px solid var(--nogo);border-radius:10px;padding:14px 16px;display:grid;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.28);z-index:5}
 .crash-ovl.pre{border-color:var(--warn)}
@@ -933,7 +941,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.2.1 · 2026-11-17</span>
+    <span class="tag ver">v1.3.0 · 2026-11-18</span>
     <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1155,6 +1163,12 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
         <option value="300">300배속</option>
       </select>
     </div>
+    <div class="rr">
+      <label class="check"><input id="rrAuto" type="checkbox" checked> 비행 중 앞쪽 경로에 불가 기상이 생기면 자동으로 새 경로로 변경 (끄면 확인 후 변경)</label>
+      <div class="btnrow"><button type="button" id="hazAhead">돌발 뇌우 넣기 (앞쪽 경로)</button><button type="button" class="pick" id="hazPick">지도에서 돌발 뇌우 놓기</button><button type="button" id="hazClear">돌발 기상 지우기</button></div>
+      <div class="rrnote" id="rrNote" role="status" hidden></div>
+      <ol class="rrlog" id="rrLog" hidden></ol>
+    </div>
     <div class="live" id="live"></div>
     <div class="cv-wrap" id="secWrap"><canvas id="sec" aria-label="경로 연직 단면과 비행 위치"></canvas><div class="crash-ovl" id="crashOvl" role="alertdialog" aria-live="assertive" hidden></div></div>
     <div class="legend" id="secLegend"></div>
@@ -1223,6 +1237,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.3.0</b> (2026-11-18) 비행 중 실시간 경로 변경(자동·확인 후), 비상 착륙지 변경·회항, 돌발 뇌우 넣기, 경로 변경 기록</li>
         <li><b>v1.2.1</b> (2026-11-17) 화면이 크기 0으로 먼저 열릴 때 연직 단면·비행 아이콘·경로 기상이 그려지지 않던 오류 수정, 한 화면의 오류가 다른 화면을 멈추지 않도록 분리</li>
         <li><b>v1.2.0</b> (2026-11-17) 지도 시간 자동 반복과 비행 재생 시간 동기화, 지도 바로 아래 비행 재생 배치, 재생 배속 1~300배, 버전·작성자 표시</li>
         <li><b>v1.1.0</b> (2026-11-17) 불가 조건 이륙 경고와 사고 재현 애니메이션, 사고 보고</li>
@@ -1249,6 +1264,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
         <li><b>배터리 소비</b>: 호버 전력 = 중량×유도속도/효율(디스크하중·공기밀도 반영), 순항 전력 = 중량×속도/(양항비×효율), 상승은 위치에너지 증가분을 더하고 하강은 일부 회수. 난류는 소비를 늘리고(EDR 0.1당 +8%), 저온은 사용 가능 용량을 줄입니다(10 °C 아래 1 °C당 −1%). 배터리 용량은 공개 항속거리를 최대이륙중량·예비 20%로 비행한다고 보고 역산한 추정치입니다.</li>
         <li><b>소비량 학습</b>: 저장한 비행 기록에 실측 소비량을 넣으면 기체별 보정계수 k = Σ(실측×예측)/Σ(예측²)를 다시 계산해 예측에 곱합니다. 맞바람에 따른 kWh/km 증가율은 기록 3건 이상부터 회귀로 구합니다.</li>
         <li><b>항로 추천</b>: 300 m 미만 순항은 소음·장애물 여유 때문에 벌점을 주고 기상이 나쁠 때만 고릅니다. 0.4 km 격자에서 위험도 지수에 비례하는 비용으로 최단 비용 경로를 찾고(다익스트라), 직선으로 펴서 3가지 성격(최소 위험·한강 회랑·최단 시간)으로 만든 뒤 순항고도 후보(상한, −150 m, −300 m)마다 평가해 고릅니다. 김포공항 반경 2.6 km는 피합니다(출발·도착지가 공항이면 제외).</li>
+        <li><b>실시간 경로 변경</b>: 비행 중 8초(모의 시간)마다 남은 경로를 그 시각 예측으로 다시 평가해 앞쪽에 위험도 80 이상 구간이나 배터리 부족이 생기면, 지금 위치에서 도착지까지 같은 고도로 새 항로를 찾아 이어 붙입니다. 안 되면 도착지에 가까운 대체 버티포트, 마지막으로 출발지(회항) 순으로 찾고, 모두 불가하면 경고합니다. 돌발 뇌우는 3분에 걸쳐 발달하고 상층풍의 절반 속도로 이동합니다.</li>
         <li><b>비행 프로파일</b>: 수직 이륙 30 m → 이륙 구간 속도·상승률로 순항고도까지 상승 → 정속 순항 → 착륙 구간 속도·하강률로 하강 → 수직 착륙. 대지속도 = 대기속도 + 경로방향 바람.</li>
       </ul>
       <p>시간 축은 0~60분 5분 간격(준실시간), 2~48시간 1시간 간격(단기)입니다. 버티포트 위치·수치는 모두 설명용이며 운항 판단에 쓰면 안 됩니다.</p>
@@ -1256,7 +1272,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.2.1 (2026-11-17) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.3.0 (2026-11-18) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1326,6 +1342,7 @@ const SCN = {
   fog:{label:'새벽 한강 복사안개', issueH:4, U:2, dir:80, T:9, dep:0.6, pr:0, llj:0, conv:false}
 };
 const CONV = {t0:-0.8, t1:3.5, x0:-1, y0:-14, vx:5.5, vy:3, R:3, W:7, O:13, P:45};
+const HAZ = [];   // 돌발 기상: 비행 중 넣는 뇌우 셀 {x,y,t0(시),R(km),vx,vy(km/h)} — 3분에 걸쳐 발달, 1시간 유지 후 소멸
 
 /* ---------- fleet: published specs (sources) + estimated parameters ---------- */
 // cfg: multi = 멀티콥터, lift = 리프트+크루즈, vector = 틸트/벡터 추력
@@ -1422,6 +1439,19 @@ function met(x, y, z, t, sc){
     epsC = 0.04*life*Math.exp(-Math.pow(r/R,2));
     tiC = 0.15*life*Math.exp(-Math.pow(r/R,2));
     if (T0>15) ts = life*Math.exp(-Math.pow(r/(1.3*R),2));
+  }
+  for (const c of HAZ){
+    if (t<c.t0) continue;
+    const age=t-c.t0, life=Math.min(1,age/0.05)*(age<1?1:Math.max(0,1-(age-1)/0.5)); if (life<=0) continue;
+    const cx=c.x+c.vx*age, cy=c.y+c.vy*age, r=Math.max(0.01,Math.hypot(x-cx,y-cy)), R=c.R;
+    if (r>4.5*R) continue;
+    const O=14*life*(r/R)*Math.exp(1-r/R)*Math.exp(-zz/450);
+    u+=O*(x-cx)/r; v+=O*(y-cy)/r;
+    w=Math.min(w, -8*life*Math.exp(-Math.pow(r/(0.6*R),2))*Math.min(1,zz/250));
+    Pc+=50*life*Math.exp(-Math.pow(r/(0.7*R),2));
+    epsC+=0.05*life*Math.exp(-Math.pow(r/R,2));
+    tiC+=0.15*life*Math.exp(-Math.pow(r/R,2));
+    ts=Math.max(ts, life*Math.exp(-Math.pow(r/(1.3*R),2)));
   }
   const sH = Math.hypot(u,v);
   const lnz = Math.log(zz/z0e);
@@ -1820,7 +1850,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.2.1', APP_DATE='2026-11-17', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.3.0', APP_DATE='2026-11-18', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -1892,7 +1922,7 @@ function initMap(){
     const ri=riOf(minItem(marginItems(m,z,state.lim,false))[0]);
     $('#mapRead').textContent=`${e.latlng.lat.toFixed(4)}N ${e.latlng.lng.toFixed(4)}E · ${z} m · 위험도 ${ri.toFixed(0)} · ${dirName(wd)}풍 ${m.spd.toFixed(1)} m/s(돌풍 ${m.gust.toFixed(1)}) · 기온 ${m.T.toFixed(1)} °C · 습도 ${m.rh.toFixed(0)}% · EDR ${m.edr.toFixed(2)} · 시정 ${Math.round(m.vis)} m${m.rain>0.1?' · 비 '+m.rain.toFixed(1)+' mm/h':''}${m.snow>0.05?' · 눈 '+m.snow.toFixed(1)+' mm/h':''}${m.ts>0.05?' · 뇌우 '+m.ts.toFixed(2):''}`;
   });
-  LM.on('click',e=>{ if(!state.pick) return; const q=KM(e.latlng.lat,e.latlng.lng); setPoint(state.pick, q.x, q.y); setPick(null); });
+  LM.on('click',e=>{ if(!state.pick) return; const q=KM(e.latlng.lat,e.latlng.lng); const w=state.pick; setPick(null); if (w==='haz') addHazard(q.x,q.y); else setPoint(w, q.x, q.y); });
   LM.on('contextmenu',e=>{ LY.ctxLL=e.latlng; L.popup({closeButton:false}).setLatLng(e.latlng).setContent('<div class="ctx"><button type="button" data-ctx="a">여기서 출발</button><button type="button" data-ctx="b">여기로 도착</button></div>').openOn(LM); });
   $('#mapBase').addEventListener('change',e=>{ if(e.target.value==='osm'){ LY.osm.addTo(LM); LY.urban.remove(); } else { LY.osm.remove(); LY.urban.addTo(LM); } });
   LY.pinA=L.marker(LL(state.A.x,state.A.y),{icon:PIN('a'),draggable:true,keyboard:true,title:'출발 (끌어서 옮기기)',zIndexOffset:900}).addTo(LM);
@@ -2022,6 +2052,10 @@ function drawMapField(){
     LY.cell.addLayer(L.circle(LL(cx,cy),{radius:CONV.R*1300,pane:'linePane',color:css('--nogo'),weight:1.6,dashArray:'6 5',fill:false,interactive:false}));
     LY.cell.addLayer(L.marker(LL(cx,cy+CONV.R*1.3+0.35),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'cell-lbl',html:'뇌우·돌풍전선',iconSize:null})}));
   }
+  HAZ.forEach(c=>{ if (t<c.t0) return; const age=t-c.t0, life=Math.min(1,age/0.05)*(age<1?1:Math.max(0,1-(age-1)/0.5)); if (life<=0.02) return;
+    const cx=c.x+c.vx*age, cy=c.y+c.vy*age;
+    LY.cell.addLayer(L.circle(LL(cx,cy),{radius:c.R*1300*Math.max(0.35,life),pane:'linePane',color:css('--nogo'),weight:2,dashArray:'4 4',fill:true,fillColor:css('--nogo'),fillOpacity:0.08,interactive:false}));
+    LY.cell.addLayer(L.marker(LL(cx,cy+c.R*1.3*Math.max(0.35,life)+0.3),{pane:'linePane',interactive:false,keyboard:false,icon:L.divIcon({className:'cell-lbl',html:`돌발 뇌우${life<1?' (발달 중)':''}`,iconSize:null})})); });
   $('#mapInfo').textContent=`${fmtTime(new Date(issueDate().getTime()+t*3600e3))} · 고도 ${z} m · ${$('#mapField').selectedOptions[0].text}`;
   MT.drawn=t; MT.lastDraw=performance.now(); mtLabel();
 }
@@ -2032,6 +2066,11 @@ function drawMap(){
   LM.invalidateSize();
   drawMapField();
   const field=$('#mapField').value;
+  // routes replaced during flight
+  if (!LY.hist) LY.hist=L.layerGroup().addTo(LM); LY.hist.clearLayers();
+  FLY.history.forEach((R,k)=>{ LY.hist.addLayer(L.polyline(R.xs.map((x,i)=>LL(x,R.ys[i])),{pane:'altPane',color:css('--nogo'),weight:3,opacity:0.55,dashArray:'3 6',interactive:false})); });
+  FLY.marks.forEach(mk=>{ LY.hist.addLayer(L.marker(LL(mk.x,mk.y),{pane:'markPane',keyboard:false,icon:L.divIcon({className:'rr-mk',html:`<b>↱${mk.n}</b>`,iconSize:[30,22],iconAnchor:[15,26]})}).bindTooltip(`경로 변경 ${mk.n}회째 지점`,{direction:'top',className:'wp-tip'})); });
+  if (FLY.dest) LY.hist.addLayer(L.marker(LL(FLY.dest.x,FLY.dest.y),{pane:'markPane',keyboard:false,icon:L.divIcon({className:'rr-dest',html:'<b>H</b>',iconSize:[26,26],iconAnchor:[13,13]})}).bindTooltip(`변경된 착륙지 · ${FLY.dest.n||'지도 지정 위치'}`,{permanent:true,direction:'right',offset:[14,0],className:'wp-tip'}));
   // alternative routes
   LY.alt.clearLayers(); LY.route.clearLayers(); LY.marks.clearLayers();
   state.routes.forEach((r,k)=>{
@@ -2282,13 +2321,19 @@ function fpPlay(){
   if (!current) return;
   if (FP.playing){ fpStop(); return; }
   if (CRASH.on){ resetCrash(); FP.t=0; }
-  if (FP.t>=current.pr.total) FP.t=0;
-  const hz=hazardOf();
-  if (hz && FP.t<=hz.t && !FP.override){ showPreflight(hz); return; }
-  hideOvl();
-  FP.playing=true; FP.last=performance.now(); $('#fpPlay').textContent='일시정지';
+  if (FP.t>=current.pr.total){ FP.t=0; if (FLY.count){ restoreOriginal(); } }
+  FP.hz=hazardOf(FP.t);
+  if (FP.hz && !FP.override){
+    if (FP.t<=0){ showPreflight(FP.hz); return; }
+    if (checkAhead()) return;
+    FP.hz=hazardOf(FP.t);
+  }
+  hideOvl(); clearProposal();
+  FP.playing=true; FP.last=performance.now(); FLY.lastCheck=FP.t; $('#fpPlay').textContent='일시정지';
   const tick=now=>{ if(!FP.playing) return; const dt=(now-FP.last)/1000; FP.last=now; FP.t=Math.min(current.pr.total, FP.t+dt*(+$('#fpSpeed').value));
-    if (hz && FP.override && FP.t>=hz.t){ FP.t=hz.t; startCrash(hz); return; }
+    if (!FP.override && FP.t-FLY.lastCheck>=8){ FLY.lastCheck=FP.t; if (checkAhead()) return; }
+    const hz=FP.hz;
+    if (hz && FP.t>=hz.t){ FP.t=hz.t; startCrash(hz); return; }
     fpUpdate(); if (FP.t>=current.pr.total){ fpStop(); onArrive(); return; } FP.raf=requestAnimationFrame(tick); };
   FP.raf=requestAnimationFrame(tick);
 }
@@ -2316,14 +2361,14 @@ function hazDetail(p){
     '강설':`강설 ${m.snow.toFixed(1)} mm/h > 한계 ${L.snow}`, '뇌우':`뇌우 지수 ${m.ts.toFixed(2)} > 한계 0.25`,
     '착빙':`기온 ${m.T.toFixed(1)} °C에서 ${m.inCloud?'구름':'강수·안개'} 속 비행, 결빙 운용 불가 기체`})[p.f] || `${p.f} 여유율 ${(p.mg*100).toFixed(0)}%`;
 }
-function hazardOf(){
+function hazardOf(fromT=0){
   if (!current) return null;
   const pr=current.pr, P=current.pts, E=current.energy, R=ROUTE;
-  if (ACT.mass>ACT.air.mtow) return {t:pr.tUp*0.6, s:0, z:pr.H0*0.6, i:0, cause:'중량 초과', detail:`비행 중량 ${Math.round(ACT.mass).toLocaleString()} kg > 최대이륙중량 ${ACT.air.mtow.toLocaleString()} kg`};
+  if (fromT<=pr.tUp && ACT.mass>ACT.air.mtow) return {t:pr.tUp*0.6, s:0, z:pr.H0*0.6, i:0, cause:'중량 초과', detail:`비행 중량 ${Math.round(ACT.mass).toLocaleString()} kg > 최대이륙중량 ${ACT.air.mtow.toLocaleString()} kg`};
   let hz=null;
-  for (let i=0;i<P.length;i++) if (P[i].c===3){ hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:P[i].f, detail:hazDetail(P[i])}; break; }
+  for (let i=0;i<P.length;i++) if (pr.cum[i]>=fromT-1e-6 && P[i].c===3){ hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:P[i].f, detail:hazDetail(P[i])}; break; }
   const cap=E.usable/E.corr;
-  for (let i=0;i<P.length;i++) if (P[i].ecum>cap){ if (!hz || pr.cum[i]<hz.t) hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:'배터리 여유', detail:`사용 가능 ${E.usable.toFixed(0)} kWh 모두 소진`}; break; }
+  for (let i=0;i<P.length;i++) if (pr.cum[i]>=fromT-1e-6 && P[i].ecum>cap){ if (!hz || pr.cum[i]<hz.t) hz={t:pr.cum[i], s:R.s[i], z:P[i].z, i, cause:'배터리 여유', detail:`사용 가능 ${E.usable.toFixed(0)} kWh 모두 소진`}; break; }
   return hz;
 }
 const whereOf = hz => (nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i]) ? nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i])+' 부근' : `${hz.s.toFixed(1)} km 지점`);
@@ -2389,6 +2434,126 @@ function drawCrash(ctx){
   }
 }
 
+
+/* ---------- in-flight monitoring & real-time rerouting ---------- */
+const FLY={count:0, history:[], marks:[], log:[], lastCheck:0, pending:null, dest:null};
+function resetFly(){ FLY.count=0; FLY.history=[]; FLY.marks=[]; FLY.log=[]; FLY.lastCheck=0; FLY.pending=null; FLY.dest=null; clearProposal(); safe(renderRrLog); }
+function flownPoly(s){
+  const P=ROUTE.poly, out=[P[0]]; let acc=0;
+  for (let i=1;i<P.length;i++){ const L=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]); if (acc+L < s-1e-6){ out.push(P[i]); acc+=L; } else break; }
+  out.push(interpXY(s)); return out;
+}
+function aheadHazard(fromS){
+  const P=current.pts;
+  for (let i=0;i<P.length;i++){ if (ROUTE.s[i] < fromS+0.15) continue; if (P[i].c===3) return {i, s:ROUTE.s[i], p:P[i]}; }
+  if (current.battCat===3) return {i:ROUTE.n-1, s:ROUTE.L, p:{f:'배터리 여유', m:P[P.length-1].m, z:0}, batt:true};
+  return null;
+}
+function findDetour(f, targets){
+  const tNow=t0()+FP.t/3600, P0=f.s<=0?[state.A.x,state.A.y]:interpXY(f.s), flown=f.s<=0?[[state.A.x,state.A.y]]:flownPoly(f.s);
+  const acAt={...ACT, alt:current.pr.top};
+  for (const T of targets){
+    if (Math.hypot(T.x-P0[0],T.y-P0[1])<0.3) continue;
+    let picks; try { picks=planRoutes({x:P0[0],y:P0[1]}, T, tNow, state.sc, acAt, false); } catch(e){ console.error(e); continue; }
+    for (const pk of picks){
+      const R=buildRoute(flown.concat(pk.R.poly.slice(1)));
+      const res=evalRoute(t0(), ACT, state.sc, R, {alerts:true});
+      const bad=res.pts.some((p,i)=>R.s[i]>f.s+0.05 && p.c===3) || res.battCat===3;
+      if (!bad) return {R, res, T, prof:pk.prof};
+    }
+  }
+  return null;
+}
+function hazWhere(hz){ return nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i]) ? nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i])+' 부근' : `${hz.s.toFixed(1)} km 지점`; }
+function checkAhead(){
+  if (!current || CRASH.on || FP.override) return false;
+  const f=flightAt(FP.t), hz=aheadHazard(f.s);
+  if (!hz) return false;
+  const end={x:ROUTE.xs[ROUTE.n-1], y:ROUTE.ys[ROUTE.n-1], n:(FLY.dest||state.B).n||null};
+  let plan=findDetour(f,[end]), kind='우회';
+  if (!plan){
+    const P0=f.s<=0?[state.A.x,state.A.y]:interpXY(f.s);
+    // 대체 착륙지: 도착지에 가까운 버티포트부터, 마지막으로 출발지 회항
+    const isA=v=>Math.hypot(v.x-state.A.x,v.y-state.A.y)<0.3;
+    const alts=VERTIPORTS.filter(v=>Math.hypot(v.x-end.x,v.y-end.y)>0.5 && !isA(v))
+      .sort((a,b)=>Math.hypot(a.x-end.x,a.y-end.y)-Math.hypot(b.x-end.x,b.y-end.y)).slice(0,4);
+    alts.push({...state.A, n:state.A.n||'출발지'});
+    plan=findDetour(f,alts);
+    if (plan) kind = isA(plan.T) ? '회항' : '대체 착륙지로 변경';
+  }
+  const info={t:FP.t, s:f.s, at:interpXY(Math.max(0,f.s)), where:hazWhere(hz), ahead:hz.s-f.s, cause:hz.p.f, detail:hz.batt?'남은 배터리로 도착 불가':hazDetail(hz.p), kind, plan};
+  if (!plan){ fpStop(); FLY.log.push({...info, none:true}); safe(renderRrLog); showNoDetour(info); return true; }
+  if ($('#rrAuto').checked){ applyDetour(info); return false; }
+  fpStop(); FLY.pending=info; showProposal(info); return true;
+}
+function applyDetour(info){
+  const old={L:ROUTE.L, total:current.pr.total, pct:current.energy.pct};
+  FLY.history.push(ROUTE); FLY.marks.push({x:info.at[0], y:info.at[1], n:FLY.count+1});
+  ROUTE=info.plan.R; current=info.plan.res; FP.sig=routeSig();
+  if (info.kind!=='우회') FLY.dest=info.plan.T;
+  FLY.count++; FLY.lastCheck=FP.t; FP.hz=hazardOf(FP.t);
+  FLY.log.push({...info, dL:ROUTE.L-old.L, dT:current.pr.total-old.total, dE:current.energy.pct-old.pct});
+  clearProposal();
+  [renderSummary, renderAlerts, renderSegments, renderEnergy, drawMap, drawSection, drawMeteo, renderRrLog].forEach(f=>safe(f));
+  rrNote(`경로 변경 ${FLY.count}회째 · ${info.where}(앞 ${info.ahead.toFixed(1)} km) ${info.cause} 예상 → ${info.kind}${info.kind!=='우회'?' ('+(info.plan.T.n||'지도 지정 위치')+')':''}`);
+}
+function rrNote(t){ const n=$('#rrNote'); n.textContent=t; n.hidden=false; clearTimeout(rrNote.tm); rrNote.tm=setTimeout(()=>{ n.hidden=true; }, 9000); }
+function renderRrLog(){
+  const ol=$('#rrLog'); if (!ol) return;
+  ol.innerHTML=FLY.log.map(e=> e.none
+    ? `<li class="bad"><b>${fmtMS(e.t)} 우회 경로 없음</b> · ${e.where} 앞 ${e.ahead.toFixed(1)} km · ${e.cause} (${e.detail})</li>`
+    : `<li><b>${fmtMS(e.t)} ${e.kind}${e.kind!=='우회'?' → '+(e.plan.T.n||'지도 지정 위치'):''}</b> · ${e.where} 앞 ${e.ahead.toFixed(1)} km · ${e.cause} (${e.detail}) · 거리 ${e.dL>=0?'+':''}${e.dL.toFixed(1)} km, 시간 ${e.dT>=0?'+':'−'}${fmtMS(Math.abs(e.dT))}, 배터리 ${e.dE>=0?'+':''}${e.dE.toFixed(0)}%p</li>`).join('');
+  ol.hidden=!FLY.log.length;
+}
+function showProposal(info){
+  drawProposal(info.plan.R);
+  showOvl(`<h3>앞쪽 경로에 불가 기상</h3>
+    <p><b>${info.where} · 앞 ${info.ahead.toFixed(1)} km</b>에서 운용 한계를 넘을 것으로 예측됩니다.</p>
+    <p class="why"><b>${info.cause}</b> · ${info.detail}</p>
+    <p class="why">제안: ${info.kind}${info.kind!=='우회'?' ('+(info.plan.T.n||'지도 지정 위치')+')':''} · 거리 ${(info.plan.R.L-ROUTE.L>=0?'+':'')}${(info.plan.R.L-ROUTE.L).toFixed(1)} km · 배터리 사용 ${info.plan.res.energy.pct.toFixed(0)}%. 지도에 점선으로 표시했습니다.</p>
+    <div class="btnrow"><button type="button" class="primary" data-ovl="rr-accept">새 경로로 변경</button><button type="button" class="danger" data-ovl="rr-ignore">그대로 진행 (사고 위험)</button></div>`, 'pre');
+}
+function showNoDetour(info){
+  showOvl(`<h3>우회할 안전 경로가 없습니다</h3>
+    <p><b>${info.where} · 앞 ${info.ahead.toFixed(1)} km</b>: ${info.cause} · ${info.detail}</p>
+    <p class="why">도착지, 가까운 버티포트, 출발지까지 모두 불가 구간을 피할 수 없습니다. 실제 운항이라면 가능한 곳에 즉시 착륙해야 합니다.</p>
+    <div class="btnrow"><button type="button" data-ovl="restart">처음으로</button><button type="button" class="danger" data-ovl="rr-ignore">그대로 진행 (사고 위험)</button></div>`, 'acc');
+}
+function drawProposal(R){ if (!LM) return; if (!LY.prop) LY.prop=L.layerGroup().addTo(LM); LY.prop.clearLayers();
+  LY.prop.addLayer(L.polyline(R.xs.map((x,i)=>LL(x,R.ys[i])),{pane:'routePane',color:css('--accent'),weight:5,opacity:0.9,dashArray:'8 6',interactive:false})); }
+function clearProposal(){ if (LY.prop) LY.prop.clearLayers(); }
+function restoreOriginal(){ resetFly(); evalSelected(); renderAll('select'); }
+
+/* ---------- sudden weather (injected thunderstorm cells) ---------- */
+function flyingNow(){ return !!current && !CRASH.on && FP.t>0 && FP.t<current.pr.total; }
+function addHazard(x,y){
+  x=clamp(x,EXT.x0+0.5,EXT.x1-0.5); y=clamp(y,EXT.y0+0.5,EXT.y1-0.5);
+  const fly=flyingNow(), tA = fly ? t0()+FP.t/3600 : t0();
+  const m=met(x,y,600,tA,state.sc);
+  HAZ.push({x,y,t0:tA,R:1.7,vx:m.u*3.6*0.5,vy:m.v*3.6*0.5});
+  const nm=nearestName(x,y); const msg=`돌발 뇌우 발생 · ${nm?nm+' 부근':'지도 지정 위치'} · 3분 안에 최대로 발달`;
+  if (fly){
+    current=evalRoute(t0(), ACT, state.sc, ROUTE, {alerts:true}); FP.hz=hazardOf(FP.t);
+    [renderSummary, renderAlerts, renderSegments, renderEnergy, drawMap, drawSection, drawMeteo].forEach(f=>safe(f));
+    rrNote(msg);
+    const wasPlaying=FP.playing; FLY.lastCheck=FP.t;
+    if (!FP.override){ const paused=checkAhead(); if (!paused && !wasPlaying) fpUpdate(); }
+  } else { rrNote(msg+' · 추천 항로를 다시 계산했습니다'); update('plan'); }
+}
+function hazardAheadBtn(){
+  if (!current) return;
+  const s0=flightAt(FP.t).s, rem=ROUTE.L-s0;
+  if (rem<2.5){ rrNote('도착지에 너무 가까워 앞쪽에 넣을 수 없습니다. 지도에서 직접 놓아 보세요.'); return; }
+  const s=Math.min(ROUTE.L-1.2, s0+Math.max(2.2, rem*0.4)), p=interpXY(s);
+  addHazard(p[0],p[1]);
+}
+function clearHazards(){
+  if (!HAZ.length) return; HAZ.length=0;
+  if (flyingNow()){ current=evalRoute(t0(), ACT, state.sc, ROUTE, {alerts:true}); FP.hz=hazardOf(FP.t); [renderSummary, renderAlerts, renderSegments, renderEnergy, drawMap, drawSection, drawMeteo, fpUpdate].forEach(f=>safe(f)); }
+  else update('plan');
+  rrNote('돌발 기상을 모두 지웠습니다.');
+}
+
 /* ---------- panels ---------- */
 function issueDate(){ const d=new Date(); d.setHours(state.sc.issueH,0,0,0); return d; }
 function fmtTime(d){const p=n=>String(n).padStart(2,'0'); return `${d.getMonth()+1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
@@ -2396,7 +2561,7 @@ const ptName = P => P.n || nearestName(P.x,P.y) && `${nearestName(P.x,P.y)} 부�
 function renderSummary(){
   const r=current, w=r.worst, p=r.pts[w.i], sel=state.routes[state.sel];
   $('#vBig').className='big c'+r.c; $('#vVal').textContent=LV[r.c];
-  $('#fRoute').innerHTML=`추천 ${state.sel+1} · ${sel.prof.name} <small>${ptName(state.A)} → ${ptName(state.B)} · ${AIR().name}</small>`;
+  $('#fRoute').innerHTML=`추천 ${state.sel+1} · ${sel.prof.name}${FLY.count?` · 비행 중 변경 ${FLY.count}회`:''} <small>${ptName(state.A)} → ${FLY.dest?(FLY.dest.n||'지도 지정 위치')+' (착륙지 변경)':ptName(state.B)} · ${AIR().name}</small>`;
   $('#fDist').innerHTML=`${ROUTE.L.toFixed(1)} km · ${fmtMS(r.pr.total)} <small>순항 ${Math.round(r.pr.top)} m · ${state.fl.vc} km/h</small>`;
   $('#fRI').innerHTML=`${r.riMean.toFixed(0)} · ${r.riMax.toFixed(0)} <small>배터리 ${r.energy.pct.toFixed(0)}% 사용</small>`;
   $('#fFactor').textContent= r.c===0 ? '없음' : r.limit;
@@ -2646,8 +2811,8 @@ function setPoint(which, x, y, name){
 function syncPointSelect(){
   [['#selA',state.A],['#selB',state.B]].forEach(([id,P])=>{ const sel=$(id); const cust=sel.querySelector('option[value="custom"]'); cust.textContent = P.n ? '지도에서 지정' : `지도 지정: ${ptName(P)}`; sel.value = P.n || 'custom'; });
 }
-function setPick(w){ state.pick=w; $('#pickA').classList.toggle('on',w==='a'); $('#pickB').classList.toggle('on',w==='b'); $('#map').classList.toggle('picking',!!w);
-  $('#mapRead').textContent = w ? `지도에서 ${w==='a'?'출발':'도착'} 지점을 클릭하세요. (Esc로 취소)` : $('#mapRead').textContent; }
+function setPick(w){ state.pick=w; $('#pickA').classList.toggle('on',w==='a'); $('#pickB').classList.toggle('on',w==='b'); $('#hazPick').classList.toggle('on',w==='haz'); $('#map').classList.toggle('picking',!!w);
+  $('#mapRead').textContent = w ? (w==='haz' ? '지도에서 돌발 뇌우를 놓을 곳을 클릭하세요. (Esc로 취소)' : `지도에서 ${w==='a'?'출발':'도착'} 지점을 클릭하세요. (Esc로 취소)`) : $('#mapRead').textContent; }
 function selectRoute(k){ state.sel=k; state.selKey=state.routes[k].prof.key; evalSelected(); renderAll('select'); }
 function evalSelected(){
   const p=state.routes[state.sel]; ROUTE=p.R;
@@ -2656,7 +2821,7 @@ function evalSelected(){
   current=evalRoute(t0(), ACT, state.sc, ROUTE, {alerts:true});
   p.r=evalRoute(t0(), ACT, state.sc, ROUTE, {fast:true});
   FP.sig=routeSig();
-  if (FP.sig!==prevSig && !FP.playing){ FP.t=0; FP.override=false; resetCrash(); $('#fpPlay').textContent='비행 재생'; }
+  if (FP.sig!==prevSig && !FP.playing){ FP.t=0; FP.override=false; resetCrash(); resetFly(); $('#fpPlay').textContent='비행 재생'; }
   if (FP.t>current.pr.total) FP.t=current.pr.total;
 }
 function renderAll(kind){
@@ -2734,16 +2899,21 @@ $('#play').addEventListener('click',()=>{
   timer=setInterval(()=>{ state.step=(state.step+1)%STEPS.length; $('#step').value=state.step; update('step'); }, 1200);
 });
 $('#fpPlay').addEventListener('click',fpPlay);
+$('#hazAhead').addEventListener('click',hazardAheadBtn);
+$('#hazPick').addEventListener('click',()=>setPick(state.pick==='haz'?null:'haz'));
+$('#hazClear').addEventListener('click',clearHazards);
 $('#mtPlay').addEventListener('click',()=>{ MT.playing=!MT.playing; $('#mtPlay').textContent=MT.playing?'지도 시간 멈춤':'지도 시간 자동 반복'; $('#mtPlay').setAttribute('aria-pressed',MT.playing); });
 $('#mtRange').addEventListener('input',e=>{ MT.dragging=true; MT.h=MT.base+(+e.target.value/1000)*MT.span; drawMapField(); });
 $('#mtRange').addEventListener('change',()=>{ MT.dragging=false; });
 $('#mtSpan').addEventListener('change',e=>{ MT.span=+e.target.value; if (MT.h>MT.base+MT.span) MT.h=MT.base; drawMapField(); });
 $('#crashOvl').addEventListener('click',e=>{ const b=e.target.closest('[data-ovl]'); if(!b) return; const k=b.dataset.ovl;
+  if (k==='rr-accept'){ const inf=FLY.pending; FLY.pending=null; hideOvl(); if (inf) applyDetour(inf); fpPlay(); return; }
+  if (k==='rr-ignore'){ FP.override=true; FLY.pending=null; hideOvl(); clearProposal(); FP.hz=hazardOf(FP.t); fpPlay(); return; }
   if (k==='cancel'){ hideOvl(); }
   else if (k==='force'){ FP.override=true; hideOvl(); fpPlay(); }
   else if (k==='restart'){ resetCrash(); FP.override=false; FP.t=0; fpStop(); }
   else if (k==='safe'){ const i=safeRouteIdx(); resetCrash(); FP.override=false; FP.t=0; if (i>=0) selectRoute(i); fpStop(); } });
-$('#fpReset').addEventListener('click',()=>{ resetCrash(); FP.override=false; fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
+$('#fpReset').addEventListener('click',()=>{ if (FLY.count){ fpStop(); restoreOriginal(); return; } resetCrash(); resetFly(); FP.override=false; fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
 $('#fpScrub').addEventListener('input',e=>{ if(!current) return; if (CRASH.on) resetCrash(); FP.dragging=true; FP.t=+e.target.value/1000*current.pr.total; fpUpdate(); });
 $('#fpScrub').addEventListener('change',()=>{ FP.dragging=false; });
 function hoverOn(cv, X0getter){
