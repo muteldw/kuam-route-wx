@@ -913,6 +913,13 @@ button.pick#hazPick.on{background:var(--nogo-soft);border-color:var(--nogo);colo
 .rr-mk,.rr-dest{background:none;border:0}
 .rr-mk b{display:grid;place-items:center;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--on-accent);font:700 11px var(--font-data);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .rr-dest b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--warn);color:var(--on-accent);font:700 13px var(--font-ui);border:2px solid var(--surface)}
+.seg{display:flex;flex-wrap:wrap;align-items:center;gap:0;border-radius:8px}
+.seg-l{font-size:13px;font-weight:600;margin-right:10px}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:nth-of-type(1){border-radius:7px 0 0 7px;margin-left:0}
+.seg button:last-of-type{border-radius:0 7px 7px 0}
+.seg button[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);position:relative;z-index:1}
+.seg button[data-rr="off"][aria-checked="true"]{background:var(--nogo);border-color:var(--nogo)}
 [hidden]{display:none!important}
 .crash-ovl{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:min(480px,calc(100% - 16px));background:var(--surface);color:var(--ink);border:2px solid var(--nogo);border-radius:10px;padding:14px 16px;display:grid;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.28);z-index:5}
 .crash-ovl.pre{border-color:var(--warn)}
@@ -926,6 +933,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
 @media (prefers-reduced-motion:no-preference){#secWrap.crashing{animation:shake .12s linear 6}}
 @keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 .uam-mk.crashed .uam-svg g{fill:var(--nogo)!important}
+.uam-mk.shaky .uam-svg g{fill:var(--nogo)!important}
 .crash-mk span{display:block;width:34px;height:34px;border-radius:50%;border:3px solid var(--nogo);background:var(--nogo-soft);position:relative}
 .crash-mk span::before,.crash-mk span::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:3px;background:var(--nogo);border-radius:2px;transform:translate(-50%,-50%) rotate(45deg)}
 .crash-mk span::after{transform:translate(-50%,-50%) rotate(-45deg)}
@@ -941,7 +949,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.3.0 · 2026-11-18</span>
+    <span class="tag ver">v1.4.0 · 2026-11-18</span>
     <span class="tag syn">합성 시나리오 자료 · 실측 연결 전</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1164,7 +1172,14 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
       </select>
     </div>
     <div class="rr">
-      <label class="check"><input id="rrAuto" type="checkbox" checked> 비행 중 앞쪽 경로에 불가 기상이 생기면 자동으로 새 경로로 변경 (끄면 확인 후 변경)</label>
+      <div class="seg" role="radiogroup" aria-label="비행 중 경로 변경">
+        <span class="seg-l">비행 중 경로 변경</span>
+        <button type="button" role="radio" data-rr="auto" aria-checked="true">자동</button>
+        <button type="button" role="radio" data-rr="ask" aria-checked="false">확인 후</button>
+        <button type="button" role="radio" data-rr="off" aria-checked="false">끄기 (사고 재현)</button>
+      </div>
+      <div class="hint" id="rrHint">앞쪽 경로에 불가 기상이 예측되면 현재 위치에서 새 경로로 바로 바꿉니다.</div>
+      <label class="check"><input id="autoStorm" type="checkbox" checked> 비행 중 돌발 뇌우 자동 발생 (시연 · 비행마다 한 번, 앞쪽 경로에)</label>
       <div class="btnrow"><button type="button" id="hazAhead">돌발 뇌우 넣기 (앞쪽 경로)</button><button type="button" class="pick" id="hazPick">지도에서 돌발 뇌우 놓기</button><button type="button" id="hazClear">돌발 기상 지우기</button></div>
       <div class="rrnote" id="rrNote" role="status" hidden></div>
       <ol class="rrlog" id="rrLog" hidden></ol>
@@ -1237,6 +1252,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.4.0</b> (2026-11-18) 비행 중 돌발 뇌우 자동 발생(시연), 위험 구간 기체 흔들림·감속 재생, 경로 변경 모드(자동·확인 후·끄기)</li>
         <li><b>v1.3.0</b> (2026-11-18) 비행 중 실시간 경로 변경(자동·확인 후), 비상 착륙지 변경·회항, 돌발 뇌우 넣기, 경로 변경 기록</li>
         <li><b>v1.2.1</b> (2026-11-17) 화면이 크기 0으로 먼저 열릴 때 연직 단면·비행 아이콘·경로 기상이 그려지지 않던 오류 수정, 한 화면의 오류가 다른 화면을 멈추지 않도록 분리</li>
         <li><b>v1.2.0</b> (2026-11-17) 지도 시간 자동 반복과 비행 재생 시간 동기화, 지도 바로 아래 비행 재생 배치, 재생 배속 1~300배, 버전·작성자 표시</li>
@@ -1264,7 +1280,8 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
         <li><b>배터리 소비</b>: 호버 전력 = 중량×유도속도/효율(디스크하중·공기밀도 반영), 순항 전력 = 중량×속도/(양항비×효율), 상승은 위치에너지 증가분을 더하고 하강은 일부 회수. 난류는 소비를 늘리고(EDR 0.1당 +8%), 저온은 사용 가능 용량을 줄입니다(10 °C 아래 1 °C당 −1%). 배터리 용량은 공개 항속거리를 최대이륙중량·예비 20%로 비행한다고 보고 역산한 추정치입니다.</li>
         <li><b>소비량 학습</b>: 저장한 비행 기록에 실측 소비량을 넣으면 기체별 보정계수 k = Σ(실측×예측)/Σ(예측²)를 다시 계산해 예측에 곱합니다. 맞바람에 따른 kWh/km 증가율은 기록 3건 이상부터 회귀로 구합니다.</li>
         <li><b>항로 추천</b>: 300 m 미만 순항은 소음·장애물 여유 때문에 벌점을 주고 기상이 나쁠 때만 고릅니다. 0.4 km 격자에서 위험도 지수에 비례하는 비용으로 최단 비용 경로를 찾고(다익스트라), 직선으로 펴서 3가지 성격(최소 위험·한강 회랑·최단 시간)으로 만든 뒤 순항고도 후보(상한, −150 m, −300 m)마다 평가해 고릅니다. 김포공항 반경 2.6 km는 피합니다(출발·도착지가 공항이면 제외).</li>
-        <li><b>실시간 경로 변경</b>: 비행 중 8초(모의 시간)마다 남은 경로를 그 시각 예측으로 다시 평가해 앞쪽에 위험도 80 이상 구간이나 배터리 부족이 생기면, 지금 위치에서 도착지까지 같은 고도로 새 항로를 찾아 이어 붙입니다. 안 되면 도착지에 가까운 대체 버티포트, 마지막으로 출발지(회항) 순으로 찾고, 모두 불가하면 경고합니다. 돌발 뇌우는 3분에 걸쳐 발달하고 상층풍의 절반 속도로 이동합니다.</li>
+        <li><b>실시간 경로 변경</b>: 비행 중 8초(모의 시간)마다 남은 경로를 그 시각 예측으로 다시 평가해 앞쪽에 위험도 80 이상 구간이나 배터리 부족이 생기면, 지금 위치에서 도착지까지 같은 고도로 새 항로를 찾아 이어 붙입니다. 안 되면 도착지에 가까운 대체 버티포트, 마지막으로 출발지(회항) 순으로 찾고, 모두 불가하면 경고합니다. 돌발 뇌우는 3분에 걸쳐 발달하고 상층풍의 절반 속도로 이동합니다. 경로 변경은 자동·확인 후·끄기(사고 재현) 중에 고릅니다.</li>
+        <li><b>기체 흔들림</b>: 위험도 지수(35→80), 난류(EDR이 한계의 55%→115%), 급변풍(F-factor 0.04→0.12)에 비례해 흔들림 세기를 정하고 단면·지도 아이콘에 표시합니다. 심하면 붉게 바뀝니다. 흔들리는 구간에서는 재생을 최대 8배속으로 늦춰 보여줍니다.</li>
         <li><b>비행 프로파일</b>: 수직 이륙 30 m → 이륙 구간 속도·상승률로 순항고도까지 상승 → 정속 순항 → 착륙 구간 속도·하강률로 하강 → 수직 착륙. 대지속도 = 대기속도 + 경로방향 바람.</li>
       </ul>
       <p>시간 축은 0~60분 5분 간격(준실시간), 2~48시간 1시간 간격(단기)입니다. 버티포트 위치·수치는 모두 설명용이며 운항 판단에 쓰면 안 됩니다.</p>
@@ -1272,7 +1289,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.3.0 (2026-11-18) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.4.0 (2026-11-18) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1850,7 +1867,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.3.0', APP_DATE='2026-11-18', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.4.0', APP_DATE='2026-11-18', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -2191,6 +2208,24 @@ function drawUAMSide(ctx,x,y,col){
   ctx.restore();
 }
 function cursorS(){ if (FP.playing || HOV.s===null) return FP.t>0 || FP.playing ? flightAt(FP.t).s : null; return HOV.s; }
+
+/* ---------- buffeting: the aircraft shakes in proportion to risk & turbulence ---------- */
+function shakeAt(p){
+  const byRisk=clamp((p.ri-30)/45,0,1), byTurb=clamp((p.m.edr/ACT.lim.edr-0.45)/0.6,0,1), byShear=clamp((Math.abs(p.F||0)-0.035)/0.08,0,1);
+  return Math.max(byRisk, byTurb, byShear*0.8);
+}
+function shakeLevel(i){   // 지나는 지점과 앞뒤 약 0.6 km 안의 위험을 반영 (가까울수록 크게)
+  if (!current || CRASH.on) return 0;
+  const P=current.pts, n=P.length; let k=0;
+  for (let j=Math.max(0,i-6); j<=Math.min(n-1,i+6); j++){ const w=1-Math.abs(j-i)/8; k=Math.max(k, shakeAt(P[j])*w); }
+  return k;
+}
+function shakeOffset(k){
+  if (k<=0 || REDUCED) return {dx:0,dy:0,rot:0};
+  const t=performance.now();
+  return {dx:k*(4.5*Math.sin(t*0.031)+2*Math.sin(t*0.083)), dy:k*(3.5*Math.sin(t*0.047+1.3)+1.5*Math.sin(t*0.11)), rot:k*(0.16*Math.sin(t*0.039)+0.06*Math.sin(t*0.097))};
+}
+const shakeName = k => k<=0.05 ? '안정' : k<0.4 ? '약한 흔들림' : k<0.75 ? '흔들림' : '심한 흔들림';
 function secPaint(){
   if (!SEC.bg || !SEC.bg.width || !SEC.bg.height) return;
   const cv=$('#sec'), ctx=cv.getContext('2d');
@@ -2199,7 +2234,10 @@ function secPaint(){
   const s=cursorS();
   if (s!==null){ const x=SEC.X(s); ctx.save(); ctx.strokeStyle=css('--ink'); ctx.globalAlpha=0.55; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x,SEC.padT); ctx.lineTo(x,SEC.padT+SEC.ih); ctx.stroke(); ctx.restore(); }
   if (CRASH.on){ drawCrash(ctx); return; }
-  const f=flightAt(FP.t); drawUAMSide(ctx, SEC.X(f.s), SEC.Y(Math.max(f.z,0))-10);
+  const f=flightAt(FP.t), k=(FP.playing||FP.t>0)?shakeLevel(f.i):0, o=FP.playing?shakeOffset(k):{dx:0,dy:0,rot:0};
+  const ux=SEC.X(f.s), uy=SEC.Y(Math.max(f.z,0))-10;
+  if (k>0.05){ ctx.save(); ctx.globalAlpha=0.25+0.35*k; ctx.strokeStyle=k>=0.75?css('--nogo'):css('--warn'); ctx.lineWidth=2; for (let q=0;q<3;q++){ const a=-0.6+q*0.6; ctx.beginPath(); ctx.arc(ux+o.dx,uy+o.dy,20+q*3+4*k,a-0.25,a+0.25); ctx.stroke(); ctx.beginPath(); ctx.arc(ux+o.dx,uy+o.dy,20+q*3+4*k,Math.PI+a-0.25,Math.PI+a+0.25); ctx.stroke(); } ctx.restore(); }
+  ctx.save(); ctx.translate(ux+o.dx, uy+o.dy); ctx.rotate(o.rot); drawUAMSide(ctx, 0, 0, k>=0.75?css('--nogo'):null); ctx.restore();
 }
 const MROWS=[{k:'ri',n:'위험도',u:'지수'},{k:'kw',n:'전력',u:'kW'},{k:'T',n:'기온',u:'°C'},{k:'wind',n:'바람',u:'m/s'},{k:'rh',n:'습도',u:'%'},{k:'cc',n:'구름',u:'운량'},{k:'pr',n:'강수',u:'mm/h'}];
 function drawMeteo(){
@@ -2297,15 +2335,17 @@ function flightAt(t){
 function fpUpdate(){
   if (!current) return;
   const f=flightAt(FP.t), total=current.pr.total, p=current.pts[f.i], m=p.m;
-  $('#fpTime').textContent=`${fmtMS(FP.t)} / ${fmtMS(total)}`;
+  $('#fpTime').textContent=`${fmtMS(FP.t)} / ${fmtMS(total)}${FP.playing&&FP.slow?' · 위험 구간 감속 재생':''}`;
   if (!FP.dragging) $('#fpScrub').value=Math.round(FP.t/total*1000);
-  if (LY.uam){ const x=ROUTE.xs[f.i], y=ROUTE.ys[f.i]; const pos = (f.s<=0) ? [state.A.x,state.A.y] : (f.s>=ROUTE.L ? [state.B.x,state.B.y] : interpXY(f.s));
-    LY.uam.setLatLng(LL(pos[0],pos[1])); const el=LY.uam.getElement(); if (el){ const sv=el.querySelector('svg'); if (sv) sv.style.transform=`rotate(${Math.atan2(ROUTE.tx[f.i],ROUTE.ty[f.i])*180/Math.PI}deg)`; } }
+  const kS=(FP.playing||FP.t>0)?shakeLevel(f.i):0, oS=FP.playing?shakeOffset(kS):{dx:0,dy:0,rot:0};
+  if (LY.uam){ const pos = (f.s<=0) ? [ROUTE.xs[0],ROUTE.ys[0]] : (f.s>=ROUTE.L ? [ROUTE.xs[ROUTE.n-1],ROUTE.ys[ROUTE.n-1]] : interpXY(f.s));
+    LY.uam.setLatLng(LL(pos[0],pos[1])); const el=LY.uam.getElement(); if (el){ const sv=el.querySelector('svg'); el.classList.toggle('shaky', kS>=0.75);
+      if (sv) sv.style.transform=`translate(${(oS.dx*0.8).toFixed(1)}px,${(oS.dy*0.8).toFixed(1)}px) rotate(${(Math.atan2(ROUTE.tx[f.i],ROUTE.ty[f.i])*180/Math.PI + oS.rot*60).toFixed(1)}deg)`; } }
   const eNow = f.s<=0 ? current.energy.eUp*Math.min(1,FP.t/current.pr.tUp) : (f.s>=ROUTE.L ? current.energy.raw : p.ecum);
   const pctNow = eNow*current.energy.corr/current.energy.usable*100;
   const wd=wdirOf(m), Wx=p.Wx;
   const items=[
-    ['경과', `${fmtMS(FP.t)}`], ['비행 단계', CRASH.on?'<span class="chip c3">사고 · 비행 중단</span>':f.phase], ['고도', `${Math.round(f.z)} m`], ['수직속도', `${f.vz>=0?'+':''}${f.vz.toFixed(1)} m/s`],
+    ['경과', `${fmtMS(FP.t)}`], ['비행 단계', CRASH.on?'<span class="chip c3">사고 · 비행 중단</span>':f.phase], ['기체 상태', CRASH.on?'—':`<span class="chip c${kS<=0.05?0:kS<0.4?1:kS<0.75?2:3}">${shakeName(kS)}</span>`], ['고도', `${Math.round(f.z)} m`], ['수직속도', `${f.vz>=0?'+':''}${f.vz.toFixed(1)} m/s`],
     ['대기속도 · 대지속도', `${Math.round(f.va*3.6)} · ${Math.round(f.gs*3.6)} km/h`],
     ['바람', `${dirName(wd)} ${m.spd.toFixed(1)} m/s (${Wx<0?'맞바람':'뒷바람'} ${Math.abs(Wx).toFixed(1)})`],
     ['기온 · 습도', `${m.T.toFixed(1)} °C · ${m.rh.toFixed(0)}%`],
@@ -2330,7 +2370,8 @@ function fpPlay(){
   }
   hideOvl(); clearProposal();
   FP.playing=true; FP.last=performance.now(); FLY.lastCheck=FP.t; $('#fpPlay').textContent='일시정지';
-  const tick=now=>{ if(!FP.playing) return; const dt=(now-FP.last)/1000; FP.last=now; FP.t=Math.min(current.pr.total, FP.t+dt*(+$('#fpSpeed').value));
+  const tick=now=>{ if(!FP.playing) return; const dt=(now-FP.last)/1000; FP.last=now; const sel=+$('#fpSpeed').value, kz=shakeLevel(flightAt(FP.t).i); FP.slow = kz>=0.3 && sel>8; FP.t=Math.min(current.pr.total, FP.t+dt*(FP.slow?8:sel));
+    if (!FLY.stormDone && $('#autoStorm').checked && !FP.override && FP.t>=Math.max(25, current.pr.total*0.22) && ROUTE.L-flightAt(FP.t).s>3){ FLY.stormDone=true; hazardAheadBtn(); if (!FP.playing) return; }
     if (!FP.override && FP.t-FLY.lastCheck>=8){ FLY.lastCheck=FP.t; if (checkAhead()) return; }
     const hz=FP.hz;
     if (hz && FP.t>=hz.t){ FP.t=hz.t; startCrash(hz); return; }
@@ -2436,8 +2477,9 @@ function drawCrash(ctx){
 
 
 /* ---------- in-flight monitoring & real-time rerouting ---------- */
-const FLY={count:0, history:[], marks:[], log:[], lastCheck:0, pending:null, dest:null};
-function resetFly(){ FLY.count=0; FLY.history=[]; FLY.marks=[]; FLY.log=[]; FLY.lastCheck=0; FLY.pending=null; FLY.dest=null; clearProposal(); safe(renderRrLog); }
+const FLY={count:0, history:[], marks:[], log:[], lastCheck:0, pending:null, dest:null, stormDone:false};
+const RR={mode:'auto'};   // 비행 중 경로 변경: auto 자동, ask 확인 후, off 끄기(그대로 비행 → 사고 재현)
+function resetFly(){ FLY.count=0; FLY.history=[]; FLY.marks=[]; FLY.log=[]; FLY.lastCheck=0; FLY.pending=null; FLY.dest=null; FLY.stormDone=false; clearProposal(); safe(renderRrLog); }
 function flownPoly(s){
   const P=ROUTE.poly, out=[P[0]]; let acc=0;
   for (let i=1;i<P.length;i++){ const L=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]); if (acc+L < s-1e-6){ out.push(P[i]); acc+=L; } else break; }
@@ -2466,7 +2508,7 @@ function findDetour(f, targets){
 }
 function hazWhere(hz){ return nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i]) ? nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i])+' 부근' : `${hz.s.toFixed(1)} km 지점`; }
 function checkAhead(){
-  if (!current || CRASH.on || FP.override) return false;
+  if (!current || CRASH.on || FP.override || RR.mode==='off') return false;
   const f=flightAt(FP.t), hz=aheadHazard(f.s);
   if (!hz) return false;
   const end={x:ROUTE.xs[ROUTE.n-1], y:ROUTE.ys[ROUTE.n-1], n:(FLY.dest||state.B).n||null};
@@ -2483,7 +2525,7 @@ function checkAhead(){
   }
   const info={t:FP.t, s:f.s, at:interpXY(Math.max(0,f.s)), where:hazWhere(hz), ahead:hz.s-f.s, cause:hz.p.f, detail:hz.batt?'남은 배터리로 도착 불가':hazDetail(hz.p), kind, plan};
   if (!plan){ fpStop(); FLY.log.push({...info, none:true}); safe(renderRrLog); showNoDetour(info); return true; }
-  if ($('#rrAuto').checked){ applyDetour(info); return false; }
+  if (RR.mode==='auto'){ applyDetour(info); return false; }
   fpStop(); FLY.pending=info; showProposal(info); return true;
 }
 function applyDetour(info){
@@ -2900,6 +2942,8 @@ $('#play').addEventListener('click',()=>{
 });
 $('#fpPlay').addEventListener('click',fpPlay);
 $('#hazAhead').addEventListener('click',hazardAheadBtn);
+const RR_HINT={auto:'앞쪽 경로에 불가 기상이 예측되면 현재 위치에서 새 경로로 바로 바꿉니다.', ask:'앞쪽 경로에 불가 기상이 예측되면 멈추고 새 경로를 제안합니다. 수락하거나 그대로 진행할 수 있습니다.', off:'경로를 바꾸지 않고 그대로 비행합니다. 불가 구간에 들어서면 사고가 재현됩니다.'};
+document.querySelectorAll('[data-rr]').forEach(b=>b.addEventListener('click',()=>{ RR.mode=b.dataset.rr; document.querySelectorAll('[data-rr]').forEach(x=>x.setAttribute('aria-checked', x===b?'true':'false')); $('#rrHint').textContent=RR_HINT[RR.mode]; if (RR.mode!=='off' && FP.override && FP.t>0 && !CRASH.on){ /* keep consent already given */ } }));
 $('#hazPick').addEventListener('click',()=>setPick(state.pick==='haz'?null:'haz'));
 $('#hazClear').addEventListener('click',clearHazards);
 $('#mtPlay').addEventListener('click',()=>{ MT.playing=!MT.playing; $('#mtPlay').textContent=MT.playing?'지도 시간 멈춤':'지도 시간 자동 반복'; $('#mtPlay').setAttribute('aria-pressed',MT.playing); });
