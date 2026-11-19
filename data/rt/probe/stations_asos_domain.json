@@ -1,4 +1,33 @@
 {
- "columns": [],
- "stations": []
+ "columns": [
+  "STN",
+  "LON",
+  "LAT",
+  "STN_SP",
+  "HT",
+  "HT_PA",
+  "HT_TA",
+  "HT_WD",
+  "HT_RN",
+  "STN",
+  "STN_KO",
+  "STN_EN",
+  "FCT_ID",
+  "LAW_ID",
+  "BASIN",
+  "LAW_ADDR"
+ ],
+ "stations": [
+  {
+   "stn": 108,
+   "lon": 126.9658,
+   "lat": 37.57142,
+   "ht": 85.67,
+   "ht_pa": 86.67,
+   "ht_ta": 1.5,
+   "ht_wd": 10.0,
+   "ht_rn": 0.5,
+   "name": "서울"
+  }
+ ]
 }
