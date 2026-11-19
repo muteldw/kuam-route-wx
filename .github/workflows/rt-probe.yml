@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Probe
         run: |
+          set +e
           d=data/rt/probe; mkdir -p $d; P=$d/probe.txt; : > $P
           now=$(TZ=Asia/Seoul date -d '-3 min' +%Y%m%d%H%M)
           echo "run_kst=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M') obs_tm=$now" >> $P
@@ -59,7 +60,7 @@ jobs:
               -d pageNo=1 -d numOfRows=20 -d dataType=JSON -d base_date=$bd -d base_time=$bt -d nx=56 -d ny=128 -o $d/ultrasrt_ncst_kintex.json
             echo "ultra-short nowcast=$(head -c 200 $d/ultrasrt_ncst_kintex.json | tr '\n' ' ')" >> $P
           else echo "DATA.GO.KR key: missing (DATA_GO_KR_KEY)" >> $P; fi
-          for f in $d/*; do case $f in *.gz) continue;; esac; [ -n "$HUB" ] && sed -i "s/$HUB/***/g" $f; [ -n "$DGK" ] && sed -i "s|$DGK|***|g" $f; done
+          for f in $d/*; do case $f in *.gz) continue;; esac; if [ -n "$HUB" ]; then sed -i "s/$HUB/***/g" $f; fi; if [ -n "$DGK" ]; then sed -i "s|$DGK|***|g" $f; fi; done; true
           cat $P
       - name: Commit
         run: |
