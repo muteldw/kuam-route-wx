@@ -1,10 +1,10 @@
-run_kst=2026-11-19 14:47 obs_tm=202611191444
+run_kst=2026-11-19 14:48 obs_tm=202611191445
 apihub(no key)=401
 data.go.kr(no key)=401
-open-meteo kma_ldps={"latitude":37.67556,"longitude":126.73996,"generationtime_ms":0.0591278076171875,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GM
-open-meteo kma_gdps={"latitude":37.640625,"longitude":126.77344,"generationtime_ms":0.05996227264404297,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"
-open-meteo ecmwf_ifs025={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.11050701141357422,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9",
-open-meteo ecmwf_aifs025_single={"latitude":37.75,"longitude":126.75,"generationtime_ms":165.50493240356445,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9","
+open-meteo kma_ldps={"latitude":37.67556,"longitude":126.73996,"generationtime_ms":0.060677528381347656,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"
+open-meteo kma_gdps={"latitude":37.640625,"longitude":126.77344,"generationtime_ms":0.06330013275146484,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"
+open-meteo ecmwf_ifs025={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.10251998901367188,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9",
+open-meteo ecmwf_aifs025_single={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.11348724365234375,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9",
 ecmwf-opendata=200
 HUB key: missing (KMA_APIHUB_KEY)
 DATA.GO.KR key: missing (DATA_GO_KR_KEY)
