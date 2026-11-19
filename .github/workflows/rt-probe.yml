@@ -40,6 +40,17 @@ jobs:
             echo "aws_min bytes=$(wc -c < $d/aws_min_all.txt) first=$(grep -v '^#' $d/aws_min_all.txt | head -2 | tr '\n' ' ')" >> $P
             python3 -c "import json;s=json.load(open('$d/stations_aws_domain.json'));o=json.load(open('$d/aws_latest_domain.json'));print('domain AWS stations =',len(s['stations']),'| latest obs rows =',len(o['obs']))" >> $P || echo "parse failed" >> $P
             gzip -f $d/stn_aws.txt $d/stn_asos.txt; rm -f $d/aws_min_all.txt
+            # 수치모델(KIM 국지·지역, 콘솔 영역만 TEXT) — 가장 최근 발표분(6시간 주기, 발표 후 약 5시간 여유)
+            tmfc=$(python3 -c "import datetime as D;t=D.datetime.utcnow()-D.timedelta(hours=5);print(t.strftime('%Y%m%d')+'%02d'%(t.hour//6*6))")
+            echo "nwp tmfc(UTC)=$tmfc" >> $P
+            B="lon1=126.66&lat1=37.47&lon2=127.01&lat2=37.73"
+            for g in KIML KIMR; do for hf in 0 1 3; do
+              f=$d/nwp_${g}_T2_h$hf.txt
+              curl -s -m 90 "https://apihub.kma.go.kr/api/typ06/url/nwp_nc_vars_down.php?group=$g&data=U&vars=T2&tmfc=$tmfc&hf=$hf&$B&authKey=$HUB" -o $f
+              echo "nwp $g T2 hf=$hf bytes=$(wc -c < $f) head=$(head -c 200 $f | tr '\n' ' ')" >> $P
+            done; done
+            curl -s -m 90 "https://apihub.kma.go.kr/api/typ06/url/nwp_nc_vars_down.php?group=KIMG&data=P&vars=U,V&lvl_lst=925,850&tmfc=$tmfc&hf=0&$B&authKey=$HUB" -o $d/nwp_KIMG_UV_p.txt
+            echo "nwp KIMG U,V 925/850 bytes=$(wc -c < $d/nwp_KIMG_UV_p.txt) head=$(head -c 200 $d/nwp_KIMG_UV_p.txt | tr '\n' ' ')" >> $P
           else echo "HUB key: missing (KMA_APIHUB_KEY)" >> $P; fi
           if [ -n "$DGK" ]; then
             echo "DATA.GO.KR key: set" >> $P
