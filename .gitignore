@@ -4,3 +4,5 @@ __pycache__/
 !web/basemap.json
 !data/fleet.json
 .DS_Store
+!data/rt/**/*.json
+!web/rt/*.json
