@@ -30,7 +30,9 @@ jobs:
           done
           echo "ecmwf-opendata=$(code 'https://data.ecmwf.int/forecasts/')" >> $P
           python3 -c "import os,re;k=os.environ.get('HUB','');print('HUB len=',len(k),'| strip len=',len(k.strip()),'| only alnum/-_ =',bool(re.fullmatch(r'[A-Za-z0-9_\-]+',k.strip())),'| has space/newline=',any(c.isspace() for c in k),'| has http/authKey text=',('http' in k) or ('authKey' in k),'| first2=',k.strip()[:2])" >> $P
-          HUB=$(printf '%s' "$HUB" | tr -d '[:space:]')
+          # 주소 전체를 넣었어도 authKey= 뒤 값만 뽑아 씀
+          HUB=$(python3 -c "import os,re;k=os.environ.get('HUB','');m=re.search(r'authKey=([A-Za-z0-9_\-]+)',k);print(m.group(1) if m else re.sub(r'\s','',k))")
+          echo "HUB extracted len=${#HUB}" >> $P
           if [ -n "$HUB" ]; then
             echo "HUB key: set" >> $P
             curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=AWS&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_aws.txt
