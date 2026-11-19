@@ -35,11 +35,16 @@ jobs:
           echo "HUB extracted len=${#HUB}" >> $P
           if [ -n "$HUB" ]; then
             echo "HUB key: set" >> $P
-            curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=AWS&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_aws.txt
+            for u in "typ01/url/stn_inf.php?inf=AWS&stn=&tm=$now&help=1" "typ01/url/stn_inf.php?inf=AWS&stn=" "typ01/url/stn_inf.php?inf=AWS" "typ01/cgi-bin/url/nph-stn_inf?inf=AWS&stn="; do
+              curl -s -m 180 -w '' "https://apihub.kma.go.kr/api/$u&authKey=$HUB" -o $d/stn_try.txt; rc=$?
+              echo "stn_inf try [$u] rc=$rc bytes=$(wc -c < $d/stn_try.txt) head=$(head -c 150 $d/stn_try.txt | iconv -f euc-kr -t utf-8 2>/dev/null | tr '\n' ' ')" >> $P
+              if [ $(wc -c < $d/stn_try.txt) -gt 2000 ]; then cp $d/stn_try.txt $d/stn_aws.txt; break; fi
+            done; rm -f $d/stn_try.txt
             curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=SFC&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_asos.txt
             python3 tools/rt/parse_kma.py stn $d/stn_aws.txt > $d/stations_aws_domain.json || true
             python3 tools/rt/parse_kma.py stn $d/stn_asos.txt > $d/stations_asos_domain.json || true
             curl -s -m 120 "https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm2=$now&stn=0&disp=1&help=1&authKey=$HUB" -o $d/aws_min_all.txt
+            grep '^#' $d/aws_min_all.txt | iconv -f euc-kr -t utf-8 > $d/aws_min_header.txt 2>/dev/null
             python3 tools/rt/parse_kma.py min $d/aws_min_all.txt $d/stations_aws_domain.json > $d/aws_latest_domain.json || true
             echo "stn_aws bytes=$(wc -c < $d/stn_aws.txt) first=$(head -c 120 $d/stn_aws.txt | tr '\n' ' ')" >> $P
             echo "aws_min bytes=$(wc -c < $d/aws_min_all.txt) first=$(grep -v '^#' $d/aws_min_all.txt | head -2 | tr '\n' ' ')" >> $P
@@ -54,8 +59,14 @@ jobs:
               curl -s -m 90 "https://apihub.kma.go.kr/api/typ06/url/nwp_nc_vars_down.php?group=$g&data=U&vars=T2&tmfc=$tmfc&hf=$hf&$B&authKey=$HUB" -o $f
               echo "nwp $g T2 hf=$hf bytes=$(wc -c < $f) head=$(head -c 200 $f | tr '\n' ' ')" >> $P
             done; done
-            curl -s -m 90 "https://apihub.kma.go.kr/api/typ06/url/nwp_nc_vars_down.php?group=KIMG&data=P&vars=U,V&lvl_lst=925,850&tmfc=$tmfc&hf=0&$B&authKey=$HUB" -o $d/nwp_KIMG_UV_p.txt
-            echo "nwp KIMG U,V 925/850 bytes=$(wc -c < $d/nwp_KIMG_UV_p.txt) head=$(head -c 200 $d/nwp_KIMG_UV_p.txt | tr '\n' ' ')" >> $P
+            rm -f $d/nwp_KIMG_UV_p.txt
+            nw(){ f=$d/nwp_$1.$3; curl -s -m 90 "https://apihub.kma.go.kr/api/typ06/url/nwp_nc_vars_down.php?$2&tmfc=$tmfc&$B&dataType=$(echo $3|tr a-z A-Z)&authKey=$HUB" -o $f; echo "nwp $1 bytes=$(wc -c < $f) head=$(head -c 220 $f | iconv -f euc-kr -t utf-8 2>/dev/null | tr '\n' ' ')" >> $P; }
+            nw KIML_U10_h1 "group=KIML&data=U&vars=U10&hf=1" csv
+            nw KIML_V10_h1 "group=KIML&data=U&vars=V10&hf=1" csv
+            nw KIML_U850_h1 "group=KIML&data=P&vars=U&lvl_lst=850&hf=1" txt
+            nw KIML_U925_h1 "group=KIML&data=P&vars=U&lvl_lst=925&hf=1" txt
+            nw KIML_RH925_h1 "group=KIML&data=P&vars=RH&lvl_lst=925&hf=1" txt
+            nw KIMG_U850_h0 "group=KIMG&data=P&vars=U&lvl_lst=850&hf=0" txt
           else echo "HUB key: missing (KMA_APIHUB_KEY)" >> $P; fi
           if [ -n "$DGK" ]; then
             echo "DATA.GO.KR key: set" >> $P
