@@ -1,4 +1,4 @@
-run_kst=2026-11-19 15:07 obs_tm=202611191504
+run_kst=2026-11-19 15:09 obs_tm=202611191506
 apihub(no key)=401
 data.go.kr(no key)=401
 open-meteo kma_ldps={"latitude":37.67556,"longitude":126.73996,"generationtime_ms":0.06389617919921875,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"G
@@ -9,9 +9,12 @@ ecmwf-opendata=200
 HUB len= 163 | strip len= 163 | only alnum/-_ = False | has space/newline= True | has http/authKey text= True | first2= ht
 HUB extracted len=22
 HUB key: set
-stn_aws bytes=0 first=
-aws_min bytes=74287 first=202611191504,42,23.7,2.4,35.2,2.8,341.4,2.6,5.2,-99.9,0.0,0.1,6.0,6.1,86.6,1017.5,1017.8,3.1,= 202611191504,43,316.4,6.4,344.3,8.6,335.1,7.5,8.5,-99.9,0.0,0.0,0.4,0.4,73.3,1017.6,1017.7,4.0,= 
-domain AWS stations = 0 | latest obs rows = 737
+stn_inf try [typ01/url/stn_inf.php?inf=AWS&stn=&tm=202611191506&help=1] rc=0 bytes=0 head=
+stn_inf try [typ01/url/stn_inf.php?inf=AWS&stn=] rc=0 bytes=0 head=
+stn_inf try [typ01/url/stn_inf.php?inf=AWS] rc=0 bytes=149366 head=#START7777 # STN           LON           LAT STN_SP          HT     HT_WD  LAU STN STN_KO               STN_EN               FCT_ID   LAW_ID    BASIN 
+stn_aws bytes=149366 first=#START7777 # STN           LON           LAT STN_SP          HT     HT_WD  LAU STN STN_KO               STN_EN          
+aws_min bytes=74169 first=202611191506,42,122.5,2.6,37.7,3.8,2.3,2.8,5.2,-99.9,0.0,0.1,6.0,6.1,87.1,1017.5,1017.8,3.2,= 202611191506,43,290.4,7.2,341.6,8.6,334.2,7.7,8.4,-99.9,0.0,0.0,0.4,0.4,73.8,1017.6,1017.7,4.0,= 
+domain AWS stations = 25 | latest obs rows = 24
 nwp tmfc(UTC)=2026111900
 nwp KIML T2 hf=0 bytes=11422 head=# vars=T2  group=KIML  data=U # tmfc=2026111900  hf=0 # nx=30  ny=28 # fname=/ARCV/RAWD/MODL/RDPS/NE57/202611/19/00/l010_v040_korea_etc.2byte.ft000.2026111900.nc  (24854288 byte) # # j=1  2.74760e+02 
 nwp KIML T2 hf=1 bytes=11422 head=# vars=T2  group=KIML  data=U # tmfc=2026111900  hf=1 # nx=30  ny=28 # fname=/ARCV/RAWD/MODL/RDPS/NE57/202611/19/00/l010_v040_korea_etc.2byte.ft001.2026111900.nc  (60230472 byte) # # j=1  2.75600e+02 
@@ -19,5 +22,10 @@ nwp KIML T2 hf=3 bytes=11422 head=# vars=T2  group=KIML  data=U # tmfc=202611190
 nwp KIMR T2 hf=0 bytes=1463 head=# vars=T2  group=KIMR  data=U # tmfc=2026111900  hf=0 # nx=10  ny=9 # fname=/ARCV/RAWD/MODL/RDPS/NE57/202611/19/00/r030_v040_easia_etc.2byte.ft000.2026111900.nc  (16810261 byte) # # j=1  2.74700e+02  
 nwp KIMR T2 hf=1 bytes=1463 head=# vars=T2  group=KIMR  data=U # tmfc=2026111900  hf=1 # nx=10  ny=9 # fname=/ARCV/RAWD/MODL/RDPS/NE57/202611/19/00/r030_v040_easia_etc.2byte.ft001.2026111900.nc  (33449687 byte) # # j=1  2.75490e+02  
 nwp KIMR T2 hf=3 bytes=1463 head=# vars=T2  group=KIMR  data=U # tmfc=2026111900  hf=3 # nx=10  ny=9 # fname=/ARCV/RAWD/MODL/RDPS/NE57/202611/19/00/r030_v040_easia_etc.2byte.ft003.2026111900.nc  (35762058 byte) # # j=1  2.76310e+02  
-nwp KIMG U,V 925/850 bytes=787 head=# ����: vars ���� ? ����/����/_ �� ��� # # [��û �Ķ���� ��밪] #   group    : KIMG(ne57/����), KIMR(r030/����), KIML(l010/����) #   nwp      : ne57, r030, l010  ? group ��� (�� �� �ϳ��� �Է�) # 
+nwp KIML_U10_h1 bytes=26781 head=ix,iy,lon,lat,value 645,711,126.66827,37.47637,2.37 646,711,126.67990,37.47630,2.45 647,711,126.69153,37.47622,2.72 648,711,126.70312,37.47615,2.88 649,711,126.71475,37.47605,2.99 650,711,126.72638,37.47597,3.05 651,711,
+nwp KIML_V10_h1 bytes=27624 head=ix,iy,lon,lat,value 645,711,126.66827,37.47637,-4.27 646,711,126.67990,37.47630,-4.3 647,711,126.69153,37.47622,-4.16 648,711,126.70312,37.47615,-3.98 649,711,126.71475,37.47605,-3.94 650,711,126.72638,37.47597,-3.99 651
+nwp KIML_U850_h1 bytes=813 head=# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원 # # [요청 파라미터 허용값] #   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지) #   nwp      : ne57, r030, l010  ? group 대용 (둘 중 하나만
+nwp KIML_U925_h1 bytes=813 head=# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원 # # [요청 파라미터 허용값] #   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지) #   nwp      : ne57, r030, l010  ? group 대용 (둘 중 하나만
+nwp KIML_RH925_h1 bytes=814 head=# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원 # # [요청 파라미터 허용값] #   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지) #   nwp      : ne57, r030, l010  ? group 대용 (둘 중 하나만
+nwp KIMG_U850_h0 bytes=813 head=# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원 # # [요청 파라미터 허용값] #   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지) #   nwp      : ne57, r030, l010  ? group 대용 (둘 중 하나만
 DATA.GO.KR key: missing (DATA_GO_KR_KEY)

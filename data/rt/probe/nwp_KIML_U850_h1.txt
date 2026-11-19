@@ -1,0 +1,18 @@
+# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원
+#
+# [요청 파라미터 허용값]
+#   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지)
+#   nwp      : ne57, r030, l010  ? group 대용 (둘 중 하나만 입력)
+#   data     : P(등압면), U(단일면)
+#   vars     : NC 변수명 (예: T2, U10, V10, RH, T, Z)
+#   tmfc     : 분석시간 UTC 10자리 (예: 2026081800)
+#   hf       : 예측시간 hr (예: 0, 24, 48)
+#   lvl_lst  : 고도 hPa ? 등압면(P)만 해당 (예: 850)
+#   lon1/lat1/lon2/lat2 : 영역 경위도 ? 생략 시 전체 격자
+#   dataType : (생략)=브라우저 / TEXT=.txt / BIN=.bin / NC=.nc / GB2=.gb2 / CSV=.csv
+#   help     : 1이면 파라미터 설명 출력
+#
+# [현재 입력값]
+#   group=KIML  nwp=l010  data=P  vars=U
+#   tmfc=2026111900  hf=1  lvl_lst=850  dataType=TXT
+#   lon1=126.66  lat1=37.47  lon2=127.01  lat2=37.73

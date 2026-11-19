@@ -1,4 +1,4 @@
-# 오류: vars 오류 ? 영문/숫자/_ 만 허용
+# 오류: dataType 오류 ? 이 API 는 (생략)/TEXT/BIN/NC/GB2/CSV 만 지원
 #
 # [요청 파라미터 허용값]
 #   group    : KIMG(ne57/전구), KIMR(r030/지역), KIML(l010/국지)
@@ -13,6 +13,6 @@
 #   help     : 1이면 파라미터 설명 출력
 #
 # [현재 입력값]
-#   group=KIMG  nwp=ne57  data=P  vars=U,V
-#   tmfc=2026111900  hf=0  lvl_lst=925,850  dataType=
+#   group=KIMG  nwp=ne57  data=P  vars=U
+#   tmfc=2026111900  hf=0  lvl_lst=850  dataType=TXT
 #   lon1=126.66  lat1=37.47  lon2=127.01  lat2=37.73
