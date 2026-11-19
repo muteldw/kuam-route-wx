@@ -1,21 +1,22 @@
-run_kst=2026-11-19 14:59 obs_tm=202611191456
+run_kst=2026-11-19 15:06 obs_tm=202611191503
 apihub(no key)=401
 data.go.kr(no key)=401
-open-meteo kma_ldps={"latitude":37.67556,"longitude":126.73996,"generationtime_ms":0.07605552673339844,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"G
-open-meteo kma_gdps={"latitude":37.640625,"longitude":126.77344,"generationtime_ms":0.05793571472167969,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"
-open-meteo ecmwf_ifs025={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.12028217315673828,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9",
-open-meteo ecmwf_aifs025_single={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.07545948028564453,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9",
+open-meteo kma_ldps={"latitude":37.67556,"longitude":126.73996,"generationtime_ms":0.049591064453125,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT
+open-meteo kma_gdps={"latitude":37.640625,"longitude":126.77344,"generationtime_ms":0.06318092346191406,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"
+open-meteo ecmwf_ifs025={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.09918212890625,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9","el
+open-meteo ecmwf_aifs025_single={"latitude":37.75,"longitude":126.75,"generationtime_ms":0.0985860824584961,"utc_offset_seconds":32400,"timezone":"Asia/Seoul","timezone_abbreviation":"GMT+9","
 ecmwf-opendata=200
+HUB len= 163 | strip len= 163 | only alnum/-_ = False | has space/newline= True | has http/authKey text= True | first2= ht
 HUB key: set
-stn_aws bytes= first=
-aws_min bytes= first=
-parse failed
+stn_aws bytes=97 first={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+aws_min bytes=97 first={   "result" : { 
+domain AWS stations = 0 | latest obs rows = 0
 nwp tmfc(UTC)=2026111900
-nwp KIML T2 hf=0 bytes= head=
-nwp KIML T2 hf=1 bytes= head=
-nwp KIML T2 hf=3 bytes= head=
-nwp KIMR T2 hf=0 bytes= head=
-nwp KIMR T2 hf=1 bytes= head=
-nwp KIMR T2 hf=3 bytes= head=
-nwp KIMG U,V 925/850 bytes= head=
+nwp KIML T2 hf=0 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIML T2 hf=1 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIML T2 hf=3 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIMR T2 hf=0 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIMR T2 hf=1 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIMR T2 hf=3 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
+nwp KIMG U,V 925/850 bytes=97 head={   "result" : {     "status" : 401,     "message" : "유효한 인증키가 아닙니다."   } }
 DATA.GO.KR key: missing (DATA_GO_KR_KEY)
