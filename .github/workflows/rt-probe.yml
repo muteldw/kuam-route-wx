@@ -29,6 +29,8 @@ jobs:
             echo "open-meteo $m=$(head -c 160 $d/openmeteo_$m.json | tr '\n' ' ')" >> $P
           done
           echo "ecmwf-opendata=$(code 'https://data.ecmwf.int/forecasts/')" >> $P
+          python3 -c "import os,re;k=os.environ.get('HUB','');print('HUB len=',len(k),'| strip len=',len(k.strip()),'| only alnum/-_ =',bool(re.fullmatch(r'[A-Za-z0-9_\-]+',k.strip())),'| has space/newline=',any(c.isspace() for c in k),'| has http/authKey text=',('http' in k) or ('authKey' in k),'| first2=',k.strip()[:2])" >> $P
+          HUB=$(printf '%s' "$HUB" | tr -d '[:space:]')
           if [ -n "$HUB" ]; then
             echo "HUB key: set" >> $P
             curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=AWS&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_aws.txt
