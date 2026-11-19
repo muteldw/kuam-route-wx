@@ -1,0 +1,56 @@
+name: rt-probe
+# 준실시간 체계 접속 시험: 영역 내 AWS 목록·최신 관측, 초단기실황, 모델 자료원 응답 확인
+# 키는 저장소 Secrets에서만 읽고, 결과 파일에서 키 문자열을 지움
+on:
+  push:
+    branches: [probe/realtime]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      HUB: ${{ secrets.KMA_APIHUB_KEY }}
+      DGK: ${{ secrets.DATA_GO_KR_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe
+        run: |
+          d=data/rt/probe; mkdir -p $d; P=$d/probe.txt; : > $P
+          now=$(TZ=Asia/Seoul date -d '-3 min' +%Y%m%d%H%M)
+          echo "run_kst=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M') obs_tm=$now" >> $P
+          code(){ curl -s -o /dev/null -w '%{http_code}' -m 40 "$1"; }
+          echo "apihub(no key)=$(code 'https://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php?stn=108&help=1')" >> $P
+          echo "data.go.kr(no key)=$(code 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?pageNo=1&numOfRows=10&dataType=JSON&base_date=20261119&base_time=1400&nx=56&ny=128')" >> $P
+          for m in kma_ldps kma_gdps ecmwf_ifs025 ecmwf_aifs025_single; do
+            curl -s -m 40 "https://api.open-meteo.com/v1/forecast?latitude=37.6688&longitude=126.7456&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_speed_80m,wind_gusts_10m,precipitation,cloud_cover&wind_speed_unit=ms&forecast_hours=6&models=$m&timezone=Asia%2FSeoul" -o $d/openmeteo_$m.json
+            echo "open-meteo $m=$(head -c 160 $d/openmeteo_$m.json | tr '\n' ' ')" >> $P
+          done
+          echo "ecmwf-opendata=$(code 'https://data.ecmwf.int/forecasts/')" >> $P
+          if [ -n "$HUB" ]; then
+            echo "HUB key: set" >> $P
+            curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=AWS&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_aws.txt
+            curl -s -m 60 "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php?inf=SFC&stn=&tm=$now&help=1&authKey=$HUB" -o $d/stn_asos.txt
+            python3 tools/rt/parse_kma.py stn $d/stn_aws.txt > $d/stations_aws_domain.json || true
+            python3 tools/rt/parse_kma.py stn $d/stn_asos.txt > $d/stations_asos_domain.json || true
+            curl -s -m 120 "https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-aws2_min?tm2=$now&stn=0&disp=1&help=1&authKey=$HUB" -o $d/aws_min_all.txt
+            python3 tools/rt/parse_kma.py min $d/aws_min_all.txt $d/stations_aws_domain.json > $d/aws_latest_domain.json || true
+            echo "stn_aws bytes=$(wc -c < $d/stn_aws.txt) first=$(head -c 120 $d/stn_aws.txt | tr '\n' ' ')" >> $P
+            echo "aws_min bytes=$(wc -c < $d/aws_min_all.txt) first=$(grep -v '^#' $d/aws_min_all.txt | head -2 | tr '\n' ' ')" >> $P
+            python3 -c "import json;s=json.load(open('$d/stations_aws_domain.json'));o=json.load(open('$d/aws_latest_domain.json'));print('domain AWS stations =',len(s['stations']),'| latest obs rows =',len(o['obs']))" >> $P || echo "parse failed" >> $P
+            gzip -f $d/stn_aws.txt $d/stn_asos.txt; rm -f $d/aws_min_all.txt
+          else echo "HUB key: missing (KMA_APIHUB_KEY)" >> $P; fi
+          if [ -n "$DGK" ]; then
+            echo "DATA.GO.KR key: set" >> $P
+            bd=$(TZ=Asia/Seoul date -d '-40 min' +%Y%m%d); bt=$(TZ=Asia/Seoul date -d '-40 min' +%H00)
+            curl -s -m 60 -G "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst" --data-urlencode "serviceKey=$DGK" \
+              -d pageNo=1 -d numOfRows=20 -d dataType=JSON -d base_date=$bd -d base_time=$bt -d nx=56 -d ny=128 -o $d/ultrasrt_ncst_kintex.json
+            echo "ultra-short nowcast=$(head -c 200 $d/ultrasrt_ncst_kintex.json | tr '\n' ' ')" >> $P
+          else echo "DATA.GO.KR key: missing (DATA_GO_KR_KEY)" >> $P; fi
+          for f in $d/*; do case $f in *.gz) continue;; esac; [ -n "$HUB" ] && sed -i "s/$HUB/***/g" $f; [ -n "$DGK" ] && sed -i "s|$DGK|***|g" $f; done
+          cat $P
+      - name: Commit
+        run: |
+          git config user.name "github-actions"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/rt/probe && git commit -m "rt probe result" && git push || echo "nothing to commit"
