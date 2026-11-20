@@ -955,6 +955,23 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
 .crash-mk span::after{transform:translate(-50%,-50%) rotate(-45deg)}
 @media (prefers-reduced-motion:no-preference){.crash-mk span{animation:pulse 1s ease-in-out infinite}}
 .leaflet-tooltip.crash-tip{color:var(--nogo);border-color:var(--nogo);font-weight:700}
+ /* 휴대폰: 수평 지도와 연직 단면이 한 화면에 함께 보이도록 */
+@media (max-width:600px){
+  main{gap:10px} .panel{padding:10px 12px}
+  .lmap{height:min(290px,38vh)}
+  #mapRead{display:none}
+  #mapLegend{margin-top:4px;font-size:10px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+  #mapLegend>*{flex:0 1 auto;min-width:0}
+  #secLegend{font-size:10px;margin-top:2px}
+  .fp{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px 8px;margin-bottom:2px}
+  .fp button{padding:6px 10px;font-size:13px}
+  .fp #fpScrub{grid-column:1/4;grid-row:2}
+  .fp .tl{min-width:0;font-size:11.5px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fp select{font-size:12px;padding:4px 6px}
+  #fpPlay{grid-column:1;grid-row:1} #fpReset{grid-column:2;grid-row:1} #fpSpeed{grid-column:4;grid-row:1} #fpTime{grid-column:4;grid-row:2;max-width:118px}
+  .panel-head h2{font-size:15px}
+  .panel-head{margin-bottom:6px}
+}
 </style>
 
 <header class="top">
@@ -965,7 +982,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.5.2 · 2026-11-20</span>
+    <span class="tag ver">v1.5.3 · 2026-11-20</span>
     <span class="tag syn" id="dataTag">합성 시나리오 자료</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1289,6 +1306,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.5.3</b> (2026-11-20) 휴대폰에서 수평 지도와 연직 단면이 한 화면에 함께 보이도록 크기 조정(지도 높이·단면 높이를 화면 높이에 맞춤, 재생 조작 2줄로 압축)</li>
         <li><b>v1.5.2</b> (2026-11-20) 출발 시각을 맨 위로. AWS 지점을 누르면 정보창이 다른 곳을 누를 때까지 유지되고 30초 뒤 자동으로 닫힘(비행 재생 중에도 유지)</li>
         <li><b>v1.5.1</b> (2026-11-20) 화면 배치: 수평 지도·비행 재생/연직 단면을 맨 위로, 재생 버튼 바로 아래 단면, 경로 변경 설정은 단면 아래로. 좁은 화면에서는 설정 패널을 지도·단면 아래로</li>
         <li><b>v1.5.0</b> (2026-11-20) 실황 모드: 영역 AWS 24곳 관측, KIM 국지(1.5 km) 예측, ECMWF IFS로 계산. 지도에 AWS 바람 표지, 관측 시각 10 m 바람 검증표(단순모델·KIM·ECMWF), 10분 자동 수집(GitHub Actions)</li>
@@ -1331,7 +1349,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.2 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.3 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -2052,7 +2070,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.5.2', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.5.3', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -2317,7 +2335,7 @@ const HOV={s:null};
 function drawSection(){
   if (!current) return;
   if (!roomFor($('#sec'),'sec')) return;
-  const cv=$('#sec'), wide=cv.parentElement.clientWidth, H=wide<560?300:Math.round(Math.min(380,Math.max(280,wide*0.3)));
+  const cv=$('#sec'), wide=cv.parentElement.clientWidth, H=wide<560?(window.innerWidth<=600?Math.round(Math.min(230,Math.max(190,window.innerHeight*0.3))):300):Math.round(Math.min(380,Math.max(280,wide*0.3)));
   const {ctx,w,h,dpr}=fit(cv,H);
   const padT=26, padB=40, iw=w-PADL-PADR, ih=h-padT-padB, L=ROUTE.L, pr=current.pr;
   const ZMAX=Math.max(600, Math.ceil((pr.top+200)/100)*100);
