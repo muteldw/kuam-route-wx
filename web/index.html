@@ -992,7 +992,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.5.4 · 2026-11-20</span>
+    <span class="tag ver">v1.5.5 · 2026-11-20</span>
     <span class="tag syn" id="dataTag">합성 시나리오 자료</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1316,6 +1316,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.5.5</b> (2026-11-20) ‘안전한 추천 항로로 바꾸기’가 실제로는 불가인 항로를 고르던 오류 수정(이륙 전 점검과 같은 기준으로 확인), 움직이는 뇌우가 비행 동안 지나갈 자리까지 피해 항로 추천, 안전한 항로가 없으면 가장 이른 안전 출발 시각으로 미루기 제안</li>
         <li><b>v1.5.4</b> (2026-11-20) 화면이 안 뜰 때 원인을 볼 수 있도록 오류 내용을 맨 위에 표시(12초 안에 계산이 끝나지 않을 때 포함)</li>
         <li><b>v1.5.3</b> (2026-11-20) 휴대폰에서 수평 지도와 연직 단면이 한 화면에 함께 보이도록 크기 조정(지도 높이·단면 높이를 화면 높이에 맞춤, 재생 조작 2줄로 압축)</li>
         <li><b>v1.5.2</b> (2026-11-20) 출발 시각을 맨 위로. AWS 지점을 누르면 정보창이 다른 곳을 누를 때까지 유지되고 30초 뒤 자동으로 닫힘(비행 재생 중에도 유지)</li>
@@ -1360,7 +1361,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.4 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.5 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1927,9 +1928,12 @@ const PROFILES = [
 function costGrid(z, t, sc, lim){
   const g=PG_STEP, NX=Math.floor((EXT.x1-EXT.x0)/g)+1, NY=Math.floor((EXT.y1-EXT.y0)/g)+1, N=NX*NY;
   const ri=new Float32Array(N), river=new Uint8Array(N), apt=new Float32Array(N);
+  // 움직이는 뇌우(돌발 뇌우·대류셀)가 있으면 비행하는 동안(출발~약 20분 뒤) 그 셀이 지나는 자리를 모두 위험으로 봄
+  const TS = (HAZ.length || sc.conv) ? [t-0.1, t-0.04, t+0.03, t+0.1, t+0.2] : [t];
   for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){
-    const x=EXT.x0+i*g, y=EXT.y0+j*g, k=j*NX+i, m=met(x,y,z,t,sc);
-    ri[k]=riOf(minItem(marginItems(m,z,lim,false))[0]);
+    const x=EXT.x0+i*g, y=EXT.y0+j*g, k=j*NX+i;
+    let r=0; for (const tt of TS){ const m=met(x,y,z,tt,sc); r=Math.max(r, riOf(minItem(marginItems(m,z,lim,false))[0])); }
+    ri[k]=r;
     river[k]=logz0(x,y).dRiver<0.6?1:0;
     apt[k]=Math.hypot(x-AIRPORT.x,y-AIRPORT.y);
   }
@@ -2081,7 +2085,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.5.4', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.5.5', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -2628,17 +2632,31 @@ function hazardOf(fromT=0){
   return hz;
 }
 const whereOf = hz => (nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i]) ? nearestName(ROUTE.xs[hz.i],ROUTE.ys[hz.i])+' 부근' : `${hz.s.toFixed(1)} km 지점`);
-function safeRouteIdx(){ let best=-1; state.routes.forEach((p,k)=>{ if (p.r && p.r.c<3 && (best<0 || p.r.riMax<state.routes[best].r.riMax)) best=k; }); return best; }
+// 이륙 전 점검과 같은 기준(전체 평가)으로 불가 구간·배터리 부족이 없는 추천 항로를 고름
+function routeOk(p, t){ const ac=buildAc(AIR(), state.fl, state.lim, p.alt); if (ac.mass>ac.air.mtow) return null;
+  const r=evalRoute(t, ac, state.sc, p.R, {alerts:true}); return (r.pts.some(q=>q.c===3) || r.battCat===3) ? null : r; }
+function safeRouteIdx(){ let best=-1, bri=1e9; state.routes.forEach((p,k)=>{ const r=routeOk(p, t0()); if (r && r.riMax<bri){ best=k; bri=r.riMax; } }); return best; }
+function nextSafeDeparture(){ // 지금 추천 항로 중 하나로 안전하게 갈 수 있는 가장 이른 출발 시각
+  for (let st=state.step+1; st<STEPS.length; st++){ for (let k=0;k<state.routes.length;k++){ if (routeOk(state.routes[k], STEPS[st])) return {step:st, k}; } }
+  return null; }
+function altOpts(safe){
+  if (safe>=0) return {btn:`<button type="button" class="primary" data-ovl="safe">안전한 추천 ${safe+1}로 바꾸기</button>`, note:''};
+  const nx=nextSafeDeparture();
+  if (nx){ const d=new Date(issueDate().getTime()+STEPS[nx.step]*3.6e6); PRE_NEXT=nx;
+    return {btn:`<button type="button" class="primary" data-ovl="delay">출발 ${fmtTime(d)}로 미루기 (추천 ${nx.k+1})</button>`, note:`<p class="why">지금 시각에는 추천 항로 3개가 모두 불가 구간을 지납니다${HAZ.length?'(돌발 뇌우가 항로·도착지를 덮음)':''}. ${STEPS[nx.step]<=1?Math.round(STEPS[nx.step]*60)+'분':STEPS[nx.step]+'시간'} 뒤 출발하면 추천 ${nx.k+1}로 안전하게 갈 수 있습니다.</p>`}; }
+  return {btn:'', note:'<p class="why">48시간 안에는 추천 항로 3개로 안전하게 갈 수 있는 출발 시각이 없습니다. 기체나 순항고도 상한을 바꾸거나 돌발 기상을 지워 보세요.</p>'};
+}
+let PRE_NEXT=null;
 function showOvl(html, cls){ const o=$('#crashOvl'); o.className='crash-ovl '+(cls||''); o.innerHTML=html; o.hidden=false; const b=o.querySelector('button'); if (b) b.focus({preventScroll:true}); }
 function hideOvl(){ const o=$('#crashOvl'); if (o) o.hidden=true; }
 function showPreflight(hz){
-  const safe=safeRouteIdx();
+  const safe=safeRouteIdx(), ao=altOpts(safe);
   showOvl(`<h3>이륙 불가 판정</h3>
     <p>이 항로로 지금 출발하면 <b>${whereOf(hz)} · 고도 ${Math.round(hz.z)} m</b>에서 운용 한계를 넘습니다.</p>
     <p class="why"><b>${hz.cause}</b> · ${hz.detail}</p>
     <p class="why">실제 운항이라면 이륙하지 않습니다. 그래도 비행하면 그 지점에서 일어날 사고를 재현합니다.</p>
-    <div class="btnrow"><button type="button" data-ovl="cancel">이륙 취소</button>${safe>=0?`<button type="button" data-ovl="safe">안전한 추천 ${safe+1}로 바꾸기</button>`:''}<button type="button" class="danger" data-ovl="force">그래도 비행 (사고 재현)</button></div>
-    ${safe<0?'<p class="why">추천 항로가 모두 불가입니다. 출발 시각이나 기체, 고도를 바꿔 보세요.</p>':''}`, 'pre');
+    ${ao.note}
+    <div class="btnrow"><button type="button" data-ovl="cancel">이륙 취소</button>${ao.btn}<button type="button" class="danger" data-ovl="force">그래도 비행 (사고 재현)</button></div>`, 'pre');
 }
 function startCrash(hz){
   FP.playing=false; cancelAnimationFrame(FP.raf);
@@ -2652,12 +2670,12 @@ function startCrash(hz){
   $('#secWrap').classList.add('crashing'); setTimeout(()=>$('#secWrap').classList.remove('crashing'),1300);
   const tick=()=>{ secPaint(); if (CRASH.on && performance.now()-CRASH.start<2800) CRASH.raf=requestAnimationFrame(tick); };
   CRASH.raf=requestAnimationFrame(tick);
-  const safe=safeRouteIdx();
-  setTimeout(()=>{ if (!CRASH.on) return; showOvl(`<h3>사고 발생 · 비행 중단</h3>
+  setTimeout(()=>{ if (!CRASH.on) return; const safe=safeRouteIdx(), ao=altOpts(safe); showOvl(`<h3>사고 발생 · 비행 중단</h3>
     <dl class="acc"><div><dt>시각</dt><dd>이륙 후 ${fmtMS(hz.t)}</dd></div><div><dt>위치</dt><dd>${whereOf(hz)}</dd></div><div><dt>고도</dt><dd>${Math.round(hz.z)} m</dd></div><div><dt>원인</dt><dd>${hz.cause}</dd></div></dl>
     <p><b>${ACC_KIND[hz.cause]||'운용 한계 초과로 추락'}</b></p>
     <p class="why">${hz.detail}. 위험도 지수가 80을 넘는 불가 구간입니다. 실제 운항이라면 이륙하지 않거나 이 지점 전에 회항해야 합니다.</p>
-    <div class="btnrow"><button type="button" data-ovl="restart">처음으로</button>${safe>=0?`<button type="button" class="primary" data-ovl="safe">안전한 추천 ${safe+1}로 바꾸기</button>`:''}</div>`, 'acc');
+    ${ao.note}
+    <div class="btnrow"><button type="button" data-ovl="restart">처음으로</button>${ao.btn}</div>`, 'acc');
     const b=$('#banner'); b.textContent=`사고 재현: ${whereOf(hz)} ${Math.round(hz.z)} m · ${hz.cause}`; b.classList.add('on'); }, REDUCED?0:1400);
 }
 function resetCrash(){
@@ -3256,7 +3274,11 @@ $('#crashOvl').addEventListener('click',e=>{ const b=e.target.closest('[data-ovl
   if (k==='cancel'){ hideOvl(); }
   else if (k==='force'){ FP.override=true; hideOvl(); fpPlay(); }
   else if (k==='restart'){ resetCrash(); FP.override=false; FP.t=0; fpStop(); }
-  else if (k==='safe'){ const i=safeRouteIdx(); resetCrash(); FP.override=false; FP.t=0; if (i>=0) selectRoute(i); fpStop(); } });
+  else if (k==='safe'){ const i=safeRouteIdx(); resetCrash(); FP.override=false; FP.t=0; if (i>=0) selectRoute(i); fpStop(); }
+  else if (k==='delay' && PRE_NEXT){ const nx=PRE_NEXT; PRE_NEXT=null; resetCrash(); FP.override=false; FP.t=0; fpStop();
+    const key=state.routes[nx.k].prof.key; state.step=nx.step; $('#step').value=nx.step; state.selKey=key; update('plan');
+    const j=state.routes.findIndex(p=>p.prof.key===key); const ok=j>=0 && routeOk(state.routes[j], t0()); if (!ok){ const i=safeRouteIdx(); if (i>=0) selectRoute(i); }
+    rrNote(`출발 시각을 ${$('#stepLbl').textContent.split('·').pop().trim()}로 미뤘습니다.`); } });
 $('#fpReset').addEventListener('click',()=>{ if (FLY.count){ fpStop(); restoreOriginal(); return; } resetCrash(); resetFly(); FP.override=false; fpStop(); FP.t=0; $('#fpPlay').textContent='비행 재생'; fpUpdate(); });
 $('#fpScrub').addEventListener('input',e=>{ if(!current) return; if (CRASH.on) resetCrash(); FP.dragging=true; FP.t=+e.target.value/1000*current.pr.total; fpUpdate(); });
 $('#fpScrub').addEventListener('change',()=>{ FP.dragging=false; });
