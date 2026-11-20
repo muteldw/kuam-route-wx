@@ -50,6 +50,8 @@ h1,h2,h3{margin:0;text-wrap:balance}
 .score td.num,.score th{text-align:right} .score td:first-child,.score th:first-child{text-align:left}
 .score .best{color:var(--ok);font-weight:700}
 aside fieldset{min-width:0} aside select{max-width:100%;min-width:0;text-overflow:ellipsis}
+.aws-pop .leaflet-popup-content{margin:10px 14px;font-size:13px;line-height:1.5}
+.aws-pop-t{margin-top:4px;font-size:11px;color:var(--muted)}
 .live-src{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
 .layout{display:grid;grid-template-columns:316px minmax(0,1fr);gap:16px;max-width:1440px;margin:0 auto}
 @media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)} .layout>aside{order:2}}   /* 좁은 화면: 지도·단면을 먼저, 설정은 아래 */
@@ -963,7 +965,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.5.1 · 2026-11-20</span>
+    <span class="tag ver">v1.5.2 · 2026-11-20</span>
     <span class="tag syn" id="dataTag">합성 시나리오 자료</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1066,6 +1068,23 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
 </aside>
 
 <main>
+  <section class="panel timebar">
+    <div class="panel-head" style="margin:0">
+      <h2>출발 시각</h2>
+      <span class="strip-cap">칸마다 그 시각에 선택 항로로 출발했을 때의 판정입니다. 바꾸면 추천 항로도 다시 계산합니다.</span>
+    </div>
+    <div class="trow">
+      <button id="play" type="button">시각 넘기기</button>
+      <input id="step" type="range" min="0" max="59" step="1" value="0" aria-label="출발 시각">
+      <span class="tlabel" id="stepLbl">—</span>
+      <span class="mode" id="modeLbl">준실시간</span>
+    </div>
+    <div class="strip-wrap">
+      <div class="strip" id="strip" role="group" aria-label="출발 시각별 판정"></div>
+      <div class="strip-axis" id="stripAxis"></div>
+    </div>
+  </section>
+
   <section class="panel">
       <div class="panel-head">
         <h2>수평 지도</h2>
@@ -1191,22 +1210,6 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="recs" id="recs"></div>
   </section>
 
-  <section class="panel timebar">
-    <div class="panel-head" style="margin:0">
-      <h2>출발 시각</h2>
-      <span class="strip-cap">칸마다 그 시각에 선택 항로로 출발했을 때의 판정입니다. 바꾸면 추천 항로도 다시 계산합니다.</span>
-    </div>
-    <div class="trow">
-      <button id="play" type="button">시각 넘기기</button>
-      <input id="step" type="range" min="0" max="59" step="1" value="0" aria-label="출발 시각">
-      <span class="tlabel" id="stepLbl">—</span>
-      <span class="mode" id="modeLbl">준실시간</span>
-    </div>
-    <div class="strip-wrap">
-      <div class="strip" id="strip" role="group" aria-label="출발 시각별 판정"></div>
-      <div class="strip-axis" id="stripAxis"></div>
-    </div>
-  </section>
 
   <section class="panel" id="livePanel">
     <div class="panel-head"><h2>실황 자료 · AWS 검증</h2><span class="strip-cap" id="liveCap"></span></div>
@@ -1286,6 +1289,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.5.2</b> (2026-11-20) 출발 시각을 맨 위로. AWS 지점을 누르면 정보창이 다른 곳을 누를 때까지 유지되고 30초 뒤 자동으로 닫힘(비행 재생 중에도 유지)</li>
         <li><b>v1.5.1</b> (2026-11-20) 화면 배치: 수평 지도·비행 재생/연직 단면을 맨 위로, 재생 버튼 바로 아래 단면, 경로 변경 설정은 단면 아래로. 좁은 화면에서는 설정 패널을 지도·단면 아래로</li>
         <li><b>v1.5.0</b> (2026-11-20) 실황 모드: 영역 AWS 24곳 관측, KIM 국지(1.5 km) 예측, ECMWF IFS로 계산. 지도에 AWS 바람 표지, 관측 시각 10 m 바람 검증표(단순모델·KIM·ECMWF), 10분 자동 수집(GitHub Actions)</li>
         <li><b>v1.4.0</b> (2026-11-18) 비행 중 돌발 뇌우 자동 발생(시연), 위험 구간 기체 흔들림·감속 재생, 경로 변경 모드(자동·확인 후·끄기)</li>
@@ -1327,7 +1331,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.1 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.2 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -2048,7 +2052,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.5.1', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.5.2', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
@@ -3068,7 +3072,9 @@ let deb=null; const later=(fn,ms=200)=>{ clearTimeout(deb); deb=setTimeout(fn,ms
 /* ---------- 실황 표시: AWS 지도 표지, 검증표, 자료 상태 ---------- */
 function wsColor(ws){ return ws>=10?css('--nogo'): ws>=7?css('--warn'): ws>=4?css('--caution'): css('--ok'); }
 function drawAws(){
-  if (!LM) return; if (!LY.aws) LY.aws=L.layerGroup().addTo(LM); LY.aws.clearLayers();
+  if (!LM) return; if (!LY.aws) LY.aws=L.layerGroup().addTo(LM);
+  const sig=`${LIVE.at}|${$('#mapAws').checked}|${css('--ink')}|${css('--ok')}`; if (sig===LY.awsSig) return; LY.awsSig=sig;   // 같은 자료면 다시 만들지 않음(눌러 둔 정보창 유지)
+  LY.aws.clearLayers();
   if (!LIVE.d || !$('#mapAws').checked) return;
   const tm=fmtTime(new Date(LIVE.at)), ink=css('--ink');
   LIVE.sta.forEach(st=>{
@@ -3076,9 +3082,26 @@ function drawAws(){
     const svg=`<svg width="34" height="34" viewBox="-17 -17 34 34" aria-hidden="true"><circle r="4.2" fill="${c}" stroke="${ink}" stroke-width="1"/>${has&&st.ws>=0.5?`<g transform="rotate(${rot})"><line x1="0" y1="-4" x2="0" y2="${-len+5}" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><path d="M0 ${-len} L-4.5 ${-len+7} L4.5 ${-len+7} Z" fill="${c}"/></g>`:''}</svg>`;
     const html=`<div class="b">${svg}<span>${has?st.ws.toFixed(1):'—'}</span></div>`;
     const tip=`<b>${st.name} AWS</b> (${st.stn}) · ${tm} KST<br>${has?`${dirName(st.wd)}풍 ${st.ws.toFixed(1)} m/s · 순간최대 ${st.gust!=null?st.gust.toFixed(1):'—'} m/s`:'바람 결측'}<br>기온 ${st.ta!=null?st.ta.toFixed(1)+' °C':'—'} · 습도 ${st.hm!=null?st.hm.toFixed(0)+'%':'—'}${st.rn60>0?` · 1시간 강수 ${st.rn60.toFixed(1)} mm`:''}<br><span style="color:var(--muted)">바람계 높이 ${st.hwd??'—'} m · 해발 ${st.ht!=null?st.ht.toFixed(0):'—'} m</span>`;
-    LY.aws.addLayer(L.marker(LL(st.x,st.y),{pane:'markPane',keyboard:false,icon:L.divIcon({className:'aws-mk',html,iconSize:[34,46],iconAnchor:[17,17]})}).bindTooltip(tip,{direction:'top',offset:[0,-12]}));
+    const mk=L.marker(LL(st.x,st.y),{pane:'markPane',keyboard:true,title:`${st.name} AWS`,icon:L.divIcon({className:'aws-mk',html,iconSize:[34,46],iconAnchor:[17,17]})});
+    if (HOVER) mk.bindTooltip(tip,{direction:'top',offset:[0,-12]});
+    mk.on('click',ev=>{ L.DomEvent.stopPropagation(ev); mk.closeTooltip&&mk.closeTooltip(); openAwsPop(st,tip); });
+    LY.aws.addLayer(mk);
   });
+  if (AWSPOP.stn!=null){ const st=LIVE.sta.find(q=>q.stn===AWSPOP.stn); if (!st) closeAwsPop(); }
 }
+// AWS 정보창: 다른 곳을 누를 때까지 유지, 30초 뒤 자동으로 닫힘 (지도 다시 그리기와 무관하게 유지)
+const HOVER=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const AWSPOP={pop:null, tm:null, stn:null, at:0};
+function openAwsPop(st,tip){
+  closeAwsPop();
+  AWSPOP.pop=L.popup({closeButton:true, autoClose:false, closeOnClick:false, autoPan:true, offset:[0,-8], className:'aws-pop', maxWidth:280})
+    .setLatLng(LL(st.x,st.y)).setContent(tip+'<div class="aws-pop-t">30초 뒤 자동으로 닫힙니다</div>').openOn(LM);
+  AWSPOP.stn=st.stn; AWSPOP.at=Date.now();
+  AWSPOP.pop.on('remove',()=>{ if (AWSPOP.pop && !AWSPOP.closing){ clearTimeout(AWSPOP.tm); AWSPOP.pop=null; AWSPOP.stn=null; } });
+  AWSPOP.tm=setTimeout(closeAwsPop, 30000);
+}
+function closeAwsPop(){ clearTimeout(AWSPOP.tm); if (AWSPOP.pop && LM){ AWSPOP.closing=true; LM.closePopup(AWSPOP.pop); AWSPOP.closing=false; } AWSPOP.pop=null; AWSPOP.stn=null; }
+document.addEventListener('pointerdown',e=>{ if (!AWSPOP.pop || Date.now()-AWSPOP.at<250) return; if (e.target.closest('.aws-pop') || e.target.closest('.aws-mk')) return; closeAwsPop(); }, true);
 function ageMin(){ return LIVE.d ? (Date.now()-LIVE.at)/60000 : Infinity; }
 function ageTxt(){ const a=ageMin(); return a<1?'방금': a<90?`${Math.round(a)}분 전`: a<48*60?`${(a/60).toFixed(1)}시간 전`:`${Math.round(a/1440)}일 전`; }
 function renderLiveInfo(){
