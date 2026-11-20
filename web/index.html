@@ -974,6 +974,16 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
 }
 </style>
 
+<div id="bootErr" hidden style="max-width:1440px;margin:0 auto 10px;padding:10px 12px;border:2px solid var(--nogo);border-radius:8px;background:var(--nogo-soft);color:var(--nogo);font-size:13px;white-space:pre-wrap"></div>
+<script>
+// 화면 오류 알림: 실행 중 오류가 나면 맨 위에 내용을 보여줌(휴대폰에서 원인 확인용)
+(function(){ var n=0; function show(m){ if(n++>4) return; var e=document.getElementById('bootErr'); if(!e) return; e.hidden=false; e.textContent=(e.textContent?e.textContent+'\n':'화면 오류 — 이 내용을 캡처해 알려주세요 ('+navigator.userAgent.replace(/^Mozilla\/5\.0 /,'').slice(0,90)+')\n')+m; }
+  window.addEventListener('error',function(ev){ show((ev.message||'오류')+(ev.lineno?' @'+ev.lineno+':'+ev.colno:'')); });
+  window.addEventListener('unhandledrejection',function(ev){ show('비동기 오류: '+(ev.reason&&ev.reason.message||ev.reason)); });
+  window.__showErr=show;
+  setTimeout(function(){ var v=document.getElementById('vVal'); if(!v||v.textContent==='—'||!v.textContent) show('12초가 지나도 계산 결과가 나오지 않았습니다. (Leaflet '+(window.L?'불러옴':'못 불러옴')+')'); },12000);
+})();
+</script>
 <header class="top">
   <div>
     <div class="eyebrow">K-UAM 경로 기상 · 준실시간 시험판</div>
@@ -982,7 +992,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <div class="byline">작성자 이동원 (Dong-Won Yi) · <span class="num">yidongwonyi@gmail.com</span></div>
   </div>
   <div class="times">
-    <span class="tag ver">v1.5.3 · 2026-11-20</span>
+    <span class="tag ver">v1.5.4 · 2026-11-20</span>
     <span class="tag syn" id="dataTag">합성 시나리오 자료</span>
     <span class="tag">발표 <b class="num" id="tIssue">—</b></span>
     <span class="tag">출발 <b class="num" id="tValid">—</b></span>
@@ -1306,6 +1316,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
     <summary>버전 이력</summary>
     <div class="notes">
       <ul class="vlog">
+        <li><b>v1.5.4</b> (2026-11-20) 화면이 안 뜰 때 원인을 볼 수 있도록 오류 내용을 맨 위에 표시(12초 안에 계산이 끝나지 않을 때 포함)</li>
         <li><b>v1.5.3</b> (2026-11-20) 휴대폰에서 수평 지도와 연직 단면이 한 화면에 함께 보이도록 크기 조정(지도 높이·단면 높이를 화면 높이에 맞춤, 재생 조작 2줄로 압축)</li>
         <li><b>v1.5.2</b> (2026-11-20) 출발 시각을 맨 위로. AWS 지점을 누르면 정보창이 다른 곳을 누를 때까지 유지되고 30초 뒤 자동으로 닫힘(비행 재생 중에도 유지)</li>
         <li><b>v1.5.1</b> (2026-11-20) 화면 배치: 수평 지도·비행 재생/연직 단면을 맨 위로, 재생 버튼 바로 아래 단면, 경로 변경 설정은 단면 아래로. 좁은 화면에서는 설정 패널을 지도·단면 아래로</li>
@@ -1349,7 +1360,7 @@ button.danger{background:var(--nogo);border-color:var(--nogo);color:var(--on-acc
   </details>
 </main>
 </div>
-<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.3 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
+<div class="foot">K-UAM 회랑 기상 콘솔 v1.5.4 (2026-11-20) · 작성자 이동원 (Dong-Won Yi), yidongwonyi@gmail.com · 좌표·지표 분류와 버티포트 위치는 근사·가상값이며, 기체 운용 한계와 배터리 용량은 추정값입니다.</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -2019,7 +2030,7 @@ function planRoutes(A, B, t0, sc, acBase, autoAlt){
 
 /* ---------- robustness: one failing view must not stop the others ---------- */
 const PENDING=new Set();
-function safe(fn, ...a){ try { return fn(...a); } catch(e){ console.error('[K-UAM]', fn.name, e); } }
+function safe(fn, ...a){ try { return fn(...a); } catch(e){ console.error('[K-UAM]', fn.name, e); if (window.__showErr) window.__showErr((fn.name||'함수')+': '+(e&&e.message)); } }
 function roomFor(cv, key){ const w=cv.parentElement ? cv.parentElement.clientWidth : 0; if (w<120){ PENDING.add(key); return false; } PENDING.delete(key); return true; }
 
 /* ---------- colors ---------- */
@@ -2070,7 +2081,7 @@ const COMPASS = ['북','북북동','북동','동북동','동','동남동','남�
 const dirName = d => COMPASS[Math.round(d/22.5)%16];
 
 /* ---------- state ---------- */
-const APP_VERSION='1.5.3', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
+const APP_VERSION='1.5.4', APP_DATE='2026-11-20', APP_AUTHOR='이동원 (Dong-Won Yi) <yidongwonyi@gmail.com>';
 const STEPS = []; for (let m=0;m<=60;m+=5) STEPS.push(m/60); for (let h=2;h<=48;h++) STEPS.push(h);
 const state = {sc:{...SCN.conv}, scKey:'conv', airId:'joby', lim:null, fl:null, autoAlt:true, pax:{adult:2, child:1}, bag:10,
   step:0, acked:{}, A:{...VERTIPORTS[0]}, B:{...VERTIPORTS[1]}, aSel:'킨텍스 V5', bSel:'여의도', routes:[], sel:0, selKey:null, pick:null, corr:{}, slope:{}, learn:true};
