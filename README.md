@@ -1,10 +1,10 @@
 # kuam-route-wx
 
-**버전 1.4.0** (2026-11-18) · 작성자 이동원 (Dong-Won Yi) · yidongwonyi@gmail.com · 변경 이력은 [CHANGELOG.md](CHANGELOG.md)
+**버전 1.5.0** (2026-11-20) · 작성자 이동원 (Dong-Won Yi) · yidongwonyi@gmail.com · 변경 이력은 [CHANGELOG.md](CHANGELOG.md)
 
 K-UAM 경로 기상 위험 · eVTOL 배터리 · 항로 추천 단순 진단모델과 웹 콘솔 (수도권 서북부: 킨텍스 V5 ~ 여의도·용산).
 
-> 현재는 **합성 시나리오 자료**로 동작하는 시연판입니다. 버티포트 위치·수치는 설명용이며 운항 판단에 쓰면 안 됩니다.
+> **실황 모드**(영역 AWS + KIM 국지 + ECMWF, 10분 수집)와 **합성 시나리오**를 고를 수 있는 시험판입니다. 단순 진단모델이며 버티포트 위치·수치는 설명용이라 운항 판단에 쓰면 안 됩니다.
 
 ## 구성
 
@@ -15,8 +15,13 @@ K-UAM 경로 기상 위험 · eVTOL 배터리 · 항로 추천 단순 진단모�
 | `data/fleet.json` | 국가별 eVTOL 10종 제원(출처·기준일)과 모델용 추정 파라미터 |
 | `web/basemap.json` | 기본도 자료(한강, 시군구·읍면동 경계, 주요도로) |
 | `tools/build_basemap.py` | 기본도 생성 스크립트 (Natural Earth 10m, 통계청 2018 경계) |
+| `tools/rt/collect.py` | 준실시간 수집기: 영역 AWS 1분 자료, KIM 국지 10 m 바람·기온, ECMWF IFS 시계열 → `latest.json` |
+| `.github/workflows/rt-collect.yml` | 수집기를 10분마다 실행해 `rt-data` 브랜치에 올림 (Secret `KMA_APIHUB_KEY` 필요) |
+| `tools/rt/embed_snapshot.py` | `latest.json`을 `web/index.html`에 스냅샷으로 넣음(외부 자료를 못 읽는 화면용) |
 
 ## 웹 콘솔 기능
+
+- **실황 모드**: 콘솔 영역(126.66–127.01°E, 37.47–37.73°N) 안 AWS 전 지점(현재 24곳)의 10분 평균풍·순간최대풍·기온·습도·강수, KIM 국지 1.5 km 0~48시간, ECMWF IFS 925 hPa·지상값으로 계산. 지도에 AWS 바람 표지, 관측 시각 검증표(단순모델·KIM·ECMWF)
 
 - **경로 설정**: 예시 버티포트 목록, ‘지도에서’ 클릭, 출발·도착 핀 끌기, 지도 오른쪽 클릭
 - **항로 3개 추천**: 최단 시간 · 최소 위험 · 한강 회랑. 위험도 지수 가중 격자 탐색(다익스트라) + 직선화, 순항고도 후보(상한, −150, −300 m) 중 선택. 김포공항 반경 2.6 km 회피
@@ -56,6 +61,15 @@ python model/kuam_simple_model.py --from 마곡 --to "상암 DMC" --aircraft eha
 - 기본: 내장 벡터 지도. 한강 하류(일산대교~오두산)와 강폭은 근사값
 - 선택: OpenStreetMap 타일(GitHub Pages 등 일반 웹 주소에서 표시)
 - 카카오지도는 API 키와 등록 도메인이 필요해 웹 주소를 정한 뒤 연결 예정
+
+## 실황 자료 흐름
+
+```
+GitHub Actions (10분) ─ tools/rt/collect.py ─┬ 기상청 API허브 AWS nph-aws2_min, stn_inf
+                                            ├ 기상청 API허브 KIM 국지 nwp_nc_vars_down (CSV, 영역 추출)
+                                            └ Open-Meteo ECMWF IFS 0.25°
+        → rt-data 브랜치 latest.json → GitHub Pages 콘솔이 5분마다 읽음
+```
 
 ## 실측 연결 계획 (다음 단계)
 
