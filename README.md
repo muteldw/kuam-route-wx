@@ -1,6 +1,6 @@
 # kuam-route-wx
 
-**버전 1.5.5** (2026-11-20) · 작성자 이동원 (Dong-Won Yi) · yidongwonyi@gmail.com · 변경 이력은 [CHANGELOG.md](CHANGELOG.md)
+**버전 1.6.0** (2026-11-22) · 작성자 이동원 (Dong-Won Yi) · yidongwonyi@gmail.com · 변경 이력은 [CHANGELOG.md](CHANGELOG.md)
 
 K-UAM 경로 기상 위험 · eVTOL 배터리 · 항로 추천 단순 진단모델과 웹 콘솔 (수도권 서북부: 킨텍스 V5 ~ 여의도·용산).
 
